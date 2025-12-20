@@ -1,0 +1,59 @@
+/**
+ * Chapter Timelines Index
+ *
+ * Export all chapter timeline factories.
+ * Each chapter contributes its animations to the master timeline.
+ */
+
+// Chapter 1: The Held Breath
+export {
+  createChapter1Timeline,
+  CHAPTER_1_DURATION,
+  CHAPTER_1_START,
+} from './chapter1'
+
+// Placeholder exports for future chapters
+// These will be implemented as needed
+
+export function createChapter2Timeline(_container: HTMLElement): gsap.core.Timeline {
+  // TODO: Implement Chapter 2 - The Offer
+  return gsap.timeline()
+}
+
+export function createChapter3Timeline(_container: HTMLElement): gsap.core.Timeline {
+  // TODO: Implement Chapter 3 - Consent as Choreography
+  return gsap.timeline()
+}
+
+export function createChapter4Timeline(_container: HTMLElement): gsap.core.Timeline {
+  // TODO: Implement Chapter 4 - The Crack
+  return gsap.timeline()
+}
+
+export function createChapter5Timeline(_container: HTMLElement): gsap.core.Timeline {
+  // TODO: Implement Chapter 5 - Authority Enters
+  return gsap.timeline()
+}
+
+export function createChapter6Timeline(_container: HTMLElement): gsap.core.Timeline {
+  // TODO: Implement Chapter 6 - Violet Window (L3 Hero)
+  return gsap.timeline()
+}
+
+export function createChapter7Timeline(_container: HTMLElement): gsap.core.Timeline {
+  // TODO: Implement Chapter 7 - Heat & Tide (L3)
+  return gsap.timeline()
+}
+
+export function createChapter8Timeline(_container: HTMLElement): gsap.core.Timeline {
+  // TODO: Implement Chapter 8 - Release
+  return gsap.timeline()
+}
+
+export function createChapter9Timeline(_container: HTMLElement): gsap.core.Timeline {
+  // TODO: Implement Chapter 9 - Residue & Dawn
+  return gsap.timeline()
+}
+
+// Import gsap for placeholder timelines
+import { gsap } from '../register'
