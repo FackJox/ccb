@@ -17,6 +17,7 @@
 <div
   class="text-fragment {position} {className}"
   style:--offset="{offset}px"
+  data-text
 >
   <p>{content}</p>
 </div>

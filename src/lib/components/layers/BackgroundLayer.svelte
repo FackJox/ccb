@@ -4,9 +4,10 @@
     parallax?: number
     zIndex?: number
     alt?: string
+    layerId?: string
   }
 
-  let { src, parallax = 0.8, zIndex = 0, alt = '' }: Props = $props()
+  let { src, parallax = 0.8, zIndex = 0, alt = '', layerId }: Props = $props()
 </script>
 
 <img
@@ -15,6 +16,7 @@
   class="bg-layer"
   style:z-index={zIndex}
   data-speed={parallax}
+  data-layer={layerId}
   draggable="false"
 />
 

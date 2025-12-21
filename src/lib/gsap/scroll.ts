@@ -34,19 +34,32 @@ export function createScrollSmoother(
   content: string | HTMLElement = '#smooth-content',
   config: ScrollSmootherConfig = {}
 ): ScrollSmoother {
+  console.log('[createScrollSmoother] Called with:', { wrapper, content, config })
+
   // Kill existing instance if present
   if (smootherInstance) {
+    console.log('[createScrollSmoother] Killing existing instance')
     smootherInstance.kill()
     smootherInstance = null
   }
 
   const mergedConfig = { ...defaultScrollConfig, ...config }
+  console.log('[createScrollSmoother] Merged config:', mergedConfig)
 
-  smootherInstance = ScrollSmoother.create({
-    wrapper,
-    content,
-    ...mergedConfig,
-  })
+  try {
+    console.log('[createScrollSmoother] Creating ScrollSmoother.create()...')
+    smootherInstance = ScrollSmoother.create({
+      wrapper,
+      content,
+      ...mergedConfig,
+    })
+    console.log('[createScrollSmoother] ScrollSmoother created:', smootherInstance)
+    console.log('[createScrollSmoother] smoother.wrapper():', smootherInstance?.wrapper())
+    console.log('[createScrollSmoother] smoother.content():', smootherInstance?.content())
+  } catch (error) {
+    console.error('[createScrollSmoother] ERROR:', error)
+    throw error
+  }
 
   return smootherInstance
 }

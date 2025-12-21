@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte'
   import type { Chapter } from '$data'
 
   interface Props {
@@ -9,40 +10,35 @@
 
   let { chapter, children, class: className = '' }: Props = $props()
 
-  // Calculate height based on scroll region (reactive to prop changes)
-  const regionLength = $derived(chapter.scrollRegion.end - chapter.scrollRegion.start)
-  const heightPercent = $derived(regionLength * 100)
+  let containerEl: HTMLElement
+
+  onMount(() => {
+    console.log(`[Chapter ${chapter.id}] Mounted, complexity=${chapter.complexity}`)
+  })
 </script>
 
-<section
+<!--
+  Chapter container: All chapters stack at the same position (absolute).
+  GSAP controls visibility via opacity on child frames.
+  Chapters don't scroll - the master timeline scrubs animations as user scrolls.
+-->
+<div
+  bind:this={containerEl}
   id="chapter-{chapter.id}"
   class="chapter {className}"
   data-chapter={chapter.id}
   data-complexity={chapter.complexity}
-  style:height="{heightPercent}vh"
 >
-  <div class="chapter-content">
-    {@render children()}
-  </div>
-</section>
+  {@render children()}
+</div>
 
 <style>
   .chapter {
-    position: relative;
-    width: 100%;
+    /* All chapters stack at the same position within the pinned stage */
+    position: absolute;
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-
-  .chapter-content {
-    position: sticky;
-    top: 0;
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
   }
 </style>

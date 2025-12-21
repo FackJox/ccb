@@ -5,7 +5,8 @@
  * This is the GSAP best practice for seamless multi-chapter transitions.
  *
  * Architecture:
- * - One ScrollTrigger attached to the entire content
+ * - Stage element is pinned for entire scroll duration
+ * - All chapters stack at the same position within the stage
  * - Child timelines added at their normalized scroll positions (0-1)
  * - Each chapter timeline handles its own internal frame transitions
  * - gsap.context() used for cleanup
@@ -39,23 +40,33 @@ const defaultConfig: MasterTimelineConfig = {
 /**
  * Create the master timeline for the entire scrollytelling experience
  *
- * @param content - The scroll content container element
+ * @param stage - The stage element (pinned viewport container)
  * @param config - Optional configuration overrides
  * @returns gsap.Context for cleanup via context.revert()
  */
 export function createMasterTimeline(
-  content: HTMLElement,
+  stage: HTMLElement,
   config: MasterTimelineConfig = {}
 ): gsap.Context {
+  console.log('[createMasterTimeline] Called with stage:', stage)
+  console.log('[createMasterTimeline] Stage dimensions:', stage?.offsetWidth, 'x', stage?.offsetHeight)
+
   const mergedConfig = { ...defaultConfig, ...config }
+  console.log('[createMasterTimeline] Config:', mergedConfig)
 
   const ctx = gsap.context(() => {
+    console.log('[createMasterTimeline] Inside gsap.context()')
+
     // Create the master timeline with ScrollTrigger
+    // The stage is pinned for the entire scroll duration (700vh spacer)
+    console.log('[createMasterTimeline] Creating master timeline with ScrollTrigger...')
     const masterTL = gsap.timeline({
       scrollTrigger: {
-        trigger: content,
+        trigger: stage,
         start: 'top top',
-        end: 'bottom bottom',
+        end: '+=700%', // Match scroll-spacer height
+        pin: true,
+        pinSpacing: false, // Spacer already provides scroll distance
         scrub: mergedConfig.scrub,
         markers: mergedConfig.markers,
         onUpdate: mergedConfig.onUpdate
@@ -63,78 +74,90 @@ export function createMasterTimeline(
           : undefined,
       },
     })
+    console.log('[createMasterTimeline] Master timeline created:', masterTL)
+    console.log('[createMasterTimeline] ScrollTrigger attached:', masterTL.scrollTrigger)
 
     // Add chapter timelines at their normalized scroll positions
     // Each chapter timeline is a child that plays during its scroll region
 
+    // Set initial visibility: all chapters hidden except chapter 1
+    const allChapters = stage.querySelectorAll('[data-chapter]')
+    allChapters.forEach((chapter) => {
+      const chapterNum = chapter.getAttribute('data-chapter')
+      // Chapter 1 visible at start, others hidden
+      gsap.set(chapter, { opacity: chapterNum === '1' ? 1 : 0 })
+
+      // Within each chapter, only first frame visible
+      const frames = chapter.querySelectorAll('[data-frame]')
+      frames.forEach((frame, index) => {
+        gsap.set(frame, { opacity: index === 0 ? 1 : 0 })
+      })
+    })
+
     // Chapter 1: The Held Breath (0% - 11%)
-    const chapter1Container = content.querySelector('[data-chapter="1"]')
+    const chapter1Container = stage.querySelector('[data-chapter="1"]')
     if (chapter1Container) {
+      console.log('[createMasterTimeline] Found Chapter 1 container')
       const ch1TL = createChapter1Timeline(chapter1Container as HTMLElement)
       masterTL.add(ch1TL, chapterScrollRegions[1].start)
+
+      // Fade out chapter 1 at end of its region
+      masterTL.to(chapter1Container, {
+        opacity: 0,
+        duration: 0.02,
+        ease: 'power2.out',
+      }, chapterScrollRegions[1].end - 0.02)
     }
 
-    // Chapter 2: The Offer (11% - 20%)
-    const chapter2Container = content.querySelector('[data-chapter="2"]')
-    if (chapter2Container) {
-      const ch2TL = createChapter2Timeline(chapter2Container as HTMLElement)
-      masterTL.add(ch2TL, chapterScrollRegions[2].start)
+    // Helper to add chapter with fade in/out transitions
+    const addChapterWithTransitions = (
+      chapterNum: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9,
+      createTimeline: (container: HTMLElement) => gsap.core.Timeline
+    ) => {
+      const container = stage.querySelector(`[data-chapter="${chapterNum}"]`)
+      if (!container) return
+
+      const region = chapterScrollRegions[chapterNum]
+      const fadeDuration = 0.02 // 2% of total scroll for fade
+
+      // Fade in at start (except chapter 1 which starts visible)
+      if (chapterNum > 1) {
+        masterTL.to(container, {
+          opacity: 1,
+          duration: fadeDuration,
+          ease: 'power2.out',
+        }, region.start)
+      }
+
+      // Add chapter's internal timeline
+      const chapterTL = createTimeline(container as HTMLElement)
+      masterTL.add(chapterTL, region.start)
+
+      // Fade out at end (except chapter 9 which holds)
+      if (chapterNum < 9) {
+        masterTL.to(container, {
+          opacity: 0,
+          duration: fadeDuration,
+          ease: 'power2.in',
+        }, region.end - fadeDuration)
+      }
     }
 
-    // Chapter 3: Consent as Choreography (20% - 27%)
-    const chapter3Container = content.querySelector('[data-chapter="3"]')
-    if (chapter3Container) {
-      const ch3TL = createChapter3Timeline(chapter3Container as HTMLElement)
-      masterTL.add(ch3TL, chapterScrollRegions[3].start)
-    }
-
-    // Chapter 4: The Crack (27% - 38%)
-    const chapter4Container = content.querySelector('[data-chapter="4"]')
-    if (chapter4Container) {
-      const ch4TL = createChapter4Timeline(chapter4Container as HTMLElement)
-      masterTL.add(ch4TL, chapterScrollRegions[4].start)
-    }
-
-    // Chapter 5: Authority Enters (38% - 47%)
-    const chapter5Container = content.querySelector('[data-chapter="5"]')
-    if (chapter5Container) {
-      const ch5TL = createChapter5Timeline(chapter5Container as HTMLElement)
-      masterTL.add(ch5TL, chapterScrollRegions[5].start)
-    }
-
-    // Chapter 6: Violet Window - HERO BEAT (47% - 62%)
-    const chapter6Container = content.querySelector('[data-chapter="6"]')
-    if (chapter6Container) {
-      const ch6TL = createChapter6Timeline(chapter6Container as HTMLElement)
-      masterTL.add(ch6TL, chapterScrollRegions[6].start)
-    }
-
-    // Chapter 7: Heat & Tide - L3 (62% - 74%)
-    const chapter7Container = content.querySelector('[data-chapter="7"]')
-    if (chapter7Container) {
-      const ch7TL = createChapter7Timeline(chapter7Container as HTMLElement)
-      masterTL.add(ch7TL, chapterScrollRegions[7].start)
-    }
-
-    // Chapter 8: Release (74% - 88%)
-    const chapter8Container = content.querySelector('[data-chapter="8"]')
-    if (chapter8Container) {
-      const ch8TL = createChapter8Timeline(chapter8Container as HTMLElement)
-      masterTL.add(ch8TL, chapterScrollRegions[8].start)
-    }
-
-    // Chapter 9: Residue & Dawn (88% - 100%)
-    const chapter9Container = content.querySelector('[data-chapter="9"]')
-    if (chapter9Container) {
-      const ch9TL = createChapter9Timeline(chapter9Container as HTMLElement)
-      masterTL.add(ch9TL, chapterScrollRegions[9].start)
-    }
+    // Add all chapters with transitions
+    addChapterWithTransitions(2, createChapter2Timeline)
+    addChapterWithTransitions(3, createChapter3Timeline)
+    addChapterWithTransitions(4, createChapter4Timeline)
+    addChapterWithTransitions(5, createChapter5Timeline)
+    addChapterWithTransitions(6, createChapter6Timeline)
+    addChapterWithTransitions(7, createChapter7Timeline)
+    addChapterWithTransitions(8, createChapter8Timeline)
+    addChapterWithTransitions(9, createChapter9Timeline)
 
     // Store reference for debugging
     if (typeof window !== 'undefined') {
       ;(window as unknown as { __masterTimeline: gsap.core.Timeline }).__masterTimeline = masterTL
     }
-  }, content)
+  }, stage)
 
   return ctx
 }

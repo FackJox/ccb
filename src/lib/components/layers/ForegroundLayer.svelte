@@ -3,9 +3,10 @@
     src: string
     zIndex?: number
     alt?: string
+    layerId?: string
   }
 
-  let { src, zIndex = 1, alt = '' }: Props = $props()
+  let { src, zIndex = 1, alt = '', layerId }: Props = $props()
 </script>
 
 <img
@@ -14,6 +15,7 @@
   class="fg-layer"
   style:z-index={zIndex}
   data-speed="1"
+  data-layer={layerId}
   draggable="false"
 />
 

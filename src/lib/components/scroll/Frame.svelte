@@ -1,15 +1,16 @@
 <script lang="ts">
   import type { Frame } from '$data'
   import LayerStack from '$components/layers/LayerStack.svelte'
+  import TextFragment from '$components/text/TextFragment.svelte'
+  import TypographyBeat from '$components/text/TypographyBeat.svelte'
 
   interface Props {
     frame: Frame
     active?: boolean
     class?: string
-    textContent?: import('svelte').Snippet
   }
 
-  let { frame, active = false, class: className = '', textContent }: Props = $props()
+  let { frame, active = false, class: className = '' }: Props = $props()
 </script>
 
 <div
@@ -23,25 +24,34 @@
 
   {#if frame.text.length > 0}
     <div class="frame-text">
-      {#if textContent}
-        {@render textContent()}
-      {/if}
+      {#each frame.text as textBlock, i}
+        {#if textBlock.type === 'beat'}
+          <TypographyBeat
+            content={textBlock.content}
+            size="large"
+          />
+        {:else}
+          <TextFragment
+            content={textBlock.content}
+            position={textBlock.position}
+            offset={i * 4}
+          />
+        {/if}
+      {/each}
     </div>
   {/if}
 </div>
 
 <style>
   .frame {
+    /* Centered within viewport via absolute positioning */
     position: absolute;
-    inset: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: 852px;
     height: 393px;
-    opacity: 0;
-    transition: opacity 0.55s cubic-bezier(0.33, 0.0, 0.15, 1.0);
-  }
-
-  .frame.active {
-    opacity: 1;
+    /* GSAP controls layer opacity - frame container is always visible */
   }
 
   .frame-text {

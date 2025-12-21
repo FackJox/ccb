@@ -11,7 +11,7 @@
   const words = $derived(content.split(/\s+/))
 </script>
 
-<div class="typography-beat {size} {className}">
+<div class="typography-beat {size} {className}" data-beat>
   {#each words as word, i}
     <span
       class="beat-word"
@@ -35,21 +35,7 @@
 
   .beat-word {
     display: inline-block;
-    opacity: 0;
-    transform: translateY(0);
-    animation: beat-reveal 0.55s cubic-bezier(0.33, 0.0, 0.15, 1.0) forwards;
-    animation-delay: var(--delay, 0ms);
-  }
-
-  @keyframes beat-reveal {
-    from {
-      opacity: 0;
-      transform: translateY(0);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(-10px);
-    }
+    /* GSAP controls opacity and transform via SplitText */
   }
 
   /* Size variants */
