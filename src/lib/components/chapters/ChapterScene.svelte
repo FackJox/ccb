@@ -161,22 +161,19 @@
   .text-container {
     position: absolute;
     top: 0;
-    right: 10%;
-    width: 45%;
+    right: 5%;
+    width: 50%;
     height: 100%;
     pointer-events: none;
     z-index: 10;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-end;
-    padding: 16px 20px;
-    gap: 12px;
+    /* No flex - children are absolutely positioned to overlap */
   }
 
   /* Base text block - parchment style (default) */
   .text-block {
-    position: relative;
+    position: absolute;
+    top: 25%;
+    right: 0;
     max-width: 300px;
     padding: 16px 20px;
     background: #F4E3C9; /* bakeryParchment */
@@ -186,7 +183,6 @@
     line-height: 1.5;
     pointer-events: auto;
     will-change: transform, opacity;
-    align-self: flex-end;
 
     /* Realistic torn paper effect using SVG clip-path */
     clip-path: url(#torn-paper-clip);
@@ -243,9 +239,10 @@
 
   /* Beat text - special centered styling */
   .text-block.beat {
-    position: absolute;
-    left: 50%;
+    /* Override base positioning - center in frame */
     top: 50%;
+    left: 50%;
+    right: auto;
     transform: translate(-50%, -50%);
     max-width: 90%;
     width: auto;
@@ -259,7 +256,6 @@
     font-size: 1.25rem;
     letter-spacing: 0.05em;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
-    align-self: center;
   }
 
   .text-block.beat::before {
