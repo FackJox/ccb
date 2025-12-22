@@ -22,6 +22,16 @@
   // Get scene configuration for this chapter
   const config = $derived(getSceneConfig(chapterId))
 
+  // Helper to generate text block positioning styles
+  function getTextBlockStyle(block: SceneTextBlock): string {
+    if (!block.position) return ''
+    const styles: string[] = []
+    if (block.position.top) styles.push(`top: ${block.position.top}`)
+    if (block.position.right) styles.push(`right: ${block.position.right}`)
+    if (block.position.left) styles.push(`left: ${block.position.left}`)
+    return styles.join('; ')
+  }
+
   // Helper to generate layer positioning styles
   function getLayerStyle(layer: SceneLayer): string {
     const styles: string[] = []
@@ -70,7 +80,6 @@
 {#if config}
   <div
     class="chapter-scene {className}"
-    data-chapter={chapterId}
   >
     <!-- Layer Stack -->
     <div class="layer-container">
@@ -99,6 +108,7 @@
               data-text-block={block.num}
               data-beat={block.type === 'beat' ? '' : undefined}
               data-consent={block.type === 'consent' ? '' : undefined}
+              style={getTextBlockStyle(block)}
             >
               <TypographyBeat content={block.content} size="large" />
             </div>
@@ -109,6 +119,7 @@
               class:transparent={block.style === 'transparent'}
               class:emphasis={block.emphasis}
               data-text-block={block.num}
+              style={getTextBlockStyle(block)}
             >
               <p>{block.content}</p>
             </div>
@@ -157,12 +168,12 @@
     will-change: opacity, transform;
   }
 
-  /* Text Container - positioned center-right per storyboard */
+  /* Text Container - full width, children position themselves */
   .text-container {
     position: absolute;
     top: 0;
-    right: 5%;
-    width: 50%;
+    left: 0;
+    width: 100%;
     height: 100%;
     pointer-events: none;
     z-index: 10;
@@ -170,10 +181,11 @@
   }
 
   /* Base text block - parchment style (default) */
+  /* Position is set via inline styles from scene config, defaults here as fallback */
   .text-block {
     position: absolute;
-    top: 25%;
-    right: 0;
+    top: 25%;    /* Fallback - overridden by inline style */
+    right: 0;    /* Fallback - overridden by inline style */
     max-width: 300px;
     padding: 16px 20px;
     background: #F4E3C9; /* bakeryParchment */

@@ -154,6 +154,67 @@ Full specifications in `docs/Brand Guidelines.md` and `docs/Design/`:
 - Violet is always light-as-substance, never flat UI color
 - Violence shown as aftermath only, never impact
 
+## Chapter Implementation Patterns
+
+**IMPORTANT:** Always consult these design docs before implementing a chapter:
+
+| Document | Purpose |
+|----------|---------|
+| `docs/Design/1 Brand Physics Archetype.md` | Motion tokens, easing, duration scale |
+| `docs/Design/4 Chapter Motion Boards.md` | Per-chapter motion annotations (Entry/Focus/Exit) |
+| `docs/Design/5 Scroll-Telling Maps.md` | Scroll position → visual state mapping |
+| `docs/storyboard/Chapter N *.jpg` | Visual reference for text positioning per frame |
+
+### Text Block Configuration
+
+Text blocks are defined in `src/lib/data/scenes.ts` with positioning:
+
+```typescript
+interface SceneTextBlock {
+  num: number              // GSAP target: data-text-block="num"
+  content: string
+  type: 'fragment' | 'beat' | 'consent'
+  style: 'parchment' | 'transparent' | 'beat'
+  emphasis?: boolean
+  position?: {             // CSS positioning from storyboard
+    top?: string           // e.g., '12%', '35%'
+    right?: string         // e.g., '0', '5%'
+    left?: string
+  }
+}
+```
+
+**Pattern:** Match `position` values to storyboard frame images (`docs/storyboard/Chapter N A.jpg`, etc.)
+
+### Timeline Timing Pattern
+
+Each chapter timeline in `src/lib/gsap/timelines/chapterN.ts` must align with `docs/Design/5 Scroll-Telling Maps.md`:
+
+1. **Frame boundaries** from Scroll-Telling Map define when text groups appear/fade
+2. **Text visibility** should span the frame duration (not compress into small windows)
+3. **Frame-by-frame replacement**: texts from Frame A fade before Frame B texts appear
+
+Example (Chapter 1):
+```typescript
+// Per Scroll-Telling Map: Frame A (0-20%), Frame B (20-60%), Frame C (60-100%)
+
+// Frame A texts - staggered entry, fade together at frame end
+addTextLifecycle(tl, text1, 0.03, 0.18, -15)  // ~15% visible
+addTextLifecycle(tl, text2, 0.07, 0.18, -12)  // ~11% visible
+addTextLifecycle(tl, text3, 0.11, 0.18, -10)  // ~7% visible
+
+// Frame B texts - appear after Frame A fades
+addTextLifecycle(tl, text4, 0.22, 0.55, -18)  // ~33% visible
+// ... etc
+```
+
+### Duration Guidelines (from Brand Physics)
+
+- **Section transitions** (text blocks): 450-650ms feel
+- **Held breath moments**: 750-900ms
+- **Signature moments**: 900-1200ms
+- Text slabs stack with **40ms stagger** within frames
+
 ## Critical Constraints
 
 **What we CAN do:**
@@ -177,6 +238,9 @@ Full specifications in `docs/Brand Guidelines.md` and `docs/Design/`:
 | Scroll regions | `src/lib/gsap/scroll.ts` |
 | Animation factories | `src/lib/gsap/animations.ts` |
 | Chapter data | `src/lib/data/chapters.ts` |
+| Scene configs (layers + text) | `src/lib/data/scenes.ts` |
 | Asset paths | `src/lib/data/assets.ts` |
 | Scroll state | `src/lib/stores/scroll.svelte.ts` |
+| Chapter scene renderer | `src/lib/components/chapters/ChapterScene.svelte` |
+| Chapter timelines | `src/lib/gsap/timelines/chapter*.ts` |
 | Main page | `src/routes/+page.svelte` |

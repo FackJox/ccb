@@ -104,35 +104,7 @@
 	opacity: 0.3;
 }
 
-/* Progress indicator */
-.progress-track {
-	position: fixed;
-	right: 16px;
-	top: 50%;
-	transform: translateY(-50%);
-	width: 2px;
-	height: 60vh;
-	background: rgba(162, 72, 255, 0.2);
-	z-index: 500;
-}
-
-.progress-fill {
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	width: 100%;
-	background: #A248FF;
-	transition: height 100ms linear;
-}
-
-.progress-icon {
-	position: absolute;
-	left: 50%;
-	transform: translateX(-50%);
-	width: 24px;
-	height: 24px;
-	transition: bottom 100ms linear;
-}
+/* Progress indicator styles moved to ProgressIndicator.svelte component */
 
 /* Violet mask overlay */
 .violet-mask {

@@ -33,15 +33,23 @@
 
 <style>
   .progress-indicator {
+    /* Fixed to viewport, not any parent container */
     position: fixed;
-    right: 16px;
+    right: 24px;
     top: 50%;
     transform: translateY(-50%);
-    z-index: 500;
+
+    /* High z-index to stay above all content */
+    z-index: 9999;
+
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 12px;
+
+    /* Prevent any parent from affecting visibility */
+    pointer-events: auto;
+    isolation: isolate;
   }
 
   .progress-track {

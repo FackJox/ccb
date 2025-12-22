@@ -14,13 +14,14 @@ export {
   getChapter1GlobalSnapPoints,
 } from './chapter1'
 
-// Placeholder exports for future chapters
-// These will be implemented as needed
+// Chapter 2: The Offer
+export {
+  createChapter2Timeline,
+  CHAPTER_2_DURATION,
+  CHAPTER_2_START,
+} from './chapter2'
 
-export function createChapter2Timeline(_container: HTMLElement): gsap.core.Timeline {
-  // TODO: Implement Chapter 2 - The Offer
-  return gsap.timeline()
-}
+// Placeholder exports for future chapters
 
 export function createChapter3Timeline(_container: HTMLElement): gsap.core.Timeline {
   // TODO: Implement Chapter 3 - Consent as Choreography

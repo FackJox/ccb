@@ -1,10 +1,10 @@
 /**
  * Chapter 1 Timeline - "The Held Breath"
  *
- * Single continuous scene with layered animations:
- * - Frame A (0-30% of chapter): BG + Ceci appears, texts 1-3 with lifecycle
- * - Frame B (30-65% of chapter): Jack appears, texts 4-5
- * - Frame C (65-100% of chapter): texts 6-7 (transparent), beat text reveal
+ * Single continuous scene with layered animations per Scroll-Telling Map:
+ * - Frame A (0-20% of chapter): BG + Ceci appears, texts 1-3
+ * - Frame B (20-60% of chapter): Jack appears, texts 4-6
+ * - Frame C (60-100% of chapter): texts 7-8 (transparent), beat text reveal
  *
  * Scroll Region: 0-11% of total scroll
  * All positions are PRE-SCALED to global timeline (multiply by D = 0.11)
@@ -39,113 +39,75 @@ export function createChapter1Timeline(container: HTMLElement): gsap.core.Timeli
   const text5 = container.querySelector('[data-text-block="5"]')
   const text6 = container.querySelector('[data-text-block="6"]')
   const text7 = container.querySelector('[data-text-block="7"]')
+  const text8 = container.querySelector('[data-text-block="8"]')
   const beatText = container.querySelector('[data-beat]')
 
-  // ============== DEBUG: Log element positions ==============
-  console.log('[Chapter1 DEBUG] Container:', container)
-  console.log('[Chapter1 DEBUG] Container rect:', container.getBoundingClientRect())
-
-  const textContainer = container.querySelector('[data-text-container]')
-  console.log('[Chapter1 DEBUG] Text container rect:', textContainer?.getBoundingClientRect())
-
-  const debugElements = [
-    { name: 'text1', el: text1 },
-    { name: 'text2', el: text2 },
-    { name: 'text3', el: text3 },
-    { name: 'text4', el: text4 },
-    { name: 'text5', el: text5 },
-    { name: 'text6', el: text6 },
-    { name: 'text7', el: text7 },
-    { name: 'beatText', el: beatText },
-  ]
-
-  debugElements.forEach(({ name, el }) => {
-    if (el) {
-      const rect = (el as HTMLElement).getBoundingClientRect()
-      const computed = window.getComputedStyle(el as HTMLElement)
-      console.log(`[Chapter1 DEBUG] ${name}:`, {
-        found: true,
-        rect: { top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right },
-        opacity: computed.opacity,
-        position: computed.position,
-        inViewport: rect.top < window.innerHeight && rect.bottom > 0
-      })
-    } else {
-      console.log(`[Chapter1 DEBUG] ${name}: NOT FOUND`)
-    }
-  })
-
-  // Log frame groups
-  const frameA = container.querySelector('[data-frame="a"]')
-  const frameB = container.querySelector('[data-frame="b"]')
-  const frameC = container.querySelector('[data-frame="c"]')
-  console.log('[Chapter1 DEBUG] Frame groups:', {
-    frameA: frameA?.getBoundingClientRect(),
-    frameB: frameB?.getBoundingClientRect(),
-    frameC: frameC?.getBoundingClientRect(),
-  })
-
-  // ============== FRAME A: CECI CLAIMS THE HALL (0-30% of chapter) ==============
+  // ============== FRAME A: CECI CLAIMS THE HALL (0-20% of chapter) ==============
   tl.addLabel('frame-a', 0)
 
-  // Ceci appears at 3% of chapter
+  // Ceci appears at 2% of chapter
   if (ceci) {
     tl.to(ceci, {
       opacity: 1,
       scale: 1,
       duration: dur(0.05),
       ease: brandEase.enter,
-    }, pos(0.03))
+    }, pos(0.02))
   }
 
-  // Text block 1: appears at 8% of chapter, fades at 30%
+  // Text block 1: appears at 3%, fades at 18% (~15% visible)
   if (text1) {
-    addTextLifecycle(tl, text1, 0.08, 0.30, -20)
+    addTextLifecycle(tl, text1, 0.03, 0.18, -15)
   }
 
-  // Text block 2: appears at 15% of chapter, fades at 30%
+  // Text block 2: appears at 7%, fades at 18% (~11% visible)
   if (text2) {
-    addTextLifecycle(tl, text2, 0.15, 0.30, -18)
+    addTextLifecycle(tl, text2, 0.07, 0.18, -12)
   }
 
-  // Text block 3: appears at 22% of chapter, fades at 30%
+  // Text block 3: appears at 11%, fades at 18% (~7% visible)
   if (text3) {
-    addTextLifecycle(tl, text3, 0.22, 0.30, -15)
+    addTextLifecycle(tl, text3, 0.11, 0.18, -10)
   }
 
-  // ============== FRAME B: JACK ENTERS (30-65% of chapter) ==============
-  tl.addLabel('frame-b', pos(0.30))
+  // ============== FRAME B: JACK ENTERS (20-60% of chapter) ==============
+  tl.addLabel('frame-b', pos(0.20))
 
-  // Jack appears at 28% of chapter
+  // Jack appears at 18% of chapter (just before Frame B)
   if (jack) {
     tl.to(jack, {
       opacity: 1,
       duration: dur(0.05),
       ease: brandEase.enter,
-    }, pos(0.28))
+    }, pos(0.18))
   }
 
-  // Text block 4: appears at 38% of chapter, fades at 65%
+  // Text block 4: appears at 22%, fades at 55% (~33% visible)
   if (text4) {
-    addTextLifecycle(tl, text4, 0.38, 0.65, -20)
+    addTextLifecycle(tl, text4, 0.22, 0.55, -18)
   }
 
-  // Text block 5: appears at 50% of chapter, fades at 65%
+  // Text block 5: appears at 30%, fades at 55% (~25% visible)
   if (text5) {
-    addTextLifecycle(tl, text5, 0.50, 0.65, -15)
+    addTextLifecycle(tl, text5, 0.30, 0.55, -15)
   }
 
-  // ============== FRAME C: SHARED MOMENT (65-100% of chapter) ==============
-  tl.addLabel('frame-c', pos(0.65))
-
-  // Text block 6: appears at 68% of chapter, fades at 85%
+  // Text block 6: appears at 38%, fades at 55% (~17% visible)
   if (text6) {
-    addTextLifecycle(tl, text6, 0.68, 0.85, -15)
+    addTextLifecycle(tl, text6, 0.38, 0.55, -12)
   }
 
-  // Text block 7: appears at 72% of chapter, fades at 85%
+  // ============== FRAME C: SHARED MOMENT (60-100% of chapter) ==============
+  tl.addLabel('frame-c', pos(0.60))
+
+  // Text block 7: appears at 62%, fades at 90% (~28% visible)
   if (text7) {
-    addTextLifecycle(tl, text7, 0.72, 0.85, -12)
+    addTextLifecycle(tl, text7, 0.62, 0.90, -15)
+  }
+
+  // Text block 8: appears at 70%, fades at 90% (~20% visible)
+  if (text8) {
+    addTextLifecycle(tl, text8, 0.70, 0.90, -12)
   }
 
   // Beat text at 80% of chapter
@@ -240,10 +202,10 @@ export const CHAPTER_1_START = 0
 
 /**
  * Snap points within Chapter 1 (relative to chapter, 0-1)
- * - 0.30: Frame A → B transition (Jack enters)
- * - 0.65: Frame B → C transition (shared moment)
+ * - 0.20: Frame A → B transition (Jack enters)
+ * - 0.60: Frame B → C transition (shared moment)
  */
-export const CHAPTER_1_SNAP_POINTS = [0.30, 0.65]
+export const CHAPTER_1_SNAP_POINTS = [0.20, 0.60]
 
 /**
  * Convert chapter-relative snap points to global positions
