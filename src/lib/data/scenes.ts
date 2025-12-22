@@ -446,13 +446,13 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         style: 'parchment',
         position: { top: '8%', right: '15%' },
       },
-      // Frame D text (5D)
+      // Frame D text (5D) - persists into Chapter 6A
       {
         num: 5,
         content: "Ceci's chin lifted by a fraction—recognition, defiance, maybe destiny. Ceci moved first.",
         type: 'fragment',
         style: 'parchment',
-        position: { top: '18%', right: '10%' },
+        position: { top: '8%', right: '5%' },
       },
     ],
   },
@@ -462,13 +462,43 @@ export const sceneConfigs: Record<number, SceneConfig> = {
     layers: [
       {
         id: 'bg',
-        src: chapterAssets.C4.bg, // Reuses C4 bg
+        src: chapterAssets.C4.bg, // Reuses C4 bg (ballroom corner)
         alt: assetDescriptions[chapterAssets.C4.bg],
         type: 'bg',
         position: { anchor: 'center' },
         size: { width: '100%', height: '100%' },
         zIndex: 0,
         initialOpacity: 1,
+      },
+      {
+        id: 'bgExterior',
+        src: sharedAssets.bg.exteriorWindowsSilhouette, // Hero shot - exterior windows
+        alt: assetDescriptions[sharedAssets.bg.exteriorWindowsSilhouette],
+        type: 'bg',
+        position: { anchor: 'center' },
+        size: { width: '100%', height: '100%' },
+        zIndex: 0,
+        initialOpacity: 0, // Hidden initially, fades in during Frame C
+      },
+      {
+        id: 'coupleStanding',
+        src: sharedAssets.fg.coupleStanding,
+        alt: assetDescriptions[sharedAssets.fg.coupleStanding],
+        type: 'fg',
+        position: { anchor: 'left', bottom: true, offset: '5%' },
+        size: { height: '85%' },
+        zIndex: 1,
+        initialOpacity: 1, // Visible (continues from Ch4/5)
+      },
+      {
+        id: 'mirrorBroken',
+        src: sharedAssets.fg.mirrorBroken,
+        alt: assetDescriptions[sharedAssets.fg.mirrorBroken],
+        type: 'fg',
+        position: { anchor: 'right', bottom: true, offset: '5%' },
+        size: { height: '70%' },
+        zIndex: 2,
+        initialOpacity: 1, // Visible (continues from Ch4/5)
       },
     ],
     textBlocks: [
@@ -478,7 +508,46 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         content: "Ceci's chin lifted by a fraction—recognition, defiance, maybe destiny. Ceci moved first.",
         type: 'fragment',
         style: 'parchment',
-        position: { top: '18%', right: '10%' },
+        position: { top: '8%', right: '5%' },
+      },
+      // Frame B texts - appear after persistent text fades
+      {
+        num: 2,
+        content:
+          'She killed the main lanterns; the room dropped into dark velvet. Then she sent the violet spill surging into the windows.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '5%', right: '5%' },
+      },
+      {
+        num: 3,
+        content: 'The glass flared like a phantom stage.',
+        type: 'fragment',
+        style: 'parchment',
+        emphasis: true,
+        position: { top: '32%', right: '10%' },
+      },
+      {
+        num: 4,
+        content: 'Their bodies became silhouettes—tall, fused, impossible to parse.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '55%', right: '10%' },
+      },
+      // Frame C texts - appear after BG transition to exterior
+      {
+        num: 5,
+        content: 'A gasp rose from the square. Hundreds of faces turned upward.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '40%', right: '5%' },
+      },
+      {
+        num: 6,
+        content: 'Only shadows remained: Ceci and Jack, framed in violet fire.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '65%', right: '5%' },
       },
     ],
   },
