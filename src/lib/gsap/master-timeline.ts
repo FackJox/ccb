@@ -296,14 +296,40 @@ export function createMasterTimeline(
       const ch6TL = createChapter6Timeline(chapter6Container as HTMLElement)
       masterTL.add(ch6TL, region6.start)
 
-      // Chapter 6 fade out at end
+      // Chapter 6 fades out WHILE Chapter 7 fades in (crossfade for persistent text)
       masterTL.to(chapter6Container, {
         opacity: 0,
         duration: fadeDuration,
         ease: 'power2.in',
-      }, region6.end - fadeDuration)
+      }, region6.end) // Start fade AT the boundary, not before
     }
-    addChapterWithTransitions(7, createChapter7Timeline)
+
+    // Special handling for Chapter 6 -> 7 crossfade (text persists across transition)
+    const chapter7Container = stage.querySelector('[data-chapter="7"]')
+
+    if (chapter7Container) {
+      const region6 = chapterScrollRegions[6]
+      const region7 = chapterScrollRegions[7]
+      const fadeDuration = 0.02
+
+      // Chapter 7 starts fading in AT the chapter boundary (same time as C6 fades out)
+      masterTL.to(chapter7Container, {
+        opacity: 1,
+        duration: fadeDuration,
+        ease: 'power2.out',
+      }, region6.end) // Crossfade: start at same position as C6 fadeout
+
+      // Add Chapter 7 timeline
+      const ch7TL = createChapter7Timeline(chapter7Container as HTMLElement)
+      masterTL.add(ch7TL, region7.start)
+
+      // Chapter 7 fade out at end
+      masterTL.to(chapter7Container, {
+        opacity: 0,
+        duration: fadeDuration,
+        ease: 'power2.in',
+      }, region7.end - fadeDuration)
+    }
     addChapterWithTransitions(8, createChapter8Timeline)
     addChapterWithTransitions(9, createChapter9Timeline)
 

@@ -63,12 +63,9 @@ export {
   CHAPTER_8_START,
 } from './chapter8'
 
-// Placeholder exports for future chapters
-
-export function createChapter9Timeline(_container: HTMLElement): gsap.core.Timeline {
-  // TODO: Implement Chapter 9 - Residue & Dawn
-  return gsap.timeline()
-}
-
-// Import gsap for placeholder timelines
-import { gsap } from '../register'
+// Chapter 9: Residue & Dawn (L2)
+export {
+  createChapter9Timeline,
+  CHAPTER_9_DURATION,
+  CHAPTER_9_START,
+} from './chapter9'

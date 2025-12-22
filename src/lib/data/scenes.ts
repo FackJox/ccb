@@ -803,10 +803,110 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         position: { anchor: 'center' },
         size: { width: '100%', height: '100%' },
         zIndex: 0,
-        initialOpacity: 1,
+        initialOpacity: 0, // Fades in AFTER FG
+      },
+      {
+        id: 'bg2',
+        src: chapterAssets.C9.bg2,
+        alt: assetDescriptions[chapterAssets.C9.bg2],
+        type: 'bg',
+        position: { anchor: 'center' },
+        size: { width: '100%', height: '100%' },
+        zIndex: 0,
+        initialOpacity: 0, // Crossfades in for Frame C
+      },
+      {
+        id: 'bg3',
+        src: chapterAssets.C9.bg3,
+        alt: assetDescriptions[chapterAssets.C9.bg3],
+        type: 'bg',
+        position: { anchor: 'center' },
+        size: { width: '100%', height: '100%' },
+        zIndex: 0,
+        initialOpacity: 0, // Crossfades in for Frame D
+      },
+      {
+        id: 'couple',
+        src: chapterAssets.C9.fg,
+        alt: assetDescriptions[chapterAssets.C9.fg],
+        type: 'fg',
+        position: { anchor: 'left', bottom: true, offset: '0' },
+        size: { height: '95%' },
+        zIndex: 1,
+        initialOpacity: 0, // GSAP controls positioning via x transform
       },
     ],
-    textBlocks: [],
+    textBlocks: [
+      // Frame A
+      {
+        num: 1,
+        content:
+          'At dawn, they broomed glass from the ballroom floor together. Below, the square was quiet again: crates, crumbs, a soft memory of defiance.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '8%', left: '3%' },
+      },
+      // Frame B
+      {
+        num: 2,
+        content: 'For a long time, the smell of tobacco and mist hung in the air.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '40%', right: '3%' },
+      },
+      // Frame C - CJ Door
+      {
+        num: 3,
+        content:
+          'On the backstage door, someone had chalked a bright C/J with a streak of flour—no one claiming it; everyone knowing.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '55%', right: '3%' },
+      },
+      // Frame D - Stacked Poem
+      {
+        num: 4,
+        content: 'Upstairs, their brooms stopped;',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '8%', right: '3%' },
+      },
+      {
+        num: 5,
+        content: 'their feet met.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '20%', right: '3%' },
+      },
+      {
+        num: 6,
+        content: 'A hold.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '32%', right: '3%' },
+      },
+      {
+        num: 7,
+        content: 'Her breath met his.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '44%', right: '3%' },
+      },
+      {
+        num: 8,
+        content: 'Old as anything.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '56%', right: '3%' },
+      },
+      {
+        num: 9,
+        content: 'New as dawn.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '68%', right: '3%' },
+      },
+    ],
   },
 }
 

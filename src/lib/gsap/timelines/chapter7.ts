@@ -87,12 +87,24 @@ export function createChapter7Timeline(container: HTMLElement): gsap.core.Timeli
   }
 
   // Text 1: "Someone clapped on the count..." - persists from Chapter 6
-  // Same position as Ch6 text 11, visible immediately (Chapter 4 pattern)
+  // Starts at bottom-left (same as Ch6 text 11), animates up to top-left
   if (text1) {
-    // Visible immediately to continue from Chapter 6 - same pattern as Chapter 4 text 1
+    // Visible immediately to continue from Chapter 6
     tl.set(text1, { opacity: 1, y: 0 }, 0)
 
-    // Fade out before Frame B starts
+    // Animate from bottom-left (65%) to top-left (8%) over first 12% of chapter
+    tl.to(
+      text1,
+      {
+        top: '8%',
+        left: '4%',
+        duration: dur(0.12),
+        ease: brandEase.enter,
+      },
+      0
+    )
+
+    // Fade out at 20%
     tl.to(
       text1,
       {
