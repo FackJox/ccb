@@ -1,0 +1,7 @@
+Is there a way that we can normalise the whole scrollytelling experience across devices, like for example the
+  'perfect' pace if the user was scrolling constantly, and then set everything based around this. That way we could
+  use the time durations, but it's still tied to the scroll 1:1.
+
+  That 'perfect' pace could then be normalised for all different devices.
+
+  There should be some lerp in that perfect pace for when the user starts scrolling and stops scrolling

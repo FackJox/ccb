@@ -67,3 +67,42 @@ export function timeToScroll(ms: number): number {
 export function scrollToTime(scrollProportion: number): number {
   return scrollProportion * PERFECT_DURATION_SECONDS * 1000
 }
+
+// ============== CHAPTER TIMING HELPERS ==============
+
+/**
+ * Temporary import - will be replaced when scroll regions become derived
+ */
+import { chapterScrollRegions, type ChapterNumber } from './scroll'
+
+export interface ChapterTimingHelpers {
+  /** Convert ms to chapter-relative scroll proportion */
+  dur: (ms: number) => number
+  /** Convert cumulative ms to chapter-relative position (0-1) */
+  pos: (cumulativeMs: number) => number
+  /** The chapter's scroll span as proportion of total */
+  chapterScrollSpan: number
+}
+
+/**
+ * Create timing helpers for a specific chapter
+ * Converts milliseconds to chapter-relative scroll proportions
+ *
+ * @param chapterId - The chapter number (1-9)
+ * @returns Timing helper functions
+ */
+export function createChapterTimingHelpers(chapterId: ChapterNumber): ChapterTimingHelpers {
+  const region = chapterScrollRegions[chapterId]
+  const chapterScrollSpan = region.end - region.start
+
+  const dur = (ms: number): number => {
+    const globalProportion = timeToScroll(ms)
+    return globalProportion / chapterScrollSpan
+  }
+
+  const pos = (cumulativeMs: number): number => {
+    return timeToScroll(cumulativeMs) / chapterScrollSpan
+  }
+
+  return { dur, pos, chapterScrollSpan }
+}
