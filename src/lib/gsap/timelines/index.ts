@@ -35,12 +35,14 @@ export {
   CHAPTER_4_START,
 } from './chapter4'
 
-// Placeholder exports for future chapters
+// Chapter 5: Authority Enters
+export {
+  createChapter5Timeline,
+  CHAPTER_5_DURATION,
+  CHAPTER_5_START,
+} from './chapter5'
 
-export function createChapter5Timeline(_container: HTMLElement): gsap.core.Timeline {
-  // TODO: Implement Chapter 5 - Authority Enters
-  return gsap.timeline()
-}
+// Placeholder exports for future chapters
 
 export function createChapter6Timeline(_container: HTMLElement): gsap.core.Timeline {
   // TODO: Implement Chapter 6 - Violet Window (L3 Hero)

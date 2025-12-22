@@ -310,6 +310,36 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         zIndex: 0,
         initialOpacity: 1,
       },
+      {
+        id: 'mirrorIntact',
+        src: sharedAssets.fg.mirrorIntact,
+        alt: assetDescriptions[sharedAssets.fg.mirrorIntact],
+        type: 'fg',
+        position: { anchor: 'right', bottom: true, offset: '5%' },
+        size: { height: '70%' },
+        zIndex: 2,
+        initialOpacity: 1,  // Starts visible (continues from Frame A)
+      },
+      {
+        id: 'mirrorBroken',
+        src: sharedAssets.fg.mirrorBroken,
+        alt: assetDescriptions[sharedAssets.fg.mirrorBroken],
+        type: 'fg',
+        position: { anchor: 'right', bottom: true, offset: '5%' },
+        size: { height: '70%' },
+        zIndex: 2,
+        initialOpacity: 0,  // Hidden until swap
+      },
+      {
+        id: 'coupleStanding',
+        src: sharedAssets.fg.coupleStanding,
+        alt: assetDescriptions[sharedAssets.fg.coupleStanding],
+        type: 'fg',
+        position: { anchor: 'left', bottom: true, offset: '5%' },
+        size: { height: '85%' },
+        zIndex: 1,
+        initialOpacity: 0,  // Hidden until reveal
+      },
     ],
     textBlocks: [
       // Frame A text - same as Chapter 3B (persists across chapter transition)
@@ -319,6 +349,33 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         type: 'fragment',
         style: 'parchment',
         position: { top: '38%', left: '4%' },
+      },
+      // Frame B - Sequential beat: "Un. Deux. Trois."
+      {
+        num: 2,
+        content: '"Un."',
+        type: 'beat',
+        style: 'beat',
+      },
+      {
+        num: 3,
+        content: '"Deux."',
+        type: 'beat',
+        style: 'beat',
+      },
+      {
+        num: 4,
+        content: '"Trois."',
+        type: 'beat',
+        style: 'beat',
+      },
+      // Frame B - Narrative text
+      {
+        num: 5,
+        content: 'Her voice carried out the open windows and pulled the square into rhythm.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '25%', right: '0' },
       },
     ],
   },
@@ -336,8 +393,33 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         zIndex: 0,
         initialOpacity: 1,
       },
+      {
+        id: 'boots',
+        src: chapterAssets.C5.fg1,
+        alt: assetDescriptions[chapterAssets.C5.fg1],
+        type: 'fg',
+        position: { anchor: 'left', offset: '0' },
+        size: { height: '100%' },
+        zIndex: 1,
+        initialOpacity: 0,
+      },
     ],
-    textBlocks: [],
+    textBlocks: [
+      {
+        num: 1,
+        content: 'Boots entered the square below—sharp, official, unwelcome.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '32%', right: '0' },
+      },
+      {
+        num: 2,
+        content: "A street patrol. Jack caught the shift in Ceci's posture: not fear. Calculation.",
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '48%', right: '0' },
+      },
+    ],
   },
 
   6: {
