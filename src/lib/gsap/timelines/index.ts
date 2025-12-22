@@ -21,12 +21,14 @@ export {
   CHAPTER_2_START,
 } from './chapter2'
 
-// Placeholder exports for future chapters
+// Chapter 3: Consent as Choreography
+export {
+  createChapter3Timeline,
+  CHAPTER_3_DURATION,
+  CHAPTER_3_START,
+} from './chapter3'
 
-export function createChapter3Timeline(_container: HTMLElement): gsap.core.Timeline {
-  // TODO: Implement Chapter 3 - Consent as Choreography
-  return gsap.timeline()
-}
+// Placeholder exports for future chapters
 
 export function createChapter4Timeline(_container: HTMLElement): gsap.core.Timeline {
   // TODO: Implement Chapter 4 - The Crack

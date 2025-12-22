@@ -128,14 +128,15 @@ export function createMasterTimeline(
         gsap.set(frame, { opacity: index === 0 ? 1 : 0 })
       })
 
-      // Set initial layer visibility based on layer type
-      // BG layers start visible, FG layers (characters) start hidden
+      // Set initial layer visibility based on data-initial-opacity attribute
+      // This respects scene config's initialOpacity value per layer
       const layers = chapter.querySelectorAll('[data-layer]')
       layers.forEach((layer) => {
         const layerId = layer.getAttribute('data-layer')
+        const initialOpacity = parseFloat(layer.getAttribute('data-initial-opacity') || '0')
         const isBg = layerId === 'bg'
         gsap.set(layer, {
-          opacity: isBg ? 1 : 0,
+          opacity: initialOpacity,
           scale: isBg ? 1 : 1.02, // FG layers have subtle initial scale
         })
       })

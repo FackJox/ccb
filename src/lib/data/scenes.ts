@@ -243,6 +243,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 
   // Placeholder configs for remaining chapters
   // These will be filled in as each chapter is implemented
+  // ============== CHAPTER 3: Consent as Choreography ==============
   3: {
     chapterId: 3,
     layers: [
@@ -254,10 +255,37 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         position: { anchor: 'center' },
         size: { width: '100%', height: '100%' },
         zIndex: 0,
-        initialOpacity: 1,
+        initialOpacity: 0,  // Fades in AFTER FG (dramatic reveal from black)
+      },
+      {
+        id: 'coupleDip',
+        src: chapterAssets.C3.fg,
+        alt: assetDescriptions[chapterAssets.C3.fg],
+        type: 'fg',
+        position: { anchor: 'right', bottom: true, offset: '0' },
+        size: { height: '95%' },
+        zIndex: 1,
+        initialOpacity: 0,  // Fades in FIRST from black
       },
     ],
-    textBlocks: [],
+    textBlocks: [
+      // Frame A texts (parchment style) - staggered down the left side
+      {
+        num: 1,
+        content: 'They began again. Her weight forward, his back; his lead, her follow.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '12%', left: '4%' },
+      },
+      {
+        num: 2,
+        content: 'A pattern older than their names.',
+        type: 'fragment',
+        style: 'parchment',
+        emphasis: true,
+        position: { top: '35%', left: '8%' },
+      },
+    ],
   },
 
   4: {

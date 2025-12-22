@@ -103,6 +103,7 @@
           class:bg-layer={layer.type === 'bg'}
           class:fg-layer={layer.type === 'fg'}
           data-layer={layer.id}
+          data-initial-opacity={layer.initialOpacity ?? 0}
           style={getLayerStyle(layer)}
           draggable="false"
         />
