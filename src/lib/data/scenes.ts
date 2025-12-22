@@ -31,6 +31,14 @@ export interface SceneLayer {
 }
 
 /**
+ * Bridge reference for cross-chapter text persistence
+ */
+export interface TextBridgeRef {
+  chapter: number
+  textNum: number
+}
+
+/**
  * Text block definition
  */
 export interface SceneTextBlock {
@@ -44,6 +52,19 @@ export interface SceneTextBlock {
     right?: string     // e.g., '0', '5%'
     left?: string      // Alternative to right
   }
+  /**
+   * Cross-chapter persistence: this text continues into another chapter.
+   * The target chapter must have a matching text with `bridgesFrom`.
+   * Timeline: this text should NOT fade out (holds to chapter end).
+   */
+  bridgesTo?: TextBridgeRef
+  /**
+   * Cross-chapter persistence: this text continues from another chapter.
+   * The source chapter must have a matching text with `bridgesTo`.
+   * Timeline: this text starts visible (opacity: 1) and fades out later.
+   * Content and position MUST match the source text exactly.
+   */
+  bridgesFrom?: TextBridgeRef
 }
 
 /**
