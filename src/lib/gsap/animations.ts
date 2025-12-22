@@ -364,6 +364,67 @@ export function consentHoverOut(target: gsap.TweenTarget): gsap.core.Tween {
 }
 
 /**
+ * Text block lifecycle for hybrid scroll animation
+ * Pattern: appear → hold → drift → fade
+ *
+ * For scrubbed timelines where durations are timeline positions (0-1)
+ *
+ * @param tl - The timeline to add animations to
+ * @param target - The text block element
+ * @param options - Lifecycle configuration
+ */
+export function textBlockLifecycle(
+  tl: gsap.core.Timeline,
+  target: gsap.TweenTarget,
+  options: {
+    appearAt: number       // Timeline position to appear (0-1)
+    fadeOutAt: number      // Timeline position to start fading (0-1)
+    driftDistance?: number // How far to drift up (default -20)
+  }
+): void {
+  const { appearAt, fadeOutAt, driftDistance = -20 } = options
+  const appearDuration = 0.08  // 8% of chapter for appear animation
+
+  // Appear: fade in + rise from below
+  tl.fromTo(
+    target,
+    { opacity: 0, y: 20 },
+    {
+      opacity: 1,
+      y: 0,
+      duration: appearDuration,
+      ease: brandEase.enter,
+    },
+    appearAt
+  )
+
+  // Drift: gentle upward movement while visible
+  const driftDuration = fadeOutAt - appearAt - appearDuration - 0.05
+  if (driftDuration > 0) {
+    tl.to(
+      target,
+      {
+        y: driftDistance,
+        duration: driftDuration,
+        ease: 'none',  // Linear drift for scrubbed feel
+      },
+      appearAt + appearDuration
+    )
+  }
+
+  // Fade out
+  tl.to(
+    target,
+    {
+      opacity: 0,
+      duration: 0.05,
+      ease: brandEase.exit,
+    },
+    fadeOutAt
+  )
+}
+
+/**
  * Create scroll-linked timeline for a chapter
  */
 export function createChapterTimeline(

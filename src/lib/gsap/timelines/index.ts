@@ -10,6 +10,8 @@ export {
   createChapter1Timeline,
   CHAPTER_1_DURATION,
   CHAPTER_1_START,
+  CHAPTER_1_SNAP_POINTS,
+  getChapter1GlobalSnapPoints,
 } from './chapter1'
 
 // Placeholder exports for future chapters

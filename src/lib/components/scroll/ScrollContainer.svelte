@@ -76,6 +76,9 @@
   onMount(() => {
     console.log('[ScrollContainer] onMount started')
 
+    // Force scroll to top to prevent browser restoring previous position
+    window.scrollTo(0, 0)
+
     // Register GSAP plugins first
     registerGSAP()
     console.log('[ScrollContainer] GSAP registered')

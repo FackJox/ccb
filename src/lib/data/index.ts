@@ -36,3 +36,12 @@ export {
   assetDescriptions,
   TOTAL_ASSETS,
 } from './assets'
+
+// Scenes (data-driven scene configurations)
+export {
+  sceneConfigs,
+  getSceneConfig,
+  type SceneLayer,
+  type SceneTextBlock,
+  type SceneConfig,
+} from './scenes'

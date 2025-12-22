@@ -12,7 +12,7 @@
  * - gsap.context() used for cleanup
  */
 
-import { gsap, ScrollTrigger } from './register'
+import { gsap, ScrollTrigger, brandEase } from './register'
 import { chapterScrollRegions } from './scroll'
 import {
   createChapter1Timeline,
@@ -24,17 +24,38 @@ import {
   createChapter7Timeline,
   createChapter8Timeline,
   createChapter9Timeline,
+  getChapter1GlobalSnapPoints,
 } from './timelines'
+
+/**
+ * Calculate all snap points for the master timeline
+ * Returns global positions (0-1) where scroll should snap
+ */
+function calculateGlobalSnapPoints(): number[] {
+  const snapPoints: number[] = []
+
+  // Add Chapter 1 snap points
+  snapPoints.push(...getChapter1GlobalSnapPoints())
+
+  // Future: Add snap points from other chapters as implemented
+  // snapPoints.push(...getChapter2GlobalSnapPoints())
+  // etc.
+
+  // Sort and dedupe
+  return [...new Set(snapPoints)].sort((a, b) => a - b)
+}
 
 export interface MasterTimelineConfig {
   scrub?: number | boolean
   markers?: boolean
+  snap?: boolean // Enable scroll snapping at frame transitions
   onUpdate?: (progress: number) => void
 }
 
 const defaultConfig: MasterTimelineConfig = {
   scrub: 1, // Smooth scroll-linked animation
   markers: false,
+  snap: false, // Disabled temporarily for debugging timing issues
 }
 
 /**
@@ -60,6 +81,11 @@ export function createMasterTimeline(
     // Create the master timeline with ScrollTrigger
     // The stage is pinned for the entire scroll duration (700vh spacer)
     console.log('[createMasterTimeline] Creating master timeline with ScrollTrigger...')
+
+    // Calculate snap points if snapping is enabled
+    const snapPoints = mergedConfig.snap ? calculateGlobalSnapPoints() : []
+    console.log('[createMasterTimeline] Snap points:', snapPoints)
+
     const masterTL = gsap.timeline({
       scrollTrigger: {
         trigger: stage,
@@ -72,6 +98,15 @@ export function createMasterTimeline(
         onUpdate: mergedConfig.onUpdate
           ? (self) => mergedConfig.onUpdate!(self.progress)
           : undefined,
+        // Scroll snap configuration for cinematic frame transitions
+        ...(mergedConfig.snap && snapPoints.length > 0 && {
+          snap: {
+            snapTo: snapPoints,
+            duration: { min: 0.2, max: 0.4 }, // Smooth snap duration
+            delay: 0.1, // Brief delay before snapping
+            ease: brandEase.transform, // Use brand easing for snap
+          },
+        }),
       },
     })
     console.log('[createMasterTimeline] Master timeline created:', masterTL)
@@ -92,9 +127,28 @@ export function createMasterTimeline(
       frames.forEach((frame, index) => {
         gsap.set(frame, { opacity: index === 0 ? 1 : 0 })
       })
+
+      // Set initial layer visibility based on layer type
+      // BG layers start visible, FG layers (characters) start hidden
+      const layers = chapter.querySelectorAll('[data-layer]')
+      layers.forEach((layer) => {
+        const layerId = layer.getAttribute('data-layer')
+        const isBg = layerId === 'bg'
+        gsap.set(layer, {
+          opacity: isBg ? 1 : 0,
+          scale: isBg ? 1 : 1.02, // FG layers have subtle initial scale
+        })
+      })
+
+      // Set initial text visibility - all text blocks hidden
+      const textBlocks = chapter.querySelectorAll('[data-text-block]')
+      textBlocks.forEach((block) => {
+        gsap.set(block, { opacity: 0, y: 20 })
+      })
     })
 
     // Chapter 1: The Held Breath (0% - 11%)
+    // Positions in chapter1.ts are PRE-SCALED to global positions
     const chapter1Container = stage.querySelector('[data-chapter="1"]')
     if (chapter1Container) {
       console.log('[createMasterTimeline] Found Chapter 1 container')
@@ -130,6 +184,7 @@ export function createMasterTimeline(
       }
 
       // Add chapter's internal timeline
+      // Note: Chapter timelines should have PRE-SCALED positions
       const chapterTL = createTimeline(container as HTMLElement)
       masterTL.add(chapterTL, region.start)
 

@@ -2,12 +2,12 @@
   import {
     ScrollContainer,
     Chapter,
-    Frame,
     ProgressIndicator,
     LoadingScreen,
     VioletMask,
   } from '$components'
-  import { chapters, frames, getFramesForChapter } from '$data'
+  import { ChapterScene } from '$components/chapters'
+  import { chapters } from '$data'
   import { createScrollState } from '$stores'
 
   let isLoading = $state(true)
@@ -21,11 +21,6 @@
 
   function handleScrollReady() {
     isReady = true
-  }
-
-  // Check if a frame is in the active chapter
-  function isFrameActive(frameId: string): boolean {
-    return scrollState.chapter.frames.includes(frameId)
   }
 </script>
 
@@ -42,9 +37,8 @@
   <ScrollContainer onReady={handleScrollReady}>
     {#each chapters as chapter (chapter.id)}
       <Chapter {chapter}>
-        {#each getFramesForChapter(chapter.id) as frame (frame.id)}
-          <Frame {frame} active={isFrameActive(frame.id)} />
-        {/each}
+        <!-- All chapters use generic ChapterScene with data-driven configuration -->
+        <ChapterScene chapterId={chapter.id} />
       </Chapter>
     {/each}
   </ScrollContainer>
