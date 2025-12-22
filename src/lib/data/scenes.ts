@@ -500,6 +500,27 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         zIndex: 2,
         initialOpacity: 1, // Visible (continues from Ch4/5)
       },
+      // Frame D layers - intimate closeup scene
+      {
+        id: 'bgC2',
+        src: chapterAssets.C2.bg,
+        alt: assetDescriptions[chapterAssets.C2.bg],
+        type: 'bg',
+        position: { anchor: 'center' },
+        size: { width: '100%', height: '100%' },
+        zIndex: 0,
+        initialOpacity: 0, // Hidden initially, fades in during Frame D
+      },
+      {
+        id: 'coupleCloseup',
+        src: sharedAssets.fg.coupleCloseup,
+        alt: assetDescriptions[sharedAssets.fg.coupleCloseup],
+        type: 'fg',
+        position: { anchor: 'left', bottom: true, offset: '0' },
+        size: { height: '100%' },
+        zIndex: 3,
+        initialOpacity: 0, // Hidden initially, fades in during Frame D
+      },
     ],
     textBlocks: [
       // Frame A text - same as Chapter 5D (persists across chapter transition)
@@ -549,6 +570,48 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         style: 'parchment',
         position: { top: '65%', right: '5%' },
       },
+      // Frame D texts - intimate consent moment
+      {
+        num: 7,
+        content:
+          'She stepped into him, closer than the dance required, her breath warm at his jaw. "Follow me," she whispered—not as command, but invitation.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '15%', right: '5%' },
+      },
+      {
+        num: 8,
+        content: '"Always," he answered, the word leaving him before he could stop it.',
+        type: 'fragment',
+        style: 'parchment',
+        emphasis: true,
+        position: { top: '45%', right: '5%' },
+      },
+      // Frame E texts - return to exterior, crowd response
+      {
+        num: 9,
+        content:
+          'They waltzed, framed by darkness, her lead molten and sure. Her lilac sash—caught by the violet—looked like a wound or a promise.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '5%', left: '5%' },
+      },
+      {
+        num: 10,
+        content:
+          'She pressed her palm to his chest for a beat too long, and the square below felt the shift; murmurs turned into rhythm, rhythm into movement.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '40%', right: '5%' },
+      },
+      {
+        num: 11,
+        content:
+          'Someone clapped on the count. Another joined. Soon the crowd swayed like a single creature.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '65%', left: '5%' },
+      },
     ],
   },
 
@@ -560,15 +623,96 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         src: chapterAssets.C7.bg,
         alt: assetDescriptions[chapterAssets.C7.bg],
         type: 'bg',
+        position: { anchor: 'right' },
+        size: { height: '100%' },
+        zIndex: 0,
+        initialOpacity: 0, // Crossfade from Ch6's exterior-windows-silhouette
+        initialScale: 0.99, // For subtle breathing pulse
+      },
+      {
+        id: 'bgExterior',
+        src: sharedAssets.bg.exteriorWindowsSilhouette,
+        alt: assetDescriptions[sharedAssets.bg.exteriorWindowsSilhouette],
+        type: 'bg',
         position: { anchor: 'center' },
         size: { width: '100%', height: '100%' },
         zIndex: 0,
-        initialOpacity: 1,
+        initialOpacity: 0, // Hidden until Frame B
+      },
+      {
+        id: 'bg2',
+        src: chapterAssets.C7.bg2,
+        alt: assetDescriptions[chapterAssets.C7.bg2],
+        type: 'bg',
+        position: { anchor: 'center' },
+        size: { width: '100%', height: '100%' },
+        zIndex: 0,
+        initialOpacity: 0, // Hidden until Frame C
       },
     ],
-    textBlocks: [],
+    textBlocks: [
+      // Frame A texts - crowd scene
+      // Text 1 persists from Chapter 6 - MUST match Chapter 6 text 11 position exactly
+      {
+        num: 1,
+        content:
+          'Someone clapped on the count. Another joined. Soon the crowd swayed like a single creature.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '65%', left: '5%' }, // Same as Ch6 text 11 for seamless transition
+      },
+      {
+        num: 2,
+        content:
+          "The patrol tried to push through, but the crowd moved shoulder to shoulder, too entranced to part. Any force would have meant striking civilians. The soldiers cursed, stuck in the tide they'd meant to control.",
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '45%', right: '0' },
+      },
+      // Frame B texts - exterior windows silhouette
+      {
+        num: 3,
+        content: 'Heat traveled through him like memory.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '12%', right: '5%' },
+      },
+      {
+        num: 4,
+        content:
+          'Ceci slid her fingers to Jack\'s forearm—firm, claiming—guiding him to turn her against the light. The move pressed her body to his, her mouth grazing his cheek as she whispered the next step.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '55%', left: '3%' },
+      },
+      // Frame C texts - C7BG2 interior
+      {
+        num: 5,
+        content:
+          'Heat gathered and traveled. Not spectacle; agreement. She felt his choice and answered with one of her own: her hand rose to the back of his neck, gentle, deliberate.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '8%', left: '3%' },
+      },
+      {
+        num: 6,
+        content: 'A question. A vow. A lifetime rethreading itself.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '65%', right: '5%' },
+      },
+      // Frame D text - final intimate moment
+      {
+        num: 7,
+        content: 'Jack exhaled her name—"Ceci..."—more confession than breath.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '12%', right: '15%' },
+      },
+    ],
   },
 
+  // ============== CHAPTER 8: Release ==============
   8: {
     chapterId: 8,
     layers: [
@@ -582,8 +726,70 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         zIndex: 0,
         initialOpacity: 1,
       },
+      {
+        id: 'bg2',
+        src: chapterAssets.C8.bg2,
+        alt: assetDescriptions[chapterAssets.C8.bg2],
+        type: 'bg',
+        position: { anchor: 'center' },
+        size: { width: '100%', height: '100%' },
+        zIndex: 1, // Above bg for crossfade
+        initialOpacity: 0, // Hidden until Frame 8D transition
+      },
+      {
+        id: 'bg3',
+        src: chapterAssets.C8.bg3,
+        alt: assetDescriptions[chapterAssets.C8.bg3],
+        type: 'bg',
+        position: { anchor: 'center' },
+        size: { width: '100%', height: '100%' },
+        zIndex: 2, // Above bg2 for Frame 8E crossfade
+        initialOpacity: 0, // Hidden until Frame 8E transition
+      },
     ],
-    textBlocks: [],
+    textBlocks: [
+      // Frame 8A texts (C8BG - street scene with soldiers retreating)
+      {
+        num: 1,
+        content:
+          'From the street, they looked untouchable. The soldiers, now surrounded by motion and music, began to retreat step by step. Not ordered; inevitable.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '8%', left: '3%' },
+      },
+      {
+        num: 2,
+        content: 'The rhythm swallowed their authority. One fell back, then another followed.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '55%', right: '5%' },
+      },
+      // Frame 8D text (C8BG2 - dancing crowd triumph)
+      {
+        num: 3,
+        content:
+          'The tide of dancers took the space they vacated until the patrol dissolved into the edges of the square, retreating beneath the swell of applause and violet glow.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '8%', left: '3%' },
+      },
+      // Frame 8E texts (C8BG3 - night interior, final breath)
+      {
+        num: 4,
+        content: 'When the final note faded, the city exhaled with them. The violet lights guttered out.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '8%', left: '3%' },
+      },
+      {
+        num: 5,
+        content:
+          'In the dark, Ceci rested her forehead against his for a heartbeat too long to be innocent. His hands stayed at her waist, not trapping—just holding the moment still.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '55%', right: '5%' },
+      },
+    ],
   },
 
   9: {

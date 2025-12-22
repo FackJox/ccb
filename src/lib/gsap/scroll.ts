@@ -91,10 +91,10 @@ export const chapterScrollRegions = {
   3: { start: 0.20, end: 0.27 },
   4: { start: 0.27, end: 0.38 },
   5: { start: 0.38, end: 0.47 },
-  6: { start: 0.47, end: 0.62 },  // L3 - Hero beat
-  7: { start: 0.62, end: 0.74 },  // L3 - Heat & Tide
-  8: { start: 0.74, end: 0.88 },
-  9: { start: 0.88, end: 1.0 },
+  6: { start: 0.47, end: 0.67 },  // L3 - Hero beat (extended for text readability)
+  7: { start: 0.67, end: 0.77 },  // L3 - Heat & Tide
+  8: { start: 0.77, end: 0.90 },
+  9: { start: 0.90, end: 1.0 },
 } as const
 
 export type ChapterNumber = keyof typeof chapterScrollRegions

@@ -49,17 +49,21 @@ export {
   CHAPTER_6_START,
 } from './chapter6'
 
+// Chapter 7: Heat & Tide (L3)
+export {
+  createChapter7Timeline,
+  CHAPTER_7_DURATION,
+  CHAPTER_7_START,
+} from './chapter7'
+
+// Chapter 8: Release (L2)
+export {
+  createChapter8Timeline,
+  CHAPTER_8_DURATION,
+  CHAPTER_8_START,
+} from './chapter8'
+
 // Placeholder exports for future chapters
-
-export function createChapter7Timeline(_container: HTMLElement): gsap.core.Timeline {
-  // TODO: Implement Chapter 7 - Heat & Tide (L3)
-  return gsap.timeline()
-}
-
-export function createChapter8Timeline(_container: HTMLElement): gsap.core.Timeline {
-  // TODO: Implement Chapter 8 - Release
-  return gsap.timeline()
-}
 
 export function createChapter9Timeline(_container: HTMLElement): gsap.core.Timeline {
   // TODO: Implement Chapter 9 - Residue & Dawn
