@@ -115,30 +115,53 @@
     />
   </div>
 
-  <!-- Text Container - positioned center-right -->
+  <!-- Text Containers - grouped by frame for proper positioning -->
   <div class="text-container" data-text-container>
-    {#each textBlocks as block (block.num)}
-      {#if block.type === 'beat'}
-        <!-- Beat text - special centered styling -->
-        <div
-          class="text-block beat"
-          data-text-block={block.num}
-          data-beat
-        >
-          <TypographyBeat content={block.content} size="large" />
-        </div>
-      {:else}
-        <!-- Fragment text - parchment or transparent -->
+    <!-- Frame A texts (1-3): Upper-right area -->
+    <div class="frame-group frame-a" data-frame="a">
+      {#each textBlocks.filter(b => b.num <= 3) as block (block.num)}
         <div
           class="text-block"
-          class:transparent={block.style === 'transparent'}
+          data-text-block={block.num}
+        >
+          <p>{block.content}</p>
+        </div>
+      {/each}
+    </div>
+
+    <!-- Frame B texts (4-5): Center-right area -->
+    <div class="frame-group frame-b" data-frame="b">
+      {#each textBlocks.filter(b => b.num >= 4 && b.num <= 5) as block (block.num)}
+        <div
+          class="text-block"
           class:emphasis={block.emphasis}
           data-text-block={block.num}
         >
           <p>{block.content}</p>
         </div>
-      {/if}
-    {/each}
+      {/each}
+    </div>
+
+    <!-- Frame C texts (6-7): Center-right area, transparent style -->
+    <div class="frame-group frame-c" data-frame="c">
+      {#each textBlocks.filter(b => b.num >= 6 && b.num <= 7) as block (block.num)}
+        <div
+          class="text-block transparent"
+          data-text-block={block.num}
+        >
+          <p>{block.content}</p>
+        </div>
+      {/each}
+    </div>
+
+    <!-- Beat text - special centered styling (absolute within container) -->
+    <div
+      class="text-block beat"
+      data-text-block="8"
+      data-beat
+    >
+      <TypographyBeat content={textBlocks[7].content} size="large" />
+    </div>
   </div>
 </div>
 
@@ -208,23 +231,44 @@
   .text-container {
     position: absolute;
     top: 0;
-    right: 10%;
-    width: 45%;
+    right: 0;
+    width: 55%;
     height: 100%;
     pointer-events: none;
     z-index: 10;
+  }
+
+  /* Frame groups - each positioned absolutely at their storyboard location */
+  .frame-group {
+    position: absolute;
+    right: 10%;
+    width: 80%;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
     align-items: flex-end;
-    padding: 16px 20px;
     gap: 12px;
+  }
+
+  /* Frame A (texts 1-3): Upper-right, starts ~15% from top */
+  .frame-a {
+    top: 10%;
+  }
+
+  /* Frame B (texts 4-5): Center-right, starts ~28% from top */
+  .frame-b {
+    top: 28%;
+  }
+
+  /* Frame C (texts 6-7): Center-right, similar to B */
+  .frame-c {
+    top: 28%;
   }
 
   /* Base text block - parchment style (default) */
   .text-block {
+    position: relative;
     max-width: 300px;
-    padding: 12px 16px;
+    padding: 16px 20px;
     background: #F4E3C9; /* bakeryParchment */
     color: #0B0508; /* velvetSoot */
     font-family: 'Spectral', Georgia, serif;
@@ -232,22 +276,40 @@
     line-height: 1.5;
     pointer-events: auto;
     will-change: transform, opacity;
-    align-self: flex-end;
 
-    /* Torn flyer effect */
-    clip-path: polygon(
-      2px 0,
-      100% 1px,
-      calc(100% - 1px) 100%,
-      0 calc(100% - 2px)
-    );
+    /* Realistic torn paper effect using SVG clip-path */
+    clip-path: url(#torn-paper-clip);
+
+    /* Subtle paper shadow for depth */
+    filter: drop-shadow(0 2px 4px rgba(11, 5, 8, 0.15));
 
     /* GSAP controls - starts invisible */
     opacity: 0;
   }
 
+  /*
+   * Torn edge highlight - simulates the lighter fiber edge of torn paper
+   */
+  .text-block::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.4) 0%,
+      rgba(255, 255, 255, 0.1) 8%,
+      transparent 12%,
+      transparent 88%,
+      rgba(255, 255, 255, 0.1) 92%,
+      rgba(255, 255, 255, 0.35) 100%
+    );
+    pointer-events: none;
+    clip-path: url(#torn-paper-clip);
+  }
+
   .text-block p {
     margin: 0;
+    position: relative; /* Above the ::before */
   }
 
   /* Transparent style for Frame C texts (6, 7) */
@@ -255,7 +317,12 @@
     background: transparent;
     color: #F4E3C9; /* bakeryParchment */
     clip-path: none;
+    filter: none;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  }
+
+  .text-block.transparent::before {
+    display: none;
   }
 
   /* Emphasis style for bold lines */
@@ -276,10 +343,14 @@
     text-align: center;
     padding: 16px 24px;
     clip-path: none;
+    filter: none;
     font-family: 'Canela Bold', Georgia, serif;
     font-size: 1.25rem;
     letter-spacing: 0.05em;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
-    align-self: center;
+  }
+
+  .text-block.beat::before {
+    display: none;
   }
 </style>

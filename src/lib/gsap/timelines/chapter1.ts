@@ -41,6 +41,50 @@ export function createChapter1Timeline(container: HTMLElement): gsap.core.Timeli
   const text7 = container.querySelector('[data-text-block="7"]')
   const beatText = container.querySelector('[data-beat]')
 
+  // ============== DEBUG: Log element positions ==============
+  console.log('[Chapter1 DEBUG] Container:', container)
+  console.log('[Chapter1 DEBUG] Container rect:', container.getBoundingClientRect())
+
+  const textContainer = container.querySelector('[data-text-container]')
+  console.log('[Chapter1 DEBUG] Text container rect:', textContainer?.getBoundingClientRect())
+
+  const debugElements = [
+    { name: 'text1', el: text1 },
+    { name: 'text2', el: text2 },
+    { name: 'text3', el: text3 },
+    { name: 'text4', el: text4 },
+    { name: 'text5', el: text5 },
+    { name: 'text6', el: text6 },
+    { name: 'text7', el: text7 },
+    { name: 'beatText', el: beatText },
+  ]
+
+  debugElements.forEach(({ name, el }) => {
+    if (el) {
+      const rect = (el as HTMLElement).getBoundingClientRect()
+      const computed = window.getComputedStyle(el as HTMLElement)
+      console.log(`[Chapter1 DEBUG] ${name}:`, {
+        found: true,
+        rect: { top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right },
+        opacity: computed.opacity,
+        position: computed.position,
+        inViewport: rect.top < window.innerHeight && rect.bottom > 0
+      })
+    } else {
+      console.log(`[Chapter1 DEBUG] ${name}: NOT FOUND`)
+    }
+  })
+
+  // Log frame groups
+  const frameA = container.querySelector('[data-frame="a"]')
+  const frameB = container.querySelector('[data-frame="b"]')
+  const frameC = container.querySelector('[data-frame="c"]')
+  console.log('[Chapter1 DEBUG] Frame groups:', {
+    frameA: frameA?.getBoundingClientRect(),
+    frameB: frameB?.getBoundingClientRect(),
+    frameC: frameC?.getBoundingClientRect(),
+  })
+
   // ============== FRAME A: CECI CLAIMS THE HALL (0-30% of chapter) ==============
   tl.addLabel('frame-a', 0)
 

@@ -298,8 +298,9 @@ export default defineConfig({
             fontSize: 'base',
             lineHeight: 'relaxed',
             transform: `translateX(${offset}px)`,
-            // Slightly irregular border for torn effect
-            clipPath: 'polygon(2px 0, 100% 1px, calc(100% - 1px) 100%, 0 calc(100% - 2px))',
+            // Realistic torn paper effect - requires TornPaperDefs SVG in DOM
+            clipPath: 'url(#torn-paper-clip)',
+            filter: 'drop-shadow(0 2px 4px rgba(11, 5, 8, 0.15))',
           }
         },
       },

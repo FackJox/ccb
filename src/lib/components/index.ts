@@ -22,6 +22,7 @@ export { default as TypographyBeat } from './text/TypographyBeat.svelte'
 
 // Effects components
 export { default as VioletMask } from './effects/VioletMask.svelte'
+export { default as TornPaperDefs } from './effects/TornPaperDefs.svelte'
 
 // UI components
 export { default as LandscapeEnforcer } from './ui/LandscapeEnforcer.svelte'

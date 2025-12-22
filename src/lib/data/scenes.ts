@@ -110,7 +110,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         type: 'fragment',
         style: 'parchment',
       },
-      // Frame B texts (parchment style)
+      // Frame B texts
       {
         num: 4,
         content: "From the corner, where a restless lantern cluster hissed, Jack recognized the rhythm she'd been humming through the market streets.",
@@ -119,27 +119,33 @@ export const sceneConfigs: Record<number, SceneConfig> = {
       },
       {
         num: 5,
-        content: 'He knew it before he knew her name. He knew it the way a city knows rain.',
-        type: 'fragment',
-        style: 'parchment',
-        emphasis: true,
-      },
-      // Frame C texts (transparent style)
-      {
-        num: 6,
-        content: 'They were supposed to be alone, "rehearsing," though that word had become a lie.',
+        content: 'He knew it before he knew her name.',
         type: 'fragment',
         style: 'transparent',
       },
       {
+        num: 6,
+        content: 'He knew it the way a city knows rain.',
+        type: 'fragment',
+        style: 'transparent',
+        emphasis: true,
+      },
+      // Frame C texts
+      {
         num: 7,
-        content: 'Neighbors gathered at the edges of the hall. Windows faced the square—too exposed, too dangerous—',
+        content: 'They were supposed to be alone, "rehearsing," though that word had become a lie. Neighbours gathered at the edges of the square.',
+        type: 'fragment',
+        style: 'parchment',
+      },
+      {
+        num: 8,
+        content: 'Windows bare to the square—too exposed, too dangerous—but Ceci had said softly.',
         type: 'fragment',
         style: 'transparent',
       },
       // Beat text
       {
-        num: 8,
+        num: 9,
         content: 'Let them look. Let the city breathe again.',
         type: 'beat',
         style: 'beat',

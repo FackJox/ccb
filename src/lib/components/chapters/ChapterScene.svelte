@@ -176,8 +176,9 @@
 
   /* Base text block - parchment style (default) */
   .text-block {
+    position: relative;
     max-width: 300px;
-    padding: 12px 16px;
+    padding: 16px 20px;
     background: #F4E3C9; /* bakeryParchment */
     color: #0B0508; /* velvetSoot */
     font-family: 'Spectral', Georgia, serif;
@@ -187,20 +188,39 @@
     will-change: transform, opacity;
     align-self: flex-end;
 
-    /* Torn flyer effect */
-    clip-path: polygon(
-      2px 0,
-      100% 1px,
-      calc(100% - 1px) 100%,
-      0 calc(100% - 2px)
-    );
+    /* Realistic torn paper effect using SVG clip-path */
+    clip-path: url(#torn-paper-clip);
+
+    /* Subtle paper shadow for depth */
+    filter: drop-shadow(0 2px 4px rgba(11, 5, 8, 0.15));
 
     /* GSAP controls - starts invisible */
     opacity: 0;
   }
 
+  /*
+   * Torn edge highlight - simulates the lighter fiber edge of torn paper
+   */
+  .text-block::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.4) 0%,
+      rgba(255, 255, 255, 0.1) 8%,
+      transparent 12%,
+      transparent 88%,
+      rgba(255, 255, 255, 0.1) 92%,
+      rgba(255, 255, 255, 0.35) 100%
+    );
+    pointer-events: none;
+    clip-path: url(#torn-paper-clip);
+  }
+
   .text-block p {
     margin: 0;
+    position: relative; /* Above the ::before */
   }
 
   /* Transparent style for later frame texts */
@@ -208,7 +228,12 @@
     background: transparent;
     color: #F4E3C9; /* bakeryParchment */
     clip-path: none;
+    filter: none;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  }
+
+  .text-block.transparent::before {
+    display: none;
   }
 
   /* Emphasis style for bold lines */
@@ -229,11 +254,16 @@
     text-align: center;
     padding: 16px 24px;
     clip-path: none;
+    filter: none;
     font-family: 'Canela Bold', Georgia, serif;
     font-size: 1.25rem;
     letter-spacing: 0.05em;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
     align-self: center;
+  }
+
+  .text-block.beat::before {
+    display: none;
   }
 
   .error {
