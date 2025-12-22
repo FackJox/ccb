@@ -28,12 +28,14 @@ export {
   CHAPTER_3_START,
 } from './chapter3'
 
-// Placeholder exports for future chapters
+// Chapter 4: The Crack
+export {
+  createChapter4Timeline,
+  CHAPTER_4_DURATION,
+  CHAPTER_4_START,
+} from './chapter4'
 
-export function createChapter4Timeline(_container: HTMLElement): gsap.core.Timeline {
-  // TODO: Implement Chapter 4 - The Crack
-  return gsap.timeline()
-}
+// Placeholder exports for future chapters
 
 export function createChapter5Timeline(_container: HTMLElement): gsap.core.Timeline {
   // TODO: Implement Chapter 5 - Authority Enters

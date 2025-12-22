@@ -285,9 +285,18 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         emphasis: true,
         position: { top: '35%', left: '8%' },
       },
+      // Frame B text - mirror crash introduction (bridges to Chapter 4)
+      {
+        num: 3,
+        content: "When the mirror on the far wall slipped its wire and crashed, the silence struck like a held breath—but Ceci didn't flinch.",
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '38%', left: '4%' },
+      },
     ],
   },
 
+  // ============== CHAPTER 4: The Crack ==============
   4: {
     chapterId: 4,
     layers: [
@@ -302,7 +311,16 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         initialOpacity: 1,
       },
     ],
-    textBlocks: [],
+    textBlocks: [
+      // Frame A text - same as Chapter 3B (persists across chapter transition)
+      {
+        num: 1,
+        content: "When the mirror on the far wall slipped its wire and crashed, the silence struck like a held breath—but Ceci didn't flinch.",
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '38%', left: '4%' },
+      },
+    ],
   },
 
   5: {

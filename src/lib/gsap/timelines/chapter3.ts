@@ -33,8 +33,11 @@ export function createChapter3Timeline(container: HTMLElement): gsap.core.Timeli
   // ============== GET ELEMENTS ==============
   const bg = container.querySelector('[data-layer="bg"]')
   const coupleDip = container.querySelector('[data-layer="coupleDip"]')
+  // Frame A texts
   const text1 = container.querySelector('[data-text-block="1"]')
   const text2 = container.querySelector('[data-text-block="2"]')
+  // Frame B text
+  const text3 = container.querySelector('[data-text-block="3"]')
 
   // ============== FRAME A: DIP POSE REVEAL (0-100% of chapter) ==============
   tl.addLabel('frame-a', 0)
@@ -59,14 +62,30 @@ export function createChapter3Timeline(container: HTMLElement): gsap.core.Timeli
     }, pos(0.20))
   }
 
-  // Step 3: Text block 1 appears (35-85% visible)
+  // Step 3: Text block 1 appears (35-52% visible)
+  // Note: Chapter fade starts at ~71% (due to 2% fade on 7% chapter), so texts must complete earlier
   if (text1) {
-    addTextLifecycle(tl, text1, 0.35, 0.85, -10)
+    addTextLifecycle(tl, text1, 0.35, 0.52, -8)
   }
 
-  // Step 4: Text block 2 appears with stagger (45-90% visible)
+  // Step 4: Text block 2 appears with stagger (40-52% visible)
   if (text2) {
-    addTextLifecycle(tl, text2, 0.45, 0.90, -8)
+    addTextLifecycle(tl, text2, 0.40, 0.52, -6)
+  }
+
+  // ============== FRAME B: MIRROR INTRODUCTION (55-71% of chapter) ==============
+  // Must appear before chapter fade starts at ~71%
+  tl.addLabel('frame-b', pos(0.55))
+
+  // Step 5: Text block 3 appears at 55%, giving ~16% of chapter to read before fade
+  if (text3) {
+    // Appear
+    tl.fromTo(text3,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: dur(0.08), ease: brandEase.enter },
+      pos(0.55)
+    )
+    // No fade out - text holds to chapter end (bridges to Chapter 4)
   }
 
   return tl

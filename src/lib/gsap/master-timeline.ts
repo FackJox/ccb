@@ -201,8 +201,58 @@ export function createMasterTimeline(
 
     // Add all chapters with transitions
     addChapterWithTransitions(2, createChapter2Timeline)
-    addChapterWithTransitions(3, createChapter3Timeline)
-    addChapterWithTransitions(4, createChapter4Timeline)
+
+    // Special handling for Chapter 3 -> 4 crossfade (text persists across transition)
+    const chapter3Container = stage.querySelector('[data-chapter="3"]')
+    const chapter4Container = stage.querySelector('[data-chapter="4"]')
+
+    if (chapter3Container) {
+      const region3 = chapterScrollRegions[3]
+      const fadeDuration = 0.02
+
+      // Chapter 3 fade in
+      masterTL.to(chapter3Container, {
+        opacity: 1,
+        duration: fadeDuration,
+        ease: 'power2.out',
+      }, region3.start)
+
+      // Add Chapter 3 timeline
+      const ch3TL = createChapter3Timeline(chapter3Container as HTMLElement)
+      masterTL.add(ch3TL, region3.start)
+
+      // Chapter 3 fades out WHILE Chapter 4 fades in (crossfade)
+      masterTL.to(chapter3Container, {
+        opacity: 0,
+        duration: fadeDuration,
+        ease: 'power2.in',
+      }, region3.end) // Start fade AT the boundary, not before
+    }
+
+    if (chapter4Container) {
+      const region3 = chapterScrollRegions[3]
+      const region4 = chapterScrollRegions[4]
+      const fadeDuration = 0.02
+
+      // Chapter 4 starts fading in AT the chapter boundary (same time as C3 fades out)
+      masterTL.to(chapter4Container, {
+        opacity: 1,
+        duration: fadeDuration,
+        ease: 'power2.out',
+      }, region3.end) // Crossfade: start at same position as C3 fadeout
+
+      // Add Chapter 4 timeline
+      const ch4TL = createChapter4Timeline(chapter4Container as HTMLElement)
+      masterTL.add(ch4TL, region4.start)
+
+      // Chapter 4 fade out at end
+      masterTL.to(chapter4Container, {
+        opacity: 0,
+        duration: fadeDuration,
+        ease: 'power2.in',
+      }, region4.end - fadeDuration)
+    }
+
     addChapterWithTransitions(5, createChapter5Timeline)
     addChapterWithTransitions(6, createChapter6Timeline)
     addChapterWithTransitions(7, createChapter7Timeline)
