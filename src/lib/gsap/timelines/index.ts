@@ -44,9 +44,29 @@ export {
 
 // Placeholder exports for future chapters
 
-export function createChapter6Timeline(_container: HTMLElement): gsap.core.Timeline {
+export function createChapter6Timeline(container: HTMLElement): gsap.core.Timeline {
   // TODO: Implement Chapter 6 - Violet Window (L3 Hero)
-  return gsap.timeline()
+  const tl = gsap.timeline()
+
+  // Chapter 6 scroll region: 47-62% (15% duration)
+  const D = 0.15
+  const pos = (p: number) => p * D
+  const dur = (d: number) => d * D
+
+  // Get persistent text from Chapter 5
+  const text1 = container.querySelector('[data-text-block="1"]')
+
+  // Text 1 (from Chapter 5D) - visible immediately, fades at 30%
+  if (text1) {
+    tl.set(text1, { opacity: 1, y: 0 }, 0)
+    tl.to(text1, {
+      opacity: 0,
+      duration: dur(0.08),
+      ease: brandEase.exit,
+    }, pos(0.30))
+  }
+
+  return tl
 }
 
 export function createChapter7Timeline(_container: HTMLElement): gsap.core.Timeline {
@@ -65,4 +85,4 @@ export function createChapter9Timeline(_container: HTMLElement): gsap.core.Timel
 }
 
 // Import gsap for placeholder timelines
-import { gsap } from '../register'
+import { gsap, brandEase } from '../register'

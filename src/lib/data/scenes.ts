@@ -403,8 +403,19 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         zIndex: 1,
         initialOpacity: 0,
       },
+      {
+        id: 'bg2',
+        src: chapterAssets.C5.bg2,
+        alt: assetDescriptions[chapterAssets.C5.bg2],
+        type: 'bg',
+        position: { anchor: 'center' },
+        size: { width: '100%', height: '100%' },
+        zIndex: 0,
+        initialOpacity: 0,
+      },
     ],
     textBlocks: [
+      // Frame A texts
       {
         num: 1,
         content: 'Boots entered the square below—sharp, official, unwelcome.',
@@ -418,6 +429,30 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         type: 'fragment',
         style: 'parchment',
         position: { top: '48%', right: '0' },
+      },
+      // Frame B text (5B)
+      {
+        num: 3,
+        content: "A street patrol. Jack caught the shift in Ceci's posture: not fear. Calculation.",
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '22%', right: '0' },
+      },
+      // Frame C text (5C)
+      {
+        num: 4,
+        content: "'End this!' a captain barked. 'Curtains closed. Lights out.'",
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '8%', right: '15%' },
+      },
+      // Frame D text (5D)
+      {
+        num: 5,
+        content: "Ceci's chin lifted by a fraction—recognition, defiance, maybe destiny. Ceci moved first.",
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '18%', right: '10%' },
       },
     ],
   },
@@ -436,7 +471,16 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         initialOpacity: 1,
       },
     ],
-    textBlocks: [],
+    textBlocks: [
+      // Frame A text - same as Chapter 5D (persists across chapter transition)
+      {
+        num: 1,
+        content: "Ceci's chin lifted by a fraction—recognition, defiance, maybe destiny. Ceci moved first.",
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '18%', right: '10%' },
+      },
+    ],
   },
 
   7: {

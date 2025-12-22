@@ -1,13 +1,22 @@
 /**
  * Chapter 5 Timeline - "Authority Enters"
  *
- * Frame A (0-100% for now): Square scene with boots entering
+ * Frame A (0-30%): Square scene with boots entering
  * - BG already visible (chapter container manages opacity)
- * - Text 1 fades in, then boots fade in from below, then text 2
- * - L1 Complexity: Fade only, no complex transforms
+ * - Text 1 fades in, boots fade in, text 2 fades
+ *
+ * Frame B (30-50%): BG crossfade to night street, text 3
+ * - BG/boots fade out, BG2 fades in
+ * - Text 3 appears and fades
+ *
+ * Frame C (50-70%): Captain's order, text 4
+ * - Text 4 appears and fades
+ *
+ * Frame D (70-100%): Ceci's response, text 5
+ * - Text 5 appears and holds to chapter end
  *
  * Scroll Region: 38-47% of total scroll (9% duration)
- * Complexity: L1 (Functional)
+ * Complexity: L1 (Functional) - fade/crossfade only
  *
  * All positions are PRE-SCALED to global timeline (multiply by D = 0.09)
  */
@@ -30,19 +39,26 @@ export function createChapter5Timeline(container: HTMLElement): gsap.core.Timeli
   const tl = gsap.timeline()
 
   // ============== GET ELEMENTS ==============
+  // Layers
+  const bg = container.querySelector('[data-layer="bg"]')
+  const bg2 = container.querySelector('[data-layer="bg2"]')
   const boots = container.querySelector('[data-layer="boots"]')
+  // Text blocks
   const text1 = container.querySelector('[data-text-block="1"]')
   const text2 = container.querySelector('[data-text-block="2"]')
+  const text3 = container.querySelector('[data-text-block="3"]')
+  const text4 = container.querySelector('[data-text-block="4"]')
+  const text5 = container.querySelector('[data-text-block="5"]')
 
-  // ============== FRAME A: AUTHORITY ENTERS (0-100% of chapter) ==============
+  // ============== FRAME A: AUTHORITY ENTERS (0-30% of chapter) ==============
   tl.addLabel('frame-a', 0)
 
-  // Text block 1: appears at 5%, fades at 60%
+  // Text block 1: appears at 3%, fades at 25%
   if (text1) {
-    addTextLifecycle(tl, text1, 0.05, 0.60, -12)
+    addTextLifecycle(tl, text1, 0.03, 0.25, -8)
   }
 
-  // Boots fade in at 20% from diagonal top-left (authority entering)
+  // Boots fade in at 8% from diagonal top-left (authority entering)
   if (boots) {
     tl.fromTo(boots,
       { opacity: 0, x: -20, y: -20 },
@@ -50,16 +66,66 @@ export function createChapter5Timeline(container: HTMLElement): gsap.core.Timeli
         opacity: 1,
         x: 0,
         y: 0,
-        duration: dur(0.10),
+        duration: dur(0.08),
         ease: brandEase.enter,
       },
-      pos(0.20)
+      pos(0.08)
     )
   }
 
-  // Text block 2: appears at 35%, fades at 85%
+  // Text block 2: appears at 12%, fades at 28%
   if (text2) {
-    addTextLifecycle(tl, text2, 0.35, 0.85, -10)
+    addTextLifecycle(tl, text2, 0.12, 0.28, -6)
+  }
+
+  // ============== FRAME B: BG CROSSFADE + TEXT 3 (30-50% of chapter) ==============
+  tl.addLabel('frame-b', pos(0.30))
+
+  // BG crossfade at 30%: bg fades out, bg2 fades in
+  if (bg) {
+    tl.to(bg, {
+      opacity: 0,
+      duration: dur(0.08),
+      ease: brandEase.exit,
+    }, pos(0.30))
+  }
+
+  if (bg2) {
+    tl.to(bg2, {
+      opacity: 1,
+      duration: dur(0.08),
+      ease: brandEase.enter,
+    }, pos(0.30))
+  }
+
+  // Boots fade out with BG
+  if (boots) {
+    tl.to(boots, {
+      opacity: 0,
+      duration: dur(0.06),
+      ease: brandEase.exit,
+    }, pos(0.30))
+  }
+
+  // Text 3: appears at 35%, fades at 48%
+  if (text3) {
+    addTextLifecycle(tl, text3, 0.35, 0.48, -8)
+  }
+
+  // ============== FRAME C: CAPTAIN'S ORDER (50-70% of chapter) ==============
+  tl.addLabel('frame-c', pos(0.50))
+
+  // Text 4: appears at 52%, fades at 68%
+  if (text4) {
+    addTextLifecycle(tl, text4, 0.52, 0.68, -8)
+  }
+
+  // ============== FRAME D: CECI'S RESPONSE (70-100% of chapter) ==============
+  tl.addLabel('frame-d', pos(0.70))
+
+  // Text 5: appears at 72%, holds to end (no fadeout - chapter transition handles it)
+  if (text5) {
+    addTextAppear(tl, text5, 0.72)
   }
 
   return tl
@@ -101,6 +167,22 @@ function addTextLifecycle(
     duration: dur(0.05),
     ease: brandEase.exit,
   }, pos(fadeOutAt))
+}
+
+/**
+ * Add text appear animation (appear only, no fade out)
+ * For text that holds to end of chapter
+ */
+function addTextAppear(
+  tl: gsap.core.Timeline,
+  target: Element,
+  appearAt: number
+): void {
+  tl.fromTo(target,
+    { opacity: 0, y: 20 },
+    { opacity: 1, y: 0, duration: dur(0.08), ease: brandEase.enter },
+    pos(appearAt)
+  )
 }
 
 /**
