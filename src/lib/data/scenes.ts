@@ -190,8 +190,19 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         zIndex: 1,
         initialOpacity: 0,
       },
+      {
+        id: 'coupleCloseup',
+        src: sharedAssets.fg.coupleCloseup,
+        alt: assetDescriptions[sharedAssets.fg.coupleCloseup],
+        type: 'fg',
+        position: { anchor: 'left', bottom: true, offset: '0' },
+        size: { height: '100%' },
+        zIndex: 2,
+        initialOpacity: 0,
+      },
     ],
     textBlocks: [
+      // Frame A texts (parchment style) - staggered down the left side
       {
         num: 1,
         content: 'Jack set it down, unwound twine, revealed sheets scored thick with ink. "I wrote a pivot," he said. "A melody that asks for a different lead."',
@@ -204,16 +215,25 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         content: 'Ceci studied the marks as if the music could bruise. Jack watched her read. When she looked up, the room changed temperature.',
         type: 'fragment',
         style: 'parchment',
-        position: { top: '30%', left: '4%' },
+        position: { top: '32%', left: '8%' },
       },
+      // Frame B texts (parchment style) - positioned on right side over couple-closeup
       {
         num: 3,
-        content: "Consent lives in small sentences. She tipped her head, that chin-lift she didn't know she'd made in a hundred lives, and he answered by holding out his embrace.",
+        content: "Consent lives in small sentences. She tipped her head, that chin-lift she didn't know she'd made in a hundred lives, and he answered by holding out his embrace. Not control. Permission.",
         type: 'fragment',
         style: 'parchment',
+        position: { top: '8%', right: '0' },
       },
       {
         num: 4,
+        content: 'Her palm hovered near his wrist without touching. She matched his tempo. She nodded once—permission, acknowledgment, desire braided quiet.',
+        type: 'fragment',
+        style: 'parchment',
+        position: { top: '38%', right: '5%' },
+      },
+      {
+        num: 5,
         content: '"Will you follow?" he asked.',
         type: 'consent',
         style: 'beat',

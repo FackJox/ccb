@@ -96,6 +96,39 @@ Use `src/lib/gsap/animations.ts` for brand-compliant animations:
 - `typographyBeat()` – for "Un. Deux. Trois." reveals
 - `crowdBreathe()` – subtle scale pulse for L3 chapters
 
+### GSAP Data Attribute Pattern
+
+Use a **single `data-*` attribute per responsibility level**. The master timeline owns container visibility; chapter timelines own internal element animations.
+
+```
+Container level:  data-chapter="N"     → Master timeline controls visibility
+Layer level:      data-layer="id"      → Chapter timeline controls opacity/transform
+Text level:       data-text-block="N"  → Chapter timeline controls lifecycle
+Special:          data-beat, data-consent → For beat/consent text styling
+```
+
+**WRONG:** Having `data-chapter` on both the Chapter wrapper AND ChapterScene content causes the master timeline to set `opacity:0` on both, but only fade in the outer one (black screen bug).
+
+**RIGHT:** `data-chapter` only on the wrapper component. Internal elements use `data-layer`, `data-text-block`, etc.
+
+### Chapter Timeline Scaling Pattern
+
+Each chapter timeline uses helper functions to scale chapter-relative positions (0-1) to global timeline positions:
+
+```typescript
+// Get chapter's duration as fraction of total scroll
+const D = chapterScrollRegions[N].end - chapterScrollRegions[N].start
+
+// Scale chapter % to global position
+const pos = (chapterPercent: number) => chapterPercent * D
+
+// Scale chapter % to global duration
+const dur = (chapterPercent: number) => chapterPercent * D
+
+// Usage: text appears at 62% of chapter, fades at 88%
+addTextLifecycle(tl, text3, 0.62, 0.88, -10)
+```
+
 ## PandaCSS Design System
 
 All tokens defined in `panda.config.ts`. After changes, run `npm run panda:codegen`.
@@ -154,16 +187,27 @@ Full specifications in `docs/Brand Guidelines.md` and `docs/Design/`:
 - Violet is always light-as-substance, never flat UI color
 - Violence shown as aftermath only, never impact
 
-## Chapter Implementation Patterns
+---
 
-**IMPORTANT:** Always consult these design docs before implementing a chapter:
+## Before Implementing Any Chapter
+
+**MANDATORY:** Read ALL design documentation before planning or implementing a chapter:
 
 | Document | Purpose |
 |----------|---------|
-| `docs/Design/1 Brand Physics Archetype.md` | Motion tokens, easing, duration scale |
+| `docs/Brand Guidelines.md` | Core brand philosophy, colors, typography, motion character |
+| `docs/Design/1 Brand Physics Archetype.md` | Motion tokens, easing curves, duration scale, density rules |
+| `docs/Design/2 Chapter Map.md` | Narrative goals, emotions, desired pace, layer choreography per chapter |
+| `docs/Design/3 Global Primary Transition Mechanics.md` | Lens masks, crossfades, FG swaps, parallax techniques |
 | `docs/Design/4 Chapter Motion Boards.md` | Per-chapter motion annotations (Entry/Focus/Exit) |
 | `docs/Design/5 Scroll-Telling Maps.md` | Scroll position → visual state mapping |
+| `docs/Design/6 Complexity Strategy.md` | What's allowed/forbidden per chapter complexity level (L1/L2/L3) |
 | `docs/storyboard/Chapter N *.jpg` | Visual reference for text positioning per frame |
+| `static/assets/ASSET-INDEX.md` | Complete asset inventory, layer compositions, text content per frame |
+
+---
+
+## Chapter Implementation Patterns
 
 ### Text Block Configuration
 
@@ -185,6 +229,12 @@ interface SceneTextBlock {
 ```
 
 **Pattern:** Match `position` values to storyboard frame images (`docs/storyboard/Chapter N A.jpg`, etc.)
+
+**CSS Positioning:** Text blocks use `data-anchor="left|right"` attribute for positioning. CSS attribute selectors handle the `left`/`right` exclusivity cleanly:
+- `data-anchor="right"` → sets `right: X; left: auto`
+- `data-anchor="left"` → sets `left: X; right: auto`
+
+The anchor is derived automatically from which property (`left` or `right`) is set in the scene config.
 
 ### Timeline Timing Pattern
 
@@ -214,6 +264,25 @@ addTextLifecycle(tl, text4, 0.22, 0.55, -18)  // ~33% visible
 - **Held breath moments**: 750-900ms
 - **Signature moments**: 900-1200ms
 - Text slabs stack with **40ms stagger** within frames
+
+### Chapter Implementation Checklist
+
+When implementing a new chapter or frame:
+
+1. **Read all design docs** (see "Before Implementing Any Chapter" section above)
+2. **Review storyboard image** (`docs/storyboard/Chapter N X.jpg`) for text positioning
+3. **Check ASSET-INDEX.md** for layer composition and text content
+4. **Update `src/lib/data/scenes.ts`:**
+   - Add/update layers (id, src, alt, type, position, size, zIndex, initialOpacity)
+   - Add/update textBlocks (num, content, type, style, position)
+   - Use `sharedAssets.fg.*` or `chapterAssets.CN.*` for src paths
+5. **Update `src/lib/gsap/timelines/chapterN.ts`:**
+   - Get elements via `container.querySelector('[data-layer="id"]')` etc.
+   - Use `pos()` and `dur()` helpers for timing
+   - Use `addTextLifecycle(tl, element, appearAt, fadeOutAt, driftDistance)` for text
+   - Add frame labels with `tl.addLabel('frame-x', pos(0.XX))`
+6. **Export from `src/lib/gsap/timelines/index.ts`** if new file
+7. **Run `npm run check`** to verify TypeScript
 
 ## Critical Constraints
 

@@ -27,9 +27,21 @@
     if (!block.position) return ''
     const styles: string[] = []
     if (block.position.top) styles.push(`top: ${block.position.top}`)
-    if (block.position.right) styles.push(`right: ${block.position.right}`)
-    if (block.position.left) styles.push(`left: ${block.position.left}`)
+    // Offset value only - anchor side is handled by data-anchor attribute in CSS
+    if (block.position.left) {
+      styles.push(`left: ${block.position.left}`)
+    } else if (block.position.right) {
+      styles.push(`right: ${block.position.right}`)
+    }
     return styles.join('; ')
+  }
+
+  // Helper to determine anchor side for CSS positioning
+  function getTextBlockAnchor(block: SceneTextBlock): 'left' | 'right' | null {
+    if (!block.position) return null
+    if (block.position.left) return 'left'
+    if (block.position.right) return 'right'
+    return null
   }
 
   // Helper to generate layer positioning styles
@@ -108,6 +120,7 @@
               data-text-block={block.num}
               data-beat={block.type === 'beat' ? '' : undefined}
               data-consent={block.type === 'consent' ? '' : undefined}
+              data-anchor={getTextBlockAnchor(block)}
               style={getTextBlockStyle(block)}
             >
               <TypographyBeat content={block.content} size="large" />
@@ -119,6 +132,7 @@
               class:transparent={block.style === 'transparent'}
               class:emphasis={block.emphasis}
               data-text-block={block.num}
+              data-anchor={getTextBlockAnchor(block)}
               style={getTextBlockStyle(block)}
             >
               <p>{block.content}</p>
@@ -181,11 +195,10 @@
   }
 
   /* Base text block - parchment style (default) */
-  /* Position is set via inline styles from scene config, defaults here as fallback */
+  /* Position is set via inline styles + data-anchor attribute */
   .text-block {
     position: absolute;
     top: 25%;    /* Fallback - overridden by inline style */
-    right: 0;    /* Fallback - overridden by inline style */
     max-width: 300px;
     padding: 16px 20px;
     background: #F4E3C9; /* bakeryParchment */
@@ -204,6 +217,17 @@
 
     /* GSAP controls - starts invisible */
     opacity: 0;
+  }
+
+  /* Anchor-based positioning - CSS handles left/right exclusivity */
+  .text-block[data-anchor="right"] {
+    right: 0;  /* Default offset, overridden by inline style */
+    left: auto;
+  }
+
+  .text-block[data-anchor="left"] {
+    left: 0;   /* Default offset, overridden by inline style */
+    right: auto;
   }
 
   /*
