@@ -150,14 +150,14 @@ export function createMasterTimeline(
       masterTL.add(ch1TL, chapterScrollRegions[1].start)
 
       // Fade out chapter 1 at end of its region
-      const ch1FadeStart = chapterScrollRegions[1].end - 0.02
-      console.log(`[MasterTL] Chapter 1 fade OUT starts at: ${(ch1FadeStart * 100).toFixed(2)}%`)
+      // Start fade AT region.end so content has full region to complete
+      console.log(`[MasterTL] Chapter 1 fade OUT starts at: ${(chapterScrollRegions[1].end * 100).toFixed(2)}%`)
       console.log(`[MasterTL] Chapter 1 region: ${(chapterScrollRegions[1].start * 100).toFixed(2)}% - ${(chapterScrollRegions[1].end * 100).toFixed(2)}%`)
       masterTL.to(chapter1Container, {
         opacity: 0,
         duration: 0.02,
         ease: 'power2.out',
-      }, ch1FadeStart)
+      }, chapterScrollRegions[1].end)
     }
 
     // Helper to add chapter with fade in/out transitions
@@ -189,14 +189,14 @@ export function createMasterTimeline(
       masterTL.add(chapterTL, region.start)
 
       // Fade out at end (except chapter 9 which holds)
+      // Start fade AT region.end so content has full region to complete
       if (chapterNum < 9) {
-        const fadeStart = region.end - fadeDuration
-        console.log(`[MasterTL] Chapter ${chapterNum} fade OUT at: ${(fadeStart * 100).toFixed(2)}%`)
+        console.log(`[MasterTL] Chapter ${chapterNum} fade OUT at: ${(region.end * 100).toFixed(2)}%`)
         masterTL.to(container, {
           opacity: 0,
           duration: fadeDuration,
           ease: 'power2.in',
-        }, fadeStart)
+        }, region.end)
       }
     }
 
@@ -246,12 +246,12 @@ export function createMasterTimeline(
       const ch4TL = createChapter4Timeline(chapter4Container as HTMLElement)
       masterTL.add(ch4TL, region4.start)
 
-      // Chapter 4 fade out at end
+      // Chapter 4 fade out at end - start AT region.end
       masterTL.to(chapter4Container, {
         opacity: 0,
         duration: fadeDuration,
         ease: 'power2.in',
-      }, region4.end - fadeDuration)
+      }, region4.end)
     }
 
     // Special handling for Chapter 5 -> 6 crossfade (text persists across transition)
@@ -324,12 +324,12 @@ export function createMasterTimeline(
       const ch7TL = createChapter7Timeline(chapter7Container as HTMLElement)
       masterTL.add(ch7TL, region7.start)
 
-      // Chapter 7 fade out at end
+      // Chapter 7 fade out at end - start AT region.end
       masterTL.to(chapter7Container, {
         opacity: 0,
         duration: fadeDuration,
         ease: 'power2.in',
-      }, region7.end - fadeDuration)
+      }, region7.end)
     }
     addChapterWithTransitions(8, createChapter8Timeline)
     addChapterWithTransitions(9, createChapter9Timeline)

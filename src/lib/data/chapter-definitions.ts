@@ -54,7 +54,7 @@ export const chapterDefinitions: ChapterDefinition[] = [
 		id: 2,
 		frames: [
 			{ id: '2A', texts: [1, 2], layerTransition: 'section' },
-			{ id: '2B', texts: [3, 4, 5] }
+			{ id: '2B', texts: [3, 4, 5, 6, 7, 8] } // Includes consent text (8)
 		],
 		transitionIn: 'section',
 		transitionOut: 'section'

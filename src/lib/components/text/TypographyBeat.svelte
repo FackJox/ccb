@@ -23,9 +23,6 @@
   data-consent={variant === 'consent' ? '' : undefined}
 >
   <span class="beat-text">{content}</span>
-
-  <!-- Subtle violet glow accent line -->
-  <div class="accent-line" aria-hidden="true"></div>
 </div>
 
 <style>
