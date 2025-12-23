@@ -2,7 +2,6 @@
   import {
     ScrollContainer,
     Chapter,
-    ProgressIndicator,
     LoadingScreen,
     VioletMask,
   } from '$components'
@@ -42,8 +41,6 @@
       </Chapter>
     {/each}
   </ScrollContainer>
-
-  <ProgressIndicator />
 
   <!-- Violet mask for L3 chapter transitions -->
   <VioletMask

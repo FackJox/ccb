@@ -500,15 +500,19 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				content: "A street patrol. Jack caught the shift in Ceci's posture: not fear. Calculation.",
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '48%', right: '10%' }
+				position: { top: '12%', right: '10%' },
+				bridgesTo: { chapter: 5, textNum: 3 }, // Intra-chapter bridge
+				bridgeDriftEnd: -6
 			},
-			// Frame B text (5B)
+			// Frame B text (5B) - persists from text 2
 			{
 				num: 3,
 				content: "A street patrol. Jack caught the shift in Ceci's posture: not fear. Calculation.",
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '22%', right: '10%' }
+				position: { top: '12%', right: '10%' },
+				bridgesFrom: { chapter: 5, textNum: 2 }, // Intra-chapter bridge
+				bridgeDriftEnd: -6
 			},
 			// Frame C text (5C)
 			{
@@ -525,7 +529,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 					"Ceci's chin lifted by a fraction—recognition, defiance, maybe destiny. Ceci moved first.",
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '8%', right: '5%' },
+				position: { top: '28%', right: '5%' },
 				bridgesTo: { chapter: 6, textNum: 1 },
 				bridgeDriftEnd: -5
 			}
@@ -605,7 +609,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 					"Ceci's chin lifted by a fraction—recognition, defiance, maybe destiny. Ceci moved first.",
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '8%', right: '15%' },
+				position: { top: '28%', right: '15%' },
 				bridgesFrom: { chapter: 5, textNum: 5 },
 				bridgeDriftEnd: -5
 			},
