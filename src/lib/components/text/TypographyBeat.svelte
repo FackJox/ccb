@@ -59,36 +59,11 @@
     will-change: opacity, transform;
   }
 
-  /* Accent line - subtle violet glow beneath text */
-  .accent-line {
-    position: absolute;
-    bottom: 0.75rem;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60%;
-    max-width: 400px;
-    height: 1px;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(162, 72, 255, 0.4) 20%,
-      rgba(162, 72, 255, 0.6) 50%,
-      rgba(162, 72, 255, 0.4) 80%,
-      transparent 100%
-    );
-    opacity: 0.7;
-  }
-
   /* ==================== SIZE VARIANTS ==================== */
 
   .normal {
     font-size: clamp(1.25rem, 4vw, 1.75rem);
     padding: 1.5rem 2rem;
-  }
-
-  .normal .accent-line {
-    width: 40%;
-    max-width: 200px;
   }
 
   .large {
@@ -103,44 +78,11 @@
     padding: 3rem 2rem;
   }
 
-  .hero .accent-line {
-    width: 80%;
-    max-width: 600px;
-    height: 2px;
-  }
-
   /* ==================== VARIANT STYLES ==================== */
 
-  /* Beat variant - dramatic reveal moments */
-  .beat {
-    /* Subtle violet atmospheric glow */
-    background: radial-gradient(
-      ellipse 80% 50% at 50% 100%,
-      rgba(162, 72, 255, 0.08) 0%,
-      transparent 70%
-    );
-  }
-
-  /* Consent variant - intimate, warmer feel */
+  /* Consent variant - intimate feel */
   .consent {
-    /* Warmer, more intimate glow */
-    background: radial-gradient(
-      ellipse 60% 40% at 50% 100%,
-      rgba(244, 227, 201, 0.05) 0%,
-      transparent 60%
-    );
     font-style: italic;
-  }
-
-  .consent .accent-line {
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(244, 227, 201, 0.3) 20%,
-      rgba(244, 227, 201, 0.5) 50%,
-      rgba(244, 227, 201, 0.3) 80%,
-      transparent 100%
-    );
   }
 
 </style>
