@@ -32,10 +32,11 @@ import {
 } from '../timing'
 import { sceneConfigs } from '$data/scenes'
 
-// Get text content for reading time calculations
+// Get text content and config for reading time calculations and bridge handling
 const textBlocks = sceneConfigs[5].textBlocks
 const getTextContent = (num: number): string =>
   textBlocks.find((t) => t.num === num)?.content ?? ''
+const getTextConfig = (num: number) => textBlocks.find((t) => t.num === num)
 
 // Overlap: how much before previous text ends does next text start (ms)
 const TEXT_OVERLAP_MS = 800
@@ -222,9 +223,12 @@ export function createChapter5Timeline(container: HTMLElement): gsap.core.Timeli
   tl.addLabel('frame-d', timeToScroll(cursor))
 
   // Text 5: Bridges TO Chapter 6 (skipFade = true)
+  // Uses bridgeDriftEnd from config so destination chapter can match
   if (text5) {
+    const text5Config = getTextConfig(5)
     const readTime = calculateReadingTime(getTextContent(5))
-    cursor = addTextLifecycleTimeBased(tl, text5, cursor, readTime, -5, true)
+    const drift = text5Config?.bridgeDriftEnd ?? -5
+    cursor = addTextLifecycleTimeBased(tl, text5, cursor, readTime, drift, true)
   }
 
   // Final hold before chapter transition

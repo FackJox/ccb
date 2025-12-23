@@ -25,10 +25,11 @@ import {
 } from '../timing'
 import { sceneConfigs } from '$data/scenes'
 
-// Get text content for reading time calculations
+// Get text content and config for reading time calculations and bridge handling
 const textBlocks = sceneConfigs[6].textBlocks
 const getTextContent = (num: number): string =>
   textBlocks.find((t) => t.num === num)?.content ?? ''
+const getTextConfig = (num: number) => textBlocks.find((t) => t.num === num)
 
 // Overlap: how much before previous text ends does next text start (ms)
 const TEXT_OVERLAP_MS = 800
@@ -128,17 +129,22 @@ export function createChapter6Timeline(container: HTMLElement): gsap.core.Timeli
   cursor += BRAND_DURATIONS.section
 
   // Text 1 is already visible (bridged from Chapter 5)
-  // Set it to visible state, then fade out after reading time
+  // Set it to visible state at bridgeDriftEnd position, then fade out after reading time
   if (text1) {
-    tl.set(text1, { opacity: 1, y: 0 }, 0)
+    const text1Config = getTextConfig(1)
+    const bridgeDriftEnd = text1Config?.bridgeDriftEnd ?? 0
+
+    // Ensure text is visible at chapter start, matching source chapter's drift end position
+    tl.set(text1, { opacity: 1, y: bridgeDriftEnd }, 0)
 
     const readTime = calculateReadingTime(getTextContent(1))
 
+    // Fade out after reading time (continue drifting slightly during fade)
     tl.to(
       text1,
       {
         opacity: 0,
-        y: -8,
+        y: bridgeDriftEnd - 8, // Continue drift direction
         duration: timeToScroll(BRAND_DURATIONS.micro),
         ease: brandEase.exit,
       },
@@ -355,10 +361,13 @@ export function createChapter6Timeline(container: HTMLElement): gsap.core.Timeli
   }
 
   // Text 11: "Someone clapped on the count..." - bridges TO Chapter 7 (skipFade = true)
+  // Uses bridgeDriftEnd from config so destination chapter can match
   if (text11) {
+    const text11Config = getTextConfig(11)
     const text11Start = cursor - TEXT_OVERLAP_MS
     const readTime = calculateReadingTime(getTextContent(11))
-    cursor = addTextLifecycleTimeBased(tl, text11, text11Start, readTime, -5, true)
+    const drift = text11Config?.bridgeDriftEnd ?? -5
+    cursor = addTextLifecycleTimeBased(tl, text11, text11Start, readTime, drift, true)
   }
 
   // Final hold before chapter transition

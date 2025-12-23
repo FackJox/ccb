@@ -68,6 +68,12 @@ export interface SceneTextBlock {
 	 * Content and position MUST match the source text exactly.
 	 */
 	bridgesFrom?: TextBridgeRef;
+	/**
+	 * Final y-offset for bridging texts (in pixels).
+	 * Source chapter drifts TO this value; destination chapter starts AT this value.
+	 * Required when bridgesTo or bridgesFrom is set to prevent visual jumps.
+	 */
+	bridgeDriftEnd?: number;
 }
 
 /**
@@ -350,7 +356,8 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				type: 'fragment',
 				style: 'parchment',
 				position: { top: '38%', left: '4%' },
-				bridgesTo: { chapter: 4, textNum: 1 }
+				bridgesTo: { chapter: 4, textNum: 1 },
+				bridgeDriftEnd: -5
 			}
 		]
 	},
@@ -409,7 +416,8 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				type: 'fragment',
 				style: 'parchment',
 				position: { top: '38%', left: '4%' },
-				bridgesFrom: { chapter: 3, textNum: 3 }
+				bridgesFrom: { chapter: 3, textNum: 3 },
+				bridgeDriftEnd: -5
 			},
 			// Frame B - Sequential beat: "Un. Deux. Trois." - staggered horizontally
 			{
@@ -485,14 +493,14 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				content: 'Boots entered the square below—sharp, official, unwelcome.',
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '32%', right: '0' }
+				position: { top: '32%', right: '20%' }
 			},
 			{
 				num: 2,
 				content: "A street patrol. Jack caught the shift in Ceci's posture: not fear. Calculation.",
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '48%', right: '0' }
+				position: { top: '48%', right: '10%' }
 			},
 			// Frame B text (5B)
 			{
@@ -500,7 +508,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				content: "A street patrol. Jack caught the shift in Ceci's posture: not fear. Calculation.",
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '22%', right: '0' }
+				position: { top: '22%', right: '10%' }
 			},
 			// Frame C text (5C)
 			{
@@ -518,7 +526,8 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				type: 'fragment',
 				style: 'parchment',
 				position: { top: '8%', right: '5%' },
-				bridgesTo: { chapter: 6, textNum: 1 }
+				bridgesTo: { chapter: 6, textNum: 1 },
+				bridgeDriftEnd: -5
 			}
 		]
 	},
@@ -596,8 +605,9 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 					"Ceci's chin lifted by a fraction—recognition, defiance, maybe destiny. Ceci moved first.",
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '8%', right: '5%' },
-				bridgesFrom: { chapter: 5, textNum: 5 }
+				position: { top: '8%', right: '15%' },
+				bridgesFrom: { chapter: 5, textNum: 5 },
+				bridgeDriftEnd: -5
 			},
 			// Frame B texts - appear after persistent text fades
 			{
@@ -606,7 +616,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 					'She killed the main lanterns; the room dropped into dark velvet. Then she sent the violet spill surging into the windows.',
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '5%', right: '5%' }
+				position: { top: '5%', right: '15%' }
 			},
 			{
 				num: 3,
@@ -679,7 +689,8 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				type: 'fragment',
 				style: 'parchment',
 				position: { top: '65%', left: '5%' },
-				bridgesTo: { chapter: 7, textNum: 1 }
+				bridgesTo: { chapter: 7, textNum: 1 },
+				bridgeDriftEnd: -5
 			}
 		]
 	},
@@ -729,7 +740,8 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				type: 'fragment',
 				style: 'parchment',
 				position: { top: '65%', left: '5%' }, // Same as Ch6 text 11 for seamless transition
-				bridgesFrom: { chapter: 6, textNum: 11 }
+				bridgesFrom: { chapter: 6, textNum: 11 },
+				bridgeDriftEnd: -5
 			},
 			{
 				num: 2,

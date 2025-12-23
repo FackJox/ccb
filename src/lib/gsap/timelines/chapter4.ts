@@ -28,10 +28,11 @@ import {
 } from '../timing'
 import { sceneConfigs } from '$data/scenes'
 
-// Get text content for reading time calculations
+// Get text content and config for reading time calculations and bridge handling
 const textBlocks = sceneConfigs[4].textBlocks
 const getTextContent = (num: number): string =>
   textBlocks.find((t) => t.num === num)?.content ?? ''
+const getTextConfig = (num: number) => textBlocks.find((t) => t.num === num)
 
 // Overlap: how much before previous text ends does next text start (ms)
 const TEXT_OVERLAP_MS = 800
@@ -124,20 +125,23 @@ export function createChapter4Timeline(container: HTMLElement): gsap.core.Timeli
   cursor += BRAND_DURATIONS.section
 
   // Text 1 is already visible (bridged from Chapter 3)
-  // Set it to visible state, then fade out after reading time
+  // Set it to visible state at bridgeDriftEnd position, then fade out after reading time
   if (text1) {
-    // Ensure text is visible at chapter start
-    tl.set(text1, { opacity: 1, y: 0 }, 0)
+    const text1Config = getTextConfig(1)
+    const bridgeDriftEnd = text1Config?.bridgeDriftEnd ?? 0
+
+    // Ensure text is visible at chapter start, matching source chapter's drift end position
+    tl.set(text1, { opacity: 1, y: bridgeDriftEnd }, 0)
 
     // Calculate reading time for this text
     const readTime = calculateReadingTime(getTextContent(1))
 
-    // Fade out after reading time
+    // Fade out after reading time (continue drifting slightly during fade)
     tl.to(
       text1,
       {
         opacity: 0,
-        y: -8,
+        y: bridgeDriftEnd - 8, // Continue drift direction
         duration: timeToScroll(BRAND_DURATIONS.micro),
         ease: brandEase.exit,
       },
