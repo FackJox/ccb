@@ -123,8 +123,17 @@ export function createChapter5Timeline(container: HTMLElement): gsap.core.Timeli
   // Initial breath before content
   cursor += BRAND_DURATIONS.section
 
-  // Boots fade in from top
+  // Text 1: First narrative text
+  const text1Start = cursor
+  if (text1) {
+    const readTime = calculateReadingTime(getTextContent(1))
+    cursor = addTextLifecycleTimeBased(tl, text1, cursor, readTime, -8)
+  }
+
+  // Boots fade in from top (overlaps with text 1 - starts after text appears)
   if (boots) {
+    // Start boots after text 1 has faded in (section duration)
+    const bootsStart = text1Start + BRAND_DURATIONS.section
     tl.fromTo(
       boots,
       { opacity: 0, y: -50 },
@@ -134,15 +143,8 @@ export function createChapter5Timeline(container: HTMLElement): gsap.core.Timeli
         duration: timeToScroll(BRAND_DURATIONS.section),
         ease: brandEase.enter,
       },
-      timeToScroll(cursor)
+      timeToScroll(bootsStart)
     )
-    cursor += BRAND_DURATIONS.section
-  }
-
-  // Text 1: First narrative text
-  if (text1) {
-    const readTime = calculateReadingTime(getTextContent(1))
-    cursor = addTextLifecycleTimeBased(tl, text1, cursor, readTime, -8)
   }
 
   // Text 2: Overlaps with text 1

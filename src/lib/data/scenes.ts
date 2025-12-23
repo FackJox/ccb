@@ -561,7 +561,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				src: sharedAssets.fg.mirrorBroken,
 				alt: assetDescriptions[sharedAssets.fg.mirrorBroken],
 				type: 'fg',
-				position: { anchor: 'right', bottom: true, offset: '5%' },
+				position: { anchor: 'right', bottom: true, bottomOffset: '10%', offset: '25%' },
 				size: { height: '70%' },
 				zIndex: 2,
 				initialOpacity: 1 // Visible (continues from Ch4/5)
