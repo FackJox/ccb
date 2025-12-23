@@ -529,7 +529,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 					"Ceci's chin lifted by a fraction—recognition, defiance, maybe destiny. Ceci moved first.",
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '28%', right: '5%' },
+				position: { top: '28%', right: '15%' },
 				bridgesTo: { chapter: 6, textNum: 1 },
 				bridgeDriftEnd: -5
 			}

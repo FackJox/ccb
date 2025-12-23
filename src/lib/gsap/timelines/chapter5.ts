@@ -148,17 +148,21 @@ export function createChapter5Timeline(container: HTMLElement): gsap.core.Timeli
     )
   }
 
-  // Text 2: Overlaps with text 1
+  // Text 2: Overlaps with text 1, HOLDS until Frame B (intra-chapter bridge to text 3)
+  // Uses bridgeDriftEnd so text 3 can seamlessly continue
+  const text2Config = getTextConfig(2)
+  const text2DriftEnd = text2Config?.bridgeDriftEnd ?? -6
   if (text2) {
     const text2Start = cursor - TEXT_OVERLAP_MS
     const readTime = calculateReadingTime(getTextContent(2))
-    cursor = addTextLifecycleTimeBased(tl, text2, text2Start, readTime, -6)
+    // skipFade = true because this bridges to text 3
+    cursor = addTextLifecycleTimeBased(tl, text2, text2Start, readTime, text2DriftEnd, true)
   }
 
   // Transition pause before Frame B
   cursor += BRAND_DURATIONS.section
 
-  // ============== FRAME B: BG CROSSFADE + TEXT 3 ==============
+  // ============== FRAME B: BG CROSSFADE + TEXT 2→3 CROSSFADE ==============
   tl.addLabel('frame-b', timeToScroll(cursor))
 
   // BG crossfade: bg → bg2, boots fade out simultaneously
@@ -196,12 +200,70 @@ export function createChapter5Timeline(container: HTMLElement): gsap.core.Timeli
     )
   }
 
+  // Text 2 → Text 3 crossfade (intra-chapter bridge)
+  // Text 2 fades out while text 3 fades in at same position
+  if (text2) {
+    tl.to(
+      text2,
+      {
+        opacity: 0,
+        y: text2DriftEnd - 3, // Continue slight drift during fade
+        duration: timeToScroll(BRAND_DURATIONS.micro),
+        ease: brandEase.exit,
+      },
+      timeToScroll(cursor)
+    )
+  }
+
+  // Text 3: Starts at bridgeDriftEnd (matching text 2's end position)
+  const text3Config = getTextConfig(3)
+  const text3DriftEnd = text3Config?.bridgeDriftEnd ?? -6
+  if (text3) {
+    // Set initial position to match text 2's drift end
+    tl.set(text3, { y: text3DriftEnd }, timeToScroll(cursor))
+
+    // Fade in at same position
+    tl.fromTo(
+      text3,
+      { opacity: 0 },
+      {
+        opacity: 1,
+        duration: timeToScroll(BRAND_DURATIONS.micro),
+        ease: brandEase.enter,
+      },
+      timeToScroll(cursor)
+    )
+  }
+
   cursor += BRAND_DURATIONS.section
 
-  // Text 3
+  // Text 3 continues: drift and fade out
   if (text3) {
     const readTime = calculateReadingTime(getTextContent(3))
-    cursor = addTextLifecycleTimeBased(tl, text3, cursor, readTime, -8)
+
+    // Continue drifting from bridgeDriftEnd
+    tl.to(
+      text3,
+      {
+        y: text3DriftEnd - 8, // Continue drift direction
+        duration: timeToScroll(readTime),
+        ease: 'none',
+      },
+      timeToScroll(cursor)
+    )
+
+    // Fade out after reading time
+    tl.to(
+      text3,
+      {
+        opacity: 0,
+        duration: timeToScroll(BRAND_DURATIONS.micro),
+        ease: brandEase.exit,
+      },
+      timeToScroll(cursor + readTime)
+    )
+
+    cursor += readTime + BRAND_DURATIONS.micro
   }
 
   // Transition pause before Frame C

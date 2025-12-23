@@ -249,9 +249,9 @@ export function createMasterTimeline(
         ease: 'power2.out',
       }, region5.start)
 
-      // Add Chapter 5 timeline AFTER crossfade completes
+      // Add Chapter 5 timeline at region start (crossfade is container-level visual transition)
       const ch5TL = createChapter5Timeline(chapter5Container as HTMLElement)
-      masterTL.add(ch5TL, region5.start + fadeDuration)
+      masterTL.add(ch5TL, region5.start)
 
       // Chapter 5 fades out WHILE Chapter 6 fades in (crossfade)
       masterTL.to(chapter5Container, {
