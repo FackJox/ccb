@@ -150,11 +150,14 @@ export function createMasterTimeline(
       masterTL.add(ch1TL, chapterScrollRegions[1].start)
 
       // Fade out chapter 1 at end of its region
+      const ch1FadeStart = chapterScrollRegions[1].end - 0.02
+      console.log(`[MasterTL] Chapter 1 fade OUT starts at: ${(ch1FadeStart * 100).toFixed(2)}%`)
+      console.log(`[MasterTL] Chapter 1 region: ${(chapterScrollRegions[1].start * 100).toFixed(2)}% - ${(chapterScrollRegions[1].end * 100).toFixed(2)}%`)
       masterTL.to(chapter1Container, {
         opacity: 0,
         duration: 0.02,
         ease: 'power2.out',
-      }, chapterScrollRegions[1].end - 0.02)
+      }, ch1FadeStart)
     }
 
     // Helper to add chapter with fade in/out transitions
@@ -168,8 +171,11 @@ export function createMasterTimeline(
       const region = chapterScrollRegions[chapterNum]
       const fadeDuration = 0.02 // 2% of total scroll for fade
 
+      console.log(`[MasterTL] Chapter ${chapterNum} region: ${(region.start * 100).toFixed(2)}% - ${(region.end * 100).toFixed(2)}%`)
+
       // Fade in at start (except chapter 1 which starts visible)
       if (chapterNum > 1) {
+        console.log(`[MasterTL] Chapter ${chapterNum} fade IN at: ${(region.start * 100).toFixed(2)}%`)
         masterTL.to(container, {
           opacity: 1,
           duration: fadeDuration,
@@ -184,11 +190,13 @@ export function createMasterTimeline(
 
       // Fade out at end (except chapter 9 which holds)
       if (chapterNum < 9) {
+        const fadeStart = region.end - fadeDuration
+        console.log(`[MasterTL] Chapter ${chapterNum} fade OUT at: ${(fadeStart * 100).toFixed(2)}%`)
         masterTL.to(container, {
           opacity: 0,
           duration: fadeDuration,
           ease: 'power2.in',
-        }, region.end - fadeDuration)
+        }, fadeStart)
       }
     }
 

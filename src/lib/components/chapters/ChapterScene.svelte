@@ -115,16 +115,18 @@
       <div class="text-container" data-text-container>
         {#each config.textBlocks as block (block.num)}
           {#if block.type === 'beat' || block.type === 'consent'}
-            <!-- Beat/consent text - special centered styling -->
+            <!-- Beat/consent text - dramatic full-width typographic moment -->
             <div
               class="text-block beat"
               data-text-block={block.num}
               data-beat={block.type === 'beat' ? '' : undefined}
               data-consent={block.type === 'consent' ? '' : undefined}
-              data-anchor={getTextBlockAnchor(block)}
-              style={getTextBlockStyle(block)}
             >
-              <TypographyBeat content={block.content} size="large" />
+              <TypographyBeat
+                content={block.content}
+                size="large"
+                variant={block.type === 'consent' ? 'consent' : 'beat'}
+              />
             </div>
           {:else}
             <!-- Fragment text - parchment or transparent -->
@@ -274,25 +276,23 @@
     font-weight: 600;
   }
 
-  /* Beat text - special centered styling */
+  /* Beat text - dramatic full-width typographic moment at top */
   .text-block.beat {
-    /* Override base positioning - center in frame */
-    top: 50%;
-    left: 50%;
-    right: auto;
-    transform: translate(-50%, -50%);
-    max-width: 90%;
-    width: auto;
+    /* Position at top, spanning full width */
+    top: 8%;
+    left: 0;
+    right: 0;
+    transform: none;
+    width: 100%;
+    max-width: 100%;
+
+    /* Reset parchment styles */
     background: transparent;
-    color: #F4E3C9; /* bakeryParchment */
-    text-align: center;
-    padding: 16px 24px;
+    padding: 0;
     clip-path: none;
     filter: none;
-    font-family: 'Canela Bold', Georgia, serif;
-    font-size: 1.25rem;
-    letter-spacing: 0.05em;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+
+    /* Let TypographyBeat handle all styling */
   }
 
   .text-block.beat::before {

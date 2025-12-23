@@ -4,17 +4,20 @@
  * Pure time-based implementation using timeToScroll() for both positions and durations.
  * All timing in milliseconds, converted to global scroll proportions.
  *
- * Frame A (first ~60%): Table scene with progressive text
+ * Frame A (first ~40%): Table scene with progressive text
  * - BG visible from start
  * - FG couple fades in with subtle zoom (1.0→1.03)
  * - Text blocks 1-2 appear with staggered-overlap pattern
  *
- * Frame B (remaining ~40%): Intimate closeup transition
+ * Frame B (remaining ~60%): Intimate closeup transition
  * - FG couple (table) fades out
- * - Text 3 ("Consent lives in small sentences...") appears
  * - couple-closeup fades in
- * - Text 4 ("Her palm hovered...") overlaps
- * - Text 5 ("Will you follow?") as consent signature beat
+ * - Text 3: "Consent lives in small sentences."
+ * - Text 4: "She tipped her head..." (longer narrative)
+ * - Text 5: "Not control." (emphasis, quick)
+ * - Text 6: "Permission." (emphasis, tight pairing with text 5)
+ * - Text 7: "Her palm hovered..." (final narrative)
+ * - Text 8: "Will you follow?" (consent signature beat)
  * - Slow zoom on couple-closeup at exit
  *
  * Complexity: L2 (Expressive)
@@ -118,6 +121,9 @@ export function createChapter2Timeline(container: HTMLElement): gsap.core.Timeli
   const text2 = container.querySelector('[data-text-block="2"]')
   const text3 = container.querySelector('[data-text-block="3"]')
   const text4 = container.querySelector('[data-text-block="4"]')
+  const text5 = container.querySelector('[data-text-block="5"]')
+  const text6 = container.querySelector('[data-text-block="6"]')
+  const text7 = container.querySelector('[data-text-block="7"]')
   const consentText = container.querySelector('[data-consent]')
 
   // ============== FRAME A: TABLE SCENE ==============
@@ -214,17 +220,38 @@ export function createChapter2Timeline(container: HTMLElement): gsap.core.Timeli
     const closeupZoomStart = cursor
     cursor += BRAND_DURATIONS.section
 
-    // Text 3: First Frame B text
+    // Text 3: "Consent lives in small sentences." - short, impactful opener
     if (text3) {
       const readTime = calculateReadingTime(getTextContent(3))
-      cursor = addTextLifecycleTimeBased(tl, text3, cursor, readTime, -10)
+      cursor = addTextLifecycleTimeBased(tl, text3, cursor, readTime, -8)
     }
 
-    // Text 4: Overlaps with text 3
+    // Text 4: "She tipped her head..." - overlaps with text 3
     if (text4) {
       const text4Start = cursor - TEXT_OVERLAP_MS
       const readTime = calculateReadingTime(getTextContent(4))
-      cursor = addTextLifecycleTimeBased(tl, text4, text4Start, readTime, -8)
+      cursor = addTextLifecycleTimeBased(tl, text4, text4Start, readTime, -10)
+    }
+
+    // Text 5 & 6: "Not control." and "Permission." - quick succession, dramatic pause between
+    if (text5) {
+      const text5Start = cursor - TEXT_OVERLAP_MS
+      const readTime = calculateReadingTime(getTextContent(5))
+      cursor = addTextLifecycleTimeBased(tl, text5, text5Start, readTime, -5)
+    }
+
+    if (text6) {
+      // Short pause then "Permission." appears - tight dramatic pairing
+      const text6Start = cursor - 400 // Tighter overlap for dramatic effect
+      const readTime = calculateReadingTime(getTextContent(6))
+      cursor = addTextLifecycleTimeBased(tl, text6, text6Start, readTime, -5)
+    }
+
+    // Text 7: "Her palm hovered..." - final narrative before consent
+    if (text7) {
+      const text7Start = cursor - TEXT_OVERLAP_MS
+      const readTime = calculateReadingTime(getTextContent(7))
+      cursor = addTextLifecycleTimeBased(tl, text7, text7Start, readTime, -8)
     }
 
     // Held breath before consent text
@@ -303,13 +330,31 @@ export function createChapter2Timeline(container: HTMLElement): gsap.core.Timeli
 
     if (text3) {
       const readTime = calculateReadingTime(getTextContent(3))
-      cursor = addTextLifecycleTimeBased(tl, text3, cursor, readTime, -10)
+      cursor = addTextLifecycleTimeBased(tl, text3, cursor, readTime, -8)
     }
 
     if (text4) {
       const text4Start = cursor - TEXT_OVERLAP_MS
       const readTime = calculateReadingTime(getTextContent(4))
-      cursor = addTextLifecycleTimeBased(tl, text4, text4Start, readTime, -8)
+      cursor = addTextLifecycleTimeBased(tl, text4, text4Start, readTime, -10)
+    }
+
+    if (text5) {
+      const text5Start = cursor - TEXT_OVERLAP_MS
+      const readTime = calculateReadingTime(getTextContent(5))
+      cursor = addTextLifecycleTimeBased(tl, text5, text5Start, readTime, -5)
+    }
+
+    if (text6) {
+      const text6Start = cursor - 400
+      const readTime = calculateReadingTime(getTextContent(6))
+      cursor = addTextLifecycleTimeBased(tl, text6, text6Start, readTime, -5)
+    }
+
+    if (text7) {
+      const text7Start = cursor - TEXT_OVERLAP_MS
+      const readTime = calculateReadingTime(getTextContent(7))
+      cursor = addTextLifecycleTimeBased(tl, text7, text7Start, readTime, -8)
     }
 
     cursor += BRAND_DURATIONS.sectionHeld
@@ -334,18 +379,11 @@ export function createChapter2Timeline(container: HTMLElement): gsap.core.Timeli
   cursor += BRAND_DURATIONS.section
 
   // Log final cursor position for debugging
-  console.log('[Chapter2] Final cursor:', cursor, 'ms =', timeToScroll(cursor), 'global scroll')
+  const globalScrollEnd = timeToScroll(cursor)
+  console.log('[Chapter2] Final cursor:', cursor, 'ms')
+  console.log('[Chapter2] Final cursor as global scroll:', (globalScrollEnd * 100).toFixed(3), '%')
+  console.log('[Chapter2] Chapter 2 region ends at:', '(check derive-regions output)')
+  console.log('[Chapter2] Timeline duration:', tl.duration())
 
   return tl
 }
-
-/**
- * Get the duration of Chapter 2 as a proportion of the total experience
- * Based on scroll region: 11% - 20% = 0.09
- */
-export const CHAPTER_2_DURATION = 0.09
-
-/**
- * Chapter 2 scroll position in master timeline
- */
-export const CHAPTER_2_START = 0.11

@@ -97,9 +97,14 @@ function calculateChapterDuration(
 
   // Initial breath before content starts
   let duration = transIn + BRAND_DURATIONS.section
+  console.log(`  [Ch${chapter.id}] transIn(${transIn}) + breath(${BRAND_DURATIONS.section}) = ${duration}ms`)
 
   // Add each frame with transition pauses between
-  const frameDurations = chapter.frames.map((f) => calculateFrameDuration(f, textBlocks))
+  const frameDurations = chapter.frames.map((f) => {
+    const fd = calculateFrameDuration(f, textBlocks)
+    console.log(`  [Ch${chapter.id}] Frame ${f.id}: ${fd}ms (texts: ${f.texts.join(',')})`)
+    return fd
+  })
 
   frameDurations.forEach((frameDur, i) => {
     duration += frameDur
@@ -107,18 +112,22 @@ function calculateChapterDuration(
     // Add transition pause between frames (not after last frame)
     if (i < frameDurations.length - 1) {
       duration += BRAND_DURATIONS.section
+      console.log(`  [Ch${chapter.id}] + frame transition pause: ${BRAND_DURATIONS.section}ms`)
     }
   })
 
   // Check if chapter has beat text (signature moment) - add held breath
   const hasBeatText = textBlocks.some((t) => t.type === 'beat')
-  if (hasBeatText) {
+  const hasConsentText = textBlocks.some((t) => t.type === 'consent')
+  if (hasBeatText || hasConsentText) {
     duration += BRAND_DURATIONS.sectionHeld // held breath before beat
     duration += BRAND_DURATIONS.sectionHeld // drift after beat
+    console.log(`  [Ch${chapter.id}] + beat/consent timing: ${BRAND_DURATIONS.sectionHeld * 2}ms`)
   }
 
   // Final hold before chapter transition
   duration += BRAND_DURATIONS.section + transOut
+  console.log(`  [Ch${chapter.id}] + final(${BRAND_DURATIONS.section}) + transOut(${transOut}) = total ${duration}ms`)
 
   return duration
 }
@@ -131,11 +140,14 @@ function calculateChapterDuration(
  */
 export function deriveScrollRegions(): Record<number, { start: number; end: number }> {
   // Calculate all chapter durations in ms
-  const durationsMs = chapterDefinitions.map((ch) =>
-    calculateChapterDuration(ch, sceneConfigs[ch.id]?.textBlocks ?? [])
-  )
+  const durationsMs = chapterDefinitions.map((ch) => {
+    const duration = calculateChapterDuration(ch, sceneConfigs[ch.id]?.textBlocks ?? [])
+    console.log(`[derive-regions] Chapter ${ch.id} calculated duration: ${duration}ms`)
+    return duration
+  })
 
   const totalMs = durationsMs.reduce((a, b) => a + b, 0)
+  console.log(`[derive-regions] Total duration: ${totalMs}ms (${totalMs / 1000}s)`)
 
   // Convert to proportions
   const regions: Record<number, { start: number; end: number }> = {}
@@ -145,6 +157,7 @@ export function deriveScrollRegions(): Record<number, { start: number; end: numb
     const proportion = dur / totalMs
     const chapterId = chapterDefinitions[i].id
     regions[chapterId] = { start: cursor, end: cursor + proportion }
+    console.log(`[derive-regions] Chapter ${chapterId} region: ${(cursor * 100).toFixed(2)}% - ${((cursor + proportion) * 100).toFixed(2)}% (${dur}ms)`)
     cursor += proportion
   })
 

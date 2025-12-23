@@ -235,6 +235,9 @@ export function createChapter1Timeline(container: HTMLElement): gsap.core.Timeli
         charsClass: 'beat-char',
       })
 
+      // Make the container visible first (master timeline sets it to opacity: 0)
+      tl.set(beatText, { opacity: 1, y: 0 }, timeToScroll(cursor))
+
       tl.fromTo(
         split.chars,
         { opacity: 0, y: 15 },
@@ -284,36 +287,11 @@ export function createChapter1Timeline(container: HTMLElement): gsap.core.Timeli
   cursor += BRAND_DURATIONS.section
 
   // Log final cursor position for debugging
-  console.log('[Chapter1] Final cursor:', cursor, 'ms =', timeToScroll(cursor), 'global scroll')
+  const globalScrollEnd = timeToScroll(cursor)
+  console.log('[Chapter1] Final cursor:', cursor, 'ms')
+  console.log('[Chapter1] Final cursor as global scroll:', (globalScrollEnd * 100).toFixed(3), '%')
+  console.log('[Chapter1] Chapter 1 region ends at:', '(check derive-regions output)')
+  console.log('[Chapter1] Timeline duration:', tl.duration())
 
   return tl
-}
-
-
-/**
- * Get the duration of Chapter 1 as a proportion of the total experience
- * Based on scroll region: 0% - 11% = 0.11
- */
-export const CHAPTER_1_DURATION = 0.11
-
-/**
- * Chapter 1 scroll position in master timeline
- */
-export const CHAPTER_1_START = 0
-
-/**
- * Snap points within Chapter 1 (relative to chapter, 0-1)
- * - 0.20: Frame A → B transition (Jack enters)
- * - 0.60: Frame B → C transition (shared moment)
- */
-export const CHAPTER_1_SNAP_POINTS = [0.20, 0.60]
-
-/**
- * Convert chapter-relative snap points to global positions
- * For use in master timeline scroll configuration
- */
-export function getChapter1GlobalSnapPoints(): number[] {
-  return CHAPTER_1_SNAP_POINTS.map(
-    (point) => CHAPTER_1_START + point * CHAPTER_1_DURATION
-  )
 }

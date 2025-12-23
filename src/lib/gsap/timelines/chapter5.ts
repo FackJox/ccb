@@ -250,14 +250,3 @@ export function createChapter5Timeline(container: HTMLElement): gsap.core.Timeli
 
   return tl
 }
-
-/**
- * Get the duration of Chapter 5 as a proportion of the total experience
- * Based on scroll region: 38% - 47% = 0.09
- */
-export const CHAPTER_5_DURATION = 0.09
-
-/**
- * Chapter 5 scroll position in master timeline
- */
-export const CHAPTER_5_START = 0.38

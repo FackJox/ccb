@@ -3,64 +3,17 @@
  *
  * Export all chapter timeline factories.
  * Each chapter contributes its animations to the master timeline.
+ *
+ * Note: Duration/start values are now derived from chapterScrollRegions
+ * (see src/lib/gsap/scroll.ts and src/lib/gsap/derive-regions.ts)
  */
 
-// Chapter 1: The Held Breath
-// Note: Duration/start constants are now derived from chapterScrollRegions
 export { createChapter1Timeline } from './chapter1'
-
-// Chapter 2: The Offer
-export {
-  createChapter2Timeline,
-  CHAPTER_2_DURATION,
-  CHAPTER_2_START,
-} from './chapter2'
-
-// Chapter 3: Consent as Choreography
-export {
-  createChapter3Timeline,
-  CHAPTER_3_DURATION,
-  CHAPTER_3_START,
-} from './chapter3'
-
-// Chapter 4: The Crack
-export {
-  createChapter4Timeline,
-  CHAPTER_4_DURATION,
-  CHAPTER_4_START,
-} from './chapter4'
-
-// Chapter 5: Authority Enters
-export {
-  createChapter5Timeline,
-  CHAPTER_5_DURATION,
-  CHAPTER_5_START,
-} from './chapter5'
-
-// Chapter 6: Violet Window (L3 Hero)
-export {
-  createChapter6Timeline,
-  CHAPTER_6_DURATION,
-  CHAPTER_6_START,
-} from './chapter6'
-
-// Chapter 7: Heat & Tide (L3)
-export {
-  createChapter7Timeline,
-  CHAPTER_7_DURATION,
-  CHAPTER_7_START,
-} from './chapter7'
-
-// Chapter 8: Release (L2)
-export {
-  createChapter8Timeline,
-  CHAPTER_8_DURATION,
-  CHAPTER_8_START,
-} from './chapter8'
-
-// Chapter 9: Residue & Dawn (L2)
-export {
-  createChapter9Timeline,
-  CHAPTER_9_DURATION,
-  CHAPTER_9_START,
-} from './chapter9'
+export { createChapter2Timeline } from './chapter2'
+export { createChapter3Timeline } from './chapter3'
+export { createChapter4Timeline } from './chapter4'
+export { createChapter5Timeline } from './chapter5'
+export { createChapter6Timeline } from './chapter6'
+export { createChapter7Timeline } from './chapter7'
+export { createChapter8Timeline } from './chapter8'
+export { createChapter9Timeline } from './chapter9'
