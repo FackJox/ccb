@@ -261,7 +261,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				content: 'Consent lives in small sentences.',
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '8%', right: '0' }
+				position: { top: '8%', right: '25%' }
 			},
 			{
 				num: 4,
@@ -269,7 +269,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 					"She tipped her head, that chin-lift she didn't know she'd made in a hundred lives, and he answered by holding out his embrace.",
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '18%', right: '5%' }
+				position: { top: '12%', right: '5%' }
 			},
 			{
 				num: 5,
@@ -285,7 +285,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				type: 'fragment',
 				style: 'parchment',
 				emphasis: true,
-				position: { top: '42%', right: '15%' }
+				position: { top: '42%', right: '25%' }
 			},
 			{
 				num: 7,
@@ -293,7 +293,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				type: 'fragment',
 				style: 'parchment',
 				emphasis: true,
-				position: { top: '55%', right: '10%' }
+				position: { top: '55%', right: '20%' }
 			}
 		]
 	},

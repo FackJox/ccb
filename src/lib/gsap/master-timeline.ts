@@ -240,7 +240,7 @@ export function createMasterTimeline(
 
     if (chapter5Container) {
       const region5 = chapterScrollRegions[5]
-      const fadeDuration = 0.02
+      const fadeDuration = 0.04  // Longer crossfade from Chapter 4
 
       // Chapter 5 fade in
       masterTL.to(chapter5Container, {
@@ -249,9 +249,9 @@ export function createMasterTimeline(
         ease: 'power2.out',
       }, region5.start)
 
-      // Add Chapter 5 timeline
+      // Add Chapter 5 timeline AFTER crossfade completes
       const ch5TL = createChapter5Timeline(chapter5Container as HTMLElement)
-      masterTL.add(ch5TL, region5.start)
+      masterTL.add(ch5TL, region5.start + fadeDuration)
 
       // Chapter 5 fades out WHILE Chapter 6 fades in (crossfade)
       masterTL.to(chapter5Container, {
