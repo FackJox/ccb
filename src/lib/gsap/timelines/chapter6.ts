@@ -1,50 +1,103 @@
 /**
  * Chapter 6 Timeline - "Violet Window" (L3 Hero Beat)
  *
- * Frame A/B (0-40% of chapter): Ballroom scene with text sequence
- * - Scene visible from chapter start (layers continue from Ch4/5)
- * - Persistent text (from Ch5) fades out
- * - 3 new text blocks appear sequentially
+ * Pure time-based implementation using timeToScroll() for both positions and durations.
+ * All timing in milliseconds, converted to global scroll proportions.
  *
- * Frame C (40-72% of chapter): Hero transition to exterior silhouettes
- * - BG crossfades from C4BG to exterior-windows-silhouette (hero beat)
- * - FG layers (coupleStanding, mirrorBroken) fade out with BG
- * - Text 4 persists through transition, then fades
- * - Text 5 and 6 appear sequentially over exterior scene
- *
- * Frame D (72-88% of chapter): Intimate closeup
- * - BG crossfades from exterior to C2BG
- * - coupleCloseup fades in
- * - Text 7 and 8 appear (consent moment)
- *
- * Frame E (88-100% of chapter): Return to exterior
- * - BG crossfades back to exterior-windows-silhouette
- * - coupleCloseup fades out
- * - Text 9, 10, 11 appear sequentially (crowd response)
+ * Frame A (bridged text from Ch5): Text 1 visible, fades out
+ * Frame B (build to hero): Texts 2-4 appear sequentially
+ * Frame C (HERO BEAT): bg → bgExterior crossfade (signature 1050ms), texts 5-6
+ * Frame D (intimate closeup): bgExterior → bgC2, coupleCloseup, texts 7-8
+ * Frame E (return to exterior): bgC2 → bgExterior, texts 9-11 (text 11 bridges to Ch7)
  *
  * Scroll Region: 47-62% of total scroll (15% duration)
  * Complexity: L3 (Signature) - full orchestration allowed
  *
- * This is the poster beat - the most iconic moment of the experience.
+ * This is THE poster beat - the most iconic moment of the experience.
  * "Breath, not bounce" - elements fade and drift like smoke or fabric.
  */
 
 import { gsap, brandEase } from '../register'
-import { chapterScrollRegions } from '../scroll'
+import {
+  timeToScroll,
+  calculateReadingTime,
+  BRAND_DURATIONS,
+} from '../timing'
+import { sceneConfigs } from '$data/scenes'
 
-// Chapter 6's duration as fraction of total scroll (0-1)
-const D = chapterScrollRegions[6].end - chapterScrollRegions[6].start // 0.15
+// Get text content for reading time calculations
+const textBlocks = sceneConfigs[6].textBlocks
+const getTextContent = (num: number): string =>
+  textBlocks.find((t) => t.num === num)?.content ?? ''
 
-// Helper to scale chapter-relative position to global position
-const pos = (chapterPercent: number) => chapterPercent * D
-// Helper to scale chapter-relative duration to global duration
-const dur = (chapterPercent: number) => chapterPercent * D
+// Overlap: how much before previous text ends does next text start (ms)
+const TEXT_OVERLAP_MS = 800
 
 /**
- * Create Chapter 6 timeline with positions pre-scaled for master timeline
+ * Add text lifecycle animation using pure time-based positioning
+ */
+function addTextLifecycleTimeBased(
+  tl: gsap.core.Timeline,
+  target: Element,
+  appearAtMs: number,
+  visibleDurMs: number,
+  drift: number,
+  skipFade = false
+): number {
+  const appearDur = BRAND_DURATIONS.section
+  const fadeDur = skipFade ? 0 : BRAND_DURATIONS.micro
+
+  // All conversions via timeToScroll for global positions/durations
+  tl.fromTo(
+    target,
+    { opacity: 0, y: 20 },
+    {
+      opacity: 1,
+      y: 0,
+      duration: timeToScroll(appearDur),
+      ease: brandEase.enter,
+    },
+    timeToScroll(appearAtMs)
+  )
+
+  // Drift while visible
+  if (visibleDurMs > 0) {
+    tl.to(
+      target,
+      {
+        y: drift,
+        duration: timeToScroll(visibleDurMs),
+        ease: 'none',
+      },
+      timeToScroll(appearAtMs + appearDur)
+    )
+  }
+
+  // Fade out (unless bridging to next chapter)
+  if (!skipFade) {
+    tl.to(
+      target,
+      {
+        opacity: 0,
+        duration: timeToScroll(fadeDur),
+        ease: brandEase.exit,
+      },
+      timeToScroll(appearAtMs + appearDur + visibleDurMs)
+    )
+  }
+
+  // Return end time for cursor tracking
+  return appearAtMs + appearDur + visibleDurMs + fadeDur
+}
+
+/**
+ * Create Chapter 6 timeline with pure time-based positioning
  */
 export function createChapter6Timeline(container: HTMLElement): gsap.core.Timeline {
   const tl = gsap.timeline()
+
+  // Cursor tracks cumulative time in ms from chapter start
+  let cursor = 0
 
   // ============== GET ELEMENTS ==============
   // Layers
@@ -52,100 +105,139 @@ export function createChapter6Timeline(container: HTMLElement): gsap.core.Timeli
   const bgExterior = container.querySelector('[data-layer="bgExterior"]')
   const coupleStanding = container.querySelector('[data-layer="coupleStanding"]')
   const mirrorBroken = container.querySelector('[data-layer="mirrorBroken"]')
+  const bgC2 = container.querySelector('[data-layer="bgC2"]')
+  const coupleCloseup = container.querySelector('[data-layer="coupleCloseup"]')
+
+  // Debug logging
+  console.log('[Chapter6] Elements found:', {
+    bg: !!bg,
+    bgExterior: !!bgExterior,
+    bgC2: !!bgC2,
+    coupleStanding: !!coupleStanding,
+    mirrorBroken: !!mirrorBroken,
+    coupleCloseup: !!coupleCloseup,
+    allLayers: container.querySelectorAll('[data-layer]').length,
+    layerIds: Array.from(container.querySelectorAll('[data-layer]')).map(el => el.getAttribute('data-layer'))
+  })
 
   // Text blocks
-  const text1 = container.querySelector('[data-text-block="1"]') // Persistent from Ch5
+  const text1 = container.querySelector('[data-text-block="1"]')
   const text2 = container.querySelector('[data-text-block="2"]')
   const text3 = container.querySelector('[data-text-block="3"]')
   const text4 = container.querySelector('[data-text-block="4"]')
   const text5 = container.querySelector('[data-text-block="5"]')
   const text6 = container.querySelector('[data-text-block="6"]')
-  const text7 = container.querySelector('[data-text-block="7"]') // Frame D consent text
-  const text8 = container.querySelector('[data-text-block="8"]') // Frame D consent text
-  const text9 = container.querySelector('[data-text-block="9"]') // Frame E
-  const text10 = container.querySelector('[data-text-block="10"]') // Frame E
-  const text11 = container.querySelector('[data-text-block="11"]') // Frame E
+  const text7 = container.querySelector('[data-text-block="7"]')
+  const text8 = container.querySelector('[data-text-block="8"]')
+  const text9 = container.querySelector('[data-text-block="9"]')
+  const text10 = container.querySelector('[data-text-block="10"]')
+  const text11 = container.querySelector('[data-text-block="11"]')
 
-  // Frame D layers
-  const bgC2 = container.querySelector('[data-layer="bgC2"]')
-  const coupleCloseup = container.querySelector('[data-layer="coupleCloseup"]')
+  console.log('[Chapter6] Text elements found:', {
+    text1: !!text1,
+    text2: !!text2,
+    text3: !!text3,
+    text4: !!text4,
+    text5: !!text5,
+    text6: !!text6,
+    text7: !!text7,
+    text8: !!text8,
+    text9: !!text9,
+    text10: !!text10,
+    text11: !!text11,
+  })
 
-  // ============== FRAME A: PERSISTENT TEXT FADE (0-15% of chapter) ==============
-  tl.addLabel('frame-a', 0)
+  // ============== FRAME A: BRIDGED TEXT FROM CH5 ==============
+  tl.addLabel('frame-a', timeToScroll(cursor))
 
-  // Text 1 (persistent from Ch5): visible at start, fades out
+  // Initial breath before content
+  cursor += BRAND_DURATIONS.section
+
+  // Text 1 is already visible (bridged from Chapter 5)
+  // Set it to visible state, then fade out after reading time
   if (text1) {
-    // Already visible from chapter start (persistent from Ch5)
     tl.set(text1, { opacity: 1, y: 0 }, 0)
 
-    // Fade out at 5-12% of chapter
+    const readTime = calculateReadingTime(getTextContent(1))
+
     tl.to(
       text1,
       {
         opacity: 0,
-        duration: dur(0.07),
+        y: -8,
+        duration: timeToScroll(BRAND_DURATIONS.micro),
         ease: brandEase.exit,
       },
-      pos(0.05)
+      timeToScroll(cursor + readTime)
     )
+    cursor += readTime + BRAND_DURATIONS.micro
   }
 
-  // ============== FRAME B: NEW TEXT SEQUENCE (15-40% of chapter) ==============
-  tl.addLabel('frame-b', pos(0.15))
+  // Transition pause before Frame B
+  cursor += BRAND_DURATIONS.section
 
-  // Text 2: "She killed the main lanterns..." - appears at 15%, fades at 36%
+  // ============== FRAME B: BUILD TO HERO ==============
+  tl.addLabel('frame-b', timeToScroll(cursor))
+
+  // Text 2: "She killed the main lanterns..."
   if (text2) {
-    addTextLifecycle(tl, text2, 0.15, 0.36, -10)
+    const readTime = calculateReadingTime(getTextContent(2))
+    cursor = addTextLifecycleTimeBased(tl, text2, cursor, readTime, -10)
   }
 
-  // Text 3: "The glass flared..." - appears at 25%, fades at 38%
+  // Text 3: "The glass flared..." - overlaps with text 2
   if (text3) {
-    addTextLifecycle(tl, text3, 0.25, 0.38, -8)
+    const text3Start = cursor - TEXT_OVERLAP_MS
+    const readTime = calculateReadingTime(getTextContent(3))
+    cursor = addTextLifecycleTimeBased(tl, text3, text3Start, readTime, -8)
   }
 
-  // Text 4: appears at 35%, persists through Frame C transition, fades at 50%
+  // Text 4: "Their bodies became silhouettes..." - overlaps with text 3
   if (text4) {
-    addTextLifecycle(tl, text4, 0.35, 0.5, -8)
+    const text4Start = cursor - TEXT_OVERLAP_MS
+    const readTime = calculateReadingTime(getTextContent(4))
+    cursor = addTextLifecycleTimeBased(tl, text4, text4Start, readTime, -8)
   }
 
-  // ============== FRAME C: HERO TRANSITION (40-72% of chapter) ==============
-  tl.addLabel('frame-c', pos(0.4))
+  // Transition pause before Frame C (hero beat)
+  cursor += BRAND_DURATIONS.section
 
-  // Background crossfade (hero beat - ~1000ms feel at 7% of chapter)
+  // ============== FRAME C: HERO BEAT - EXTERIOR SILHOUETTE ==============
+  tl.addLabel('frame-c', timeToScroll(cursor))
+
+  // HERO TRANSITION: bg → bgExterior (signature duration for hero beat)
   if (bg && bgExterior) {
-    // C4BG fades out
     tl.to(
       bg,
       {
         opacity: 0,
-        duration: dur(0.07),
-        ease: brandEase.enter,
+        duration: timeToScroll(BRAND_DURATIONS.signature), // 1050ms for hero
+        ease: brandEase.exit,
       },
-      pos(0.4)
+      timeToScroll(cursor)
     )
 
-    // Exterior windows silhouette fades in (hero shot)
     tl.to(
       bgExterior,
       {
         opacity: 1,
-        duration: dur(0.07),
+        duration: timeToScroll(BRAND_DURATIONS.signature),
         ease: brandEase.enter,
       },
-      pos(0.4)
+      timeToScroll(cursor)
     )
   }
 
-  // Foreground layers fade out with BG transition
+  // FG layers fade out with BG
   if (coupleStanding) {
     tl.to(
       coupleStanding,
       {
         opacity: 0,
-        duration: dur(0.07),
-        ease: brandEase.enter,
+        duration: timeToScroll(BRAND_DURATIONS.signature),
+        ease: brandEase.exit,
       },
-      pos(0.4)
+      timeToScroll(cursor)
     )
   }
 
@@ -154,184 +246,154 @@ export function createChapter6Timeline(container: HTMLElement): gsap.core.Timeli
       mirrorBroken,
       {
         opacity: 0,
-        duration: dur(0.07),
-        ease: brandEase.enter,
+        duration: timeToScroll(BRAND_DURATIONS.signature),
+        ease: brandEase.exit,
       },
-      pos(0.4)
+      timeToScroll(cursor)
     )
   }
 
-  // Text 5: "A gasp rose from the square..." - appears at 50%, fades at 68%
+  cursor += BRAND_DURATIONS.signature
+
+  // Text 5: "A gasp rose from the square..."
   if (text5) {
-    addTextLifecycle(tl, text5, 0.5, 0.68, -8)
+    const readTime = calculateReadingTime(getTextContent(5))
+    cursor = addTextLifecycleTimeBased(tl, text5, cursor, readTime, -8)
   }
 
-  // Text 6: "Only shadows remained..." - appears at 55%, fades at 72%
+  // Text 6: "Only shadows remained..." - overlaps with text 5
   if (text6) {
-    addTextLifecycle(tl, text6, 0.55, 0.72, -8)
+    const text6Start = cursor - TEXT_OVERLAP_MS
+    const readTime = calculateReadingTime(getTextContent(6))
+    cursor = addTextLifecycleTimeBased(tl, text6, text6Start, readTime, -8)
   }
 
-  // ============== FRAME D: INTIMATE CLOSEUP (72-88% of chapter) ==============
-  tl.addLabel('frame-d', pos(0.72))
+  // Transition pause before Frame D
+  cursor += BRAND_DURATIONS.section
 
-  // Scene transition: exterior silhouettes -> intimate closeup
-  // Crossfade backgrounds (signature duration ~1000ms feel at 7% of chapter)
+  // ============== FRAME D: INTIMATE CLOSEUP ==============
+  tl.addLabel('frame-d', timeToScroll(cursor))
+
+  // Scene transition: bgExterior → bgC2, coupleCloseup fades in
   if (bgExterior && bgC2) {
     tl.to(
       bgExterior,
       {
         opacity: 0,
-        duration: dur(0.07),
-        ease: brandEase.enter,
+        duration: timeToScroll(BRAND_DURATIONS.section),
+        ease: brandEase.exit,
       },
-      pos(0.72)
+      timeToScroll(cursor)
     )
 
     tl.to(
       bgC2,
       {
         opacity: 1,
-        duration: dur(0.07),
+        duration: timeToScroll(BRAND_DURATIONS.section),
         ease: brandEase.enter,
       },
-      pos(0.72)
+      timeToScroll(cursor)
     )
   }
 
-  // Couple closeup fades in with background
   if (coupleCloseup) {
     tl.to(
       coupleCloseup,
       {
         opacity: 1,
-        duration: dur(0.07),
+        duration: timeToScroll(BRAND_DURATIONS.section),
         ease: brandEase.enter,
       },
-      pos(0.72)
+      timeToScroll(cursor)
     )
   }
 
-  // Text 7: "She stepped into him..." - appears at 74%, fades at 80%
+  cursor += BRAND_DURATIONS.section
+
+  // Text 7: "She stepped into him..." / "Follow me"
   if (text7) {
-    addTextLifecycle(tl, text7, 0.74, 0.80, -8)
+    const readTime = calculateReadingTime(getTextContent(7))
+    cursor = addTextLifecycleTimeBased(tl, text7, cursor, readTime, -8)
   }
 
-  // Text 8: "'Always,' he answered..." - appears at 77%, fades at 82%
+  // Text 8: "'Always,' he answered..." - overlaps with text 7
   if (text8) {
-    addTextLifecycle(tl, text8, 0.77, 0.82, -8)
+    const text8Start = cursor - TEXT_OVERLAP_MS
+    const readTime = calculateReadingTime(getTextContent(8))
+    cursor = addTextLifecycleTimeBased(tl, text8, text8Start, readTime, -6)
   }
 
-  // ============== FRAME E: RETURN TO EXTERIOR (82-100% of chapter) ==============
-  tl.addLabel('frame-e', pos(0.82))
+  // Transition pause before Frame E
+  cursor += BRAND_DURATIONS.section
 
-  // Scene transition: intimate closeup -> exterior silhouettes
-  // Crossfade backgrounds
+  // ============== FRAME E: RETURN TO EXTERIOR ==============
+  tl.addLabel('frame-e', timeToScroll(cursor))
+
+  // Scene transition: bgC2 → bgExterior (return), coupleCloseup fades out
   if (bgC2 && bgExterior) {
     tl.to(
       bgC2,
       {
         opacity: 0,
-        duration: dur(0.07),
-        ease: brandEase.enter,
+        duration: timeToScroll(BRAND_DURATIONS.section),
+        ease: brandEase.exit,
       },
-      pos(0.82)
+      timeToScroll(cursor)
     )
 
     tl.to(
       bgExterior,
       {
         opacity: 1,
-        duration: dur(0.07),
+        duration: timeToScroll(BRAND_DURATIONS.section),
         ease: brandEase.enter,
       },
-      pos(0.82)
+      timeToScroll(cursor)
     )
   }
 
-  // Couple closeup fades out
   if (coupleCloseup) {
     tl.to(
       coupleCloseup,
       {
         opacity: 0,
-        duration: dur(0.07),
-        ease: brandEase.enter,
+        duration: timeToScroll(BRAND_DURATIONS.section),
+        ease: brandEase.exit,
       },
-      pos(0.82)
+      timeToScroll(cursor)
     )
   }
 
-  // Text 9: "They waltzed..." - appears at 82%, fades at 89%
+  cursor += BRAND_DURATIONS.section
+
+  // Text 9: "They waltzed, framed by darkness..."
   if (text9) {
-    addTextLifecycle(tl, text9, 0.82, 0.89, -8)
+    const readTime = calculateReadingTime(getTextContent(9))
+    cursor = addTextLifecycleTimeBased(tl, text9, cursor, readTime, -8)
   }
 
-  // Text 10: "She pressed her palm..." - appears at 85%, fades at 92%
+  // Text 10: "She pressed her palm to his chest..." - overlaps with text 9
   if (text10) {
-    addTextLifecycle(tl, text10, 0.85, 0.92, -8)
+    const text10Start = cursor - TEXT_OVERLAP_MS
+    const readTime = calculateReadingTime(getTextContent(10))
+    cursor = addTextLifecycleTimeBased(tl, text10, text10Start, readTime, -6)
   }
 
-  // Text 11: "Someone clapped..." - appears at 88%, persists through chapter end
-  // (continues into Chapter 7 - same position, uses tl.set pattern)
+  // Text 11: "Someone clapped on the count..." - bridges TO Chapter 7 (skipFade = true)
   if (text11) {
-    // Appear - same pattern as Chapter 3 text 3
-    tl.fromTo(
-      text11,
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: dur(0.08), ease: brandEase.enter },
-      pos(0.88)
-    )
-    // No fade out - text holds to chapter end (bridges to Chapter 7)
+    const text11Start = cursor - TEXT_OVERLAP_MS
+    const readTime = calculateReadingTime(getTextContent(11))
+    cursor = addTextLifecycleTimeBased(tl, text11, text11Start, readTime, -5, true)
   }
+
+  // Final hold before chapter transition
+  cursor += BRAND_DURATIONS.section
+
+  // Log final cursor position for debugging
+  console.log('[Chapter6] Final cursor:', cursor, 'ms =', timeToScroll(cursor), 'global scroll')
 
   return tl
-}
-
-/**
- * Add text lifecycle animation (appear -> drift -> fade)
- * All positions are chapter-relative (0-1), scaled internally
- */
-function addTextLifecycle(
-  tl: gsap.core.Timeline,
-  target: Element,
-  appearAt: number,
-  fadeOutAt: number,
-  driftDistance: number
-): void {
-  const appearDur = 0.08 // 8% of chapter for appear
-
-  // Appear
-  tl.fromTo(
-    target,
-    { opacity: 0, y: 20 },
-    { opacity: 1, y: 0, duration: dur(appearDur), ease: brandEase.enter },
-    pos(appearAt)
-  )
-
-  // Drift while visible
-  const driftDur = fadeOutAt - appearAt - appearDur - 0.05
-  if (driftDur > 0) {
-    tl.to(
-      target,
-      {
-        y: driftDistance,
-        duration: dur(driftDur),
-        ease: 'none', // Linear drift for scrubbed feel
-      },
-      pos(appearAt + appearDur)
-    )
-  }
-
-  // Fade out
-  tl.to(
-    target,
-    {
-      opacity: 0,
-      duration: dur(0.05),
-      ease: brandEase.exit,
-    },
-    pos(fadeOutAt)
-  )
 }
 
 /**
