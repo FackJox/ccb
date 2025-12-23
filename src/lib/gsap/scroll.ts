@@ -5,6 +5,7 @@
  */
 
 import { ScrollSmoother, ScrollTrigger, gsap } from './register'
+import { deriveScrollRegions } from './derive-regions'
 
 export interface ScrollSmootherConfig {
   smooth?: number
@@ -19,7 +20,7 @@ let smootherInstance: ScrollSmoother | null = null
  * Default ScrollSmoother configuration per Brand Guidelines
  */
 export const defaultScrollConfig: ScrollSmootherConfig = {
-  smooth: 1.2,
+  smooth: 1.5,
   effects: true,
   normalizeScroll: true,
   ignoreMobileResize: true,
@@ -81,11 +82,11 @@ export function killScrollSmoother(): void {
   }
 }
 
-/**
- * Chapter scroll regions as percentages of total scroll height
- * From design docs: Scroll-Telling Maps
- */
-export const chapterScrollRegions = {
+// Feature flag: set to true to use content-derived scroll regions
+const USE_DERIVED_REGIONS = true
+
+// Hardcoded regions (original)
+const HARDCODED_SCROLL_REGIONS = {
   1: { start: 0, end: 0.11 },
   2: { start: 0.11, end: 0.20 },
   3: { start: 0.20, end: 0.27 },
@@ -96,6 +97,24 @@ export const chapterScrollRegions = {
   8: { start: 0.77, end: 0.90 },
   9: { start: 0.90, end: 1.0 },
 } as const
+
+/**
+ * Chapter scroll regions as percentages of total scroll height
+ * Can be hardcoded or derived from content
+ */
+export const chapterScrollRegions: Record<number, { start: number; end: number }> =
+  USE_DERIVED_REGIONS ? deriveScrollRegions() : HARDCODED_SCROLL_REGIONS
+
+// Temporary logging to compare derived vs hardcoded regions
+if (typeof window !== 'undefined') {
+  const derived = deriveScrollRegions()
+  console.log('=== SCROLL REGIONS ===')
+  console.log('Using derived regions:', USE_DERIVED_REGIONS)
+  console.log('Chapter 1 region:', chapterScrollRegions[1])
+  console.log('Chapter 1 span:', chapterScrollRegions[1].end - chapterScrollRegions[1].start)
+  console.log('All derived regions:', derived)
+  console.log('Hardcoded regions:', HARDCODED_SCROLL_REGIONS)
+}
 
 export type ChapterNumber = keyof typeof chapterScrollRegions
 

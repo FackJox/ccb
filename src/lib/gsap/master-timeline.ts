@@ -24,25 +24,18 @@ import {
   createChapter7Timeline,
   createChapter8Timeline,
   createChapter9Timeline,
-  getChapter1GlobalSnapPoints,
 } from './timelines'
 
 /**
  * Calculate all snap points for the master timeline
  * Returns global positions (0-1) where scroll should snap
+ *
+ * TODO: Derive snap points from chapterScrollRegions + frame boundaries
  */
 function calculateGlobalSnapPoints(): number[] {
-  const snapPoints: number[] = []
-
-  // Add Chapter 1 snap points
-  snapPoints.push(...getChapter1GlobalSnapPoints())
-
-  // Future: Add snap points from other chapters as implemented
-  // snapPoints.push(...getChapter2GlobalSnapPoints())
-  // etc.
-
-  // Sort and dedupe
-  return [...new Set(snapPoints)].sort((a, b) => a - b)
+  // Snap points disabled - return empty for now
+  // Future: calculate from derived regions
+  return []
 }
 
 export interface MasterTimelineConfig {

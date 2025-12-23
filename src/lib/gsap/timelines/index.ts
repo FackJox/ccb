@@ -6,13 +6,8 @@
  */
 
 // Chapter 1: The Held Breath
-export {
-  createChapter1Timeline,
-  CHAPTER_1_DURATION,
-  CHAPTER_1_START,
-  CHAPTER_1_SNAP_POINTS,
-  getChapter1GlobalSnapPoints,
-} from './chapter1'
+// Note: Duration/start constants are now derived from chapterScrollRegions
+export { createChapter1Timeline } from './chapter1'
 
 // Chapter 2: The Offer
 export {

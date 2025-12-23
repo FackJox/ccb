@@ -1,79 +1,69 @@
 /**
  * Time-Based Scroll Timing
  *
- * All timing defined in milliseconds matching design docs.
- * Single conversion function transforms ms → scroll proportion.
+ * Chapter timing helpers that depend on scroll regions.
+ * Base constants are in timing-constants.ts to avoid circular deps.
  */
 
-// ============== EXPERIENCE DURATION ==============
-// The canonical "perfect reading pace" - will be DERIVED from content later
-// Initially set manually based on design estimate
-export const PERFECT_DURATION_SECONDS = 90
+import { gsap, brandEase } from './register'
+import { chapterScrollRegions, type ChapterNumber } from './scroll'
 
-// ============== BRAND DURATION TOKENS (from design docs) ==============
-export const BRAND_DURATIONS = {
-  // Micro-interactions (120-160ms fast, 200-260ms normal)
-  microFast: 140,
-  micro: 230,
+// Re-export base values from timing-constants
+export {
+  BRAND_DURATIONS,
+  type BrandDurationKey,
+  calculateReadingTime,
+  TARGET_SCROLL_DISTANCE,
+} from './timing-constants'
 
-  // Content/section transitions (450-650ms)
-  section: 550,
+import { BRAND_DURATIONS } from './timing-constants'
 
-  // Held breath moments (750-900ms)
-  sectionHeld: 825,
+// Re-export from derive-regions
+export { deriveScrollRegions, calculateTotalDuration } from './derive-regions'
 
-  // Signature moments (900-1200ms)
-  signature: 1050,
-} as const
+import { calculateTotalDuration } from './derive-regions'
 
-export type BrandDurationKey = keyof typeof BRAND_DURATIONS
-
-// ============== READING TIME FORMULA ==============
-const READING_BASE_MS = 500 // Minimum visibility for any text
-const READING_MS_PER_WORD = 200 // ~300 WPM comfortable reading
+// ============== DERIVED EXPERIENCE DURATION ==============
+// Computed from actual content, memoized for performance
+let _derivedDurationSeconds: number | null = null
 
 /**
- * Calculate reading time for text content
- * @param text - The text content to calculate reading time for
- * @returns Duration in milliseconds
+ * Get the total experience duration in seconds, derived from content
+ * Memoized to avoid recalculation
  */
-export function calculateReadingTime(text: string): number {
-  const wordCount = text.trim().split(/\s+/).filter(Boolean).length
-  return READING_BASE_MS + wordCount * READING_MS_PER_WORD
+export function getDerivedDurationSeconds(): number {
+  if (_derivedDurationSeconds === null) {
+    _derivedDurationSeconds = calculateTotalDuration()
+    console.log('[timing] Derived total duration:', _derivedDurationSeconds, 'seconds')
+  }
+  return _derivedDurationSeconds
 }
 
-// ============== SCROLL SPEED ==============
-// Comfortable reading scroll speed (research: 50-80px/s)
-const COMFORTABLE_SCROLL_SPEED = 65 // px/s
+// For backwards compatibility - this is now derived from content
+export const PERFECT_DURATION_SECONDS = 90 // Legacy value, use getDerivedDurationSeconds() instead
 
-// Target scroll distance in pixels
-export const TARGET_SCROLL_DISTANCE = PERFECT_DURATION_SECONDS * COMFORTABLE_SCROLL_SPEED
-
-// ============== CORE CONVERSION ==============
+// ============== CORE CONVERSION (using derived duration) ==============
 /**
  * Convert milliseconds to scroll proportion (0-1)
+ * Uses the derived total duration from content
  * @param ms - Duration in milliseconds
  * @returns Proportion of total scroll (0-1)
  */
 export function timeToScroll(ms: number): number {
-  return ms / 1000 / PERFECT_DURATION_SECONDS
+  return ms / 1000 / getDerivedDurationSeconds()
 }
 
 /**
  * Convert scroll proportion back to milliseconds
+ * Uses the derived total duration from content
  * @param scrollProportion - Proportion of total scroll (0-1)
  * @returns Duration in milliseconds
  */
 export function scrollToTime(scrollProportion: number): number {
-  return scrollProportion * PERFECT_DURATION_SECONDS * 1000
+  return scrollProportion * getDerivedDurationSeconds() * 1000
 }
 
 // ============== CHAPTER TIMING HELPERS ==============
-
-/**
- * Temporary import - will be replaced when scroll regions become derived
- */
-import { chapterScrollRegions, type ChapterNumber } from './scroll'
 
 export interface ChapterTimingHelpers {
   /** Convert ms to chapter-relative scroll proportion */
@@ -105,4 +95,95 @@ export function createChapterTimingHelpers(chapterId: ChapterNumber): ChapterTim
   }
 
   return { dur, pos, chapterScrollSpan }
+}
+
+// ============== TEXT LIFECYCLE ==============
+
+export interface TextLifecycleOptions {
+  /** Cumulative ms from chapter start when text appears */
+  appearAtMs: number
+  /** Duration of appear animation in ms (default: BRAND_DURATIONS.section) */
+  appearDurMs?: number
+  /** Duration text stays visible in ms (from reading time or override) */
+  visibleDurMs: number
+  /** Duration of fade out in ms (default: BRAND_DURATIONS.micro) */
+  fadeDurMs?: number
+  /** Vertical drift in pixels while visible */
+  drift: number
+  /** Skip fade out (for bridging texts that persist to next chapter) */
+  skipFade?: boolean
+}
+
+/**
+ * Add text lifecycle animation (appear → drift → fade)
+ *
+ * Supports two positioning modes:
+ * 1. Time-based (ms): Uses opts.appearAtMs with helpers to convert to proportions
+ * 2. Proportion-based: Uses positionOverride/durationOverride for direct control
+ *
+ * @param tl - The GSAP timeline to add animations to
+ * @param target - The DOM element to animate
+ * @param opts - Lifecycle options
+ * @param helpers - Chapter timing helpers
+ * @param positionOverride - Optional: chapter-relative position (0-1) to start appear
+ * @param durationOverride - Optional: chapter-relative duration (0-1) for visibility
+ * @returns End time in ms for sequencing next element (only valid for time-based mode)
+ */
+export function addTextLifecycle(
+  tl: gsap.core.Timeline,
+  target: Element,
+  opts: TextLifecycleOptions,
+  helpers: ChapterTimingHelpers,
+  positionOverride?: number,
+  durationOverride?: number
+): number {
+  const { dur, pos } = helpers
+
+  const appearDur = opts.appearDurMs ?? BRAND_DURATIONS.section
+  const fadeDur = opts.skipFade ? 0 : (opts.fadeDurMs ?? BRAND_DURATIONS.micro)
+
+  // Determine positioning mode
+  const useProportions = positionOverride !== undefined
+
+  // Calculate positions - either from ms or from direct proportions
+  const appearPos = useProportions ? positionOverride : pos(opts.appearAtMs)
+  const appearDurProp = useProportions ? 0.03 : dur(appearDur) // 3% of chapter for appear
+  const visibleDurProp = durationOverride ?? dur(opts.visibleDurMs)
+  const fadeDurProp = opts.skipFade ? 0 : (useProportions ? 0.02 : dur(fadeDur))
+
+  // Appear
+  tl.fromTo(
+    target,
+    { opacity: 0, y: 20 },
+    { opacity: 1, y: 0, duration: appearDurProp, ease: brandEase.enter },
+    appearPos
+  )
+
+  // Drift while visible
+  if (visibleDurProp > 0) {
+    tl.to(
+      target,
+      {
+        y: opts.drift,
+        duration: visibleDurProp,
+        ease: 'none',
+      },
+      appearPos + appearDurProp
+    )
+  }
+
+  // Fade out (unless bridging)
+  if (!opts.skipFade) {
+    tl.to(
+      target,
+      {
+        opacity: 0,
+        duration: fadeDurProp,
+        ease: brandEase.exit,
+      },
+      appearPos + appearDurProp + visibleDurProp
+    )
+  }
+
+  return opts.appearAtMs + appearDur + opts.visibleDurMs + fadeDur
 }

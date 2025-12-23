@@ -423,41 +423,160 @@ export const defaultScrollConfig: ScrollSmootherConfig = {
 
 ### New Files
 
-- [ ] `src/lib/gsap/timing.ts` - Core timing constants and conversion functions
-- [ ] `src/lib/data/chapter-definitions.ts` - Frame structures per chapter
+- [x] `src/lib/gsap/timing-constants.ts` - Base timing constants (no deps)
+- [x] `src/lib/gsap/timing.ts` - Timing helpers with derived duration
+- [x] `src/lib/gsap/derive-regions.ts` - Content-driven chapter regions
+- [x] `src/lib/data/chapter-definitions.ts` - Frame structures per chapter
 
 ### Modified Files
 
-- [ ] `src/lib/gsap/scroll.ts` - Replace hardcoded `chapterScrollRegions` with derived values
-- [ ] `src/lib/gsap/scroll.ts` - Update `defaultScrollConfig.smooth` to 1.5
-- [ ] `src/lib/data/scenes.ts` - Add `bridgesTo`/`bridgesFrom` and optional `visibleDurationMs` to interface
-- [ ] `src/lib/gsap/timelines/chapter1.ts` through `chapter9.ts` - Migrate to time-based helpers
+- [x] `src/lib/gsap/scroll.ts` - Replace hardcoded `chapterScrollRegions` with derived values
+- [x] `src/lib/gsap/scroll.ts` - Update `defaultScrollConfig.smooth` to 1.5
+- [x] `src/lib/data/scenes.ts` - Add `bridgesTo`/`bridgesFrom` and optional `visibleDurationMs` to interface
+- [x] `src/lib/gsap/timelines/chapter1.ts` - Migrated to time-based (PROVEN PATTERN)
+- [ ] `src/lib/gsap/timelines/chapter2.ts` through `chapter9.ts` - Migrate to time-based
 
 ### Migration Strategy
 
-1. **Phase 1: Foundation**
-   - Create `timing.ts` with constants and helpers
-   - Add `chapter-definitions.ts` with frame structures
-   - Keep existing `chapterScrollRegions` temporarily
+1. **Phase 1: Foundation** ✅ COMPLETE
+   - Created `timing-constants.ts` and `timing.ts` with constants and helpers
+   - Added `chapter-definitions.ts` with frame structures
+   - Created `derive-regions.ts` for content-driven regions
 
-2. **Phase 2: Validation**
-   - Add `bridgesTo`/`bridgesFrom` metadata to `scenes.ts`
-   - Implement build-time validation for bridges
-   - No runtime changes yet
+2. **Phase 2: Validation** ✅ COMPLETE
+   - Added `bridgesTo`/`bridgesFrom` metadata to `scenes.ts`
+   - `visibleDurationMs` override support added
 
-3. **Phase 3: Chapter Migration**
-   - Migrate one chapter at a time (start with Chapter 1)
-   - Use new timing helpers alongside old percentages
-   - Verify feel matches design intent
+3. **Phase 3: Chapter Migration** 🔄 IN PROGRESS
+   - ✅ Chapter 1 migrated and verified working
+   - Remaining: Chapters 2-9
 
-4. **Phase 4: Derived Regions**
-   - Switch `chapterScrollRegions` to derived calculation
-   - Update scroll container sizing
-   - Update ScrollSmoother smooth to 1.5
+4. **Phase 4: Derived Regions** ✅ COMPLETE
+   - Switched `chapterScrollRegions` to derived calculation
+   - `timeToScroll()` now uses derived total duration
+   - ScrollSmoother smooth already at 1.5
 
 5. **Phase 5: Cleanup**
-   - Remove old percentage-based code
-   - Document any manual overrides used
+   - Remove old percentage-based code after all chapters migrated
+
+---
+
+## Proven Pattern (from Chapter 1 Migration)
+
+### Critical Architecture
+
+The system uses **two aligned calculations** that MUST use the same timing logic:
+
+1. **`derive-regions.ts`** - Calculates chapter proportions from content
+2. **`timing.ts:timeToScroll()`** - Converts ms to scroll proportion
+
+Both now use the **same denominator**: `getDerivedDurationSeconds()` (memoized total from content).
+
+### Sequential-with-Overlap Timing
+
+Texts appear in staggered sequence with 800ms overlap:
+
+```
+TEXT 1:  |====appear====|====visible====|==fade==|
+TEXT 2:           |====appear====|====visible====|==fade==|
+                  ↑
+                  TEXT_OVERLAP_MS = 800ms before TEXT 1 ends
+```
+
+**Critical:** The `TEXT_OVERLAP_MS = 800` constant must match in:
+- `src/lib/gsap/timelines/chapterN.ts` - timeline cursor positioning
+- `src/lib/gsap/derive-regions.ts` - duration calculation
+
+### Pure Time-Based Timeline Pattern
+
+```typescript
+import { gsap, SplitText, brandEase } from '../register'
+import { timeToScroll, calculateReadingTime, BRAND_DURATIONS } from '../timing'
+import { sceneConfigs } from '$data/scenes'
+
+const textBlocks = sceneConfigs[N].textBlocks
+const getTextContent = (num: number): string =>
+  textBlocks.find((t) => t.num === num)?.content ?? ''
+
+const TEXT_OVERLAP_MS = 800
+
+function addTextLifecycleTimeBased(
+  tl: gsap.core.Timeline,
+  target: Element,
+  appearAtMs: number,
+  visibleDurMs: number,
+  drift: number,
+  skipFade = false
+): number {
+  const appearDur = BRAND_DURATIONS.section
+  const fadeDur = skipFade ? 0 : BRAND_DURATIONS.micro
+
+  // ALL conversions via timeToScroll for global positions/durations
+  tl.fromTo(target,
+    { opacity: 0, y: 20 },
+    { opacity: 1, y: 0, duration: timeToScroll(appearDur), ease: brandEase.enter },
+    timeToScroll(appearAtMs)
+  )
+
+  if (visibleDurMs > 0) {
+    tl.to(target, {
+      y: drift,
+      duration: timeToScroll(visibleDurMs),
+      ease: 'none',
+    }, timeToScroll(appearAtMs + appearDur))
+  }
+
+  if (!skipFade) {
+    tl.to(target, {
+      opacity: 0,
+      duration: timeToScroll(fadeDur),
+      ease: brandEase.exit,
+    }, timeToScroll(appearAtMs + appearDur + visibleDurMs))
+  }
+
+  return appearAtMs + appearDur + visibleDurMs + fadeDur
+}
+
+export function createChapterNTimeline(container: HTMLElement): gsap.core.Timeline {
+  const tl = gsap.timeline()
+  let cursor = 0
+
+  // Get elements
+  const text1 = container.querySelector('[data-text-block="1"]')
+  // ... more elements
+
+  // Initial breath
+  cursor += BRAND_DURATIONS.section
+
+  // Text 1: First text
+  if (text1) {
+    const readTime = calculateReadingTime(getTextContent(1))
+    cursor = addTextLifecycleTimeBased(tl, text1, cursor, readTime, -15)
+  }
+
+  // Text 2: Overlaps with text 1
+  if (text2) {
+    const text2Start = cursor - TEXT_OVERLAP_MS
+    const readTime = calculateReadingTime(getTextContent(2))
+    cursor = addTextLifecycleTimeBased(tl, text2, text2Start, readTime, -12)
+  }
+
+  // Frame transition pause
+  cursor += BRAND_DURATIONS.section
+
+  // ... continue pattern
+
+  console.log('[ChapterN] Final cursor:', cursor, 'ms')
+  return tl
+}
+```
+
+### Why This Works
+
+1. **Same denominator**: `timeToScroll(ms)` divides by `getDerivedDurationSeconds()`, which sums all chapter durations
+2. **Same overlap**: Both timeline and derive-regions use `TEXT_OVERLAP_MS = 800`
+3. **Same duration tokens**: Both use `BRAND_DURATIONS` for appear/fade/transition timing
+4. **Content-driven**: Chapter regions proportional to actual reading time needed
 
 ---
 
@@ -466,8 +585,10 @@ export const defaultScrollConfig: ScrollSmootherConfig = {
 | Concept | Formula |
 |---------|---------|
 | Reading time | `500 + (wordCount × 200)` ms |
-| Time → scroll | `(ms / 1000) / PERFECT_DURATION_SECONDS` |
-| Scroll distance | `PERFECT_DURATION_SECONDS × 65` px |
+| Time → scroll | `(ms / 1000) / getDerivedDurationSeconds()` |
+| Total duration | Sum of all chapter durations (derived from content) |
+| Text overlap | 800ms before previous text ends |
+| Scroll distance | `derivedDuration × 65` px |
 | Device multiplier | Desktop: 1.0, Tablet: 0.85, Mobile: 0.7 |
 
 ---
@@ -476,8 +597,9 @@ export const defaultScrollConfig: ScrollSmootherConfig = {
 
 | Decision | Rationale |
 |----------|-----------|
-| 90s perfect duration | Allows ~1min reading + transitions; tunable |
+| Derived duration | Content-driven; ~260s from current text content |
 | 200ms per word | ~300 WPM comfortable reading pace |
 | 500ms base visibility | Even short phrases need minimum dwell time |
+| 800ms text overlap | Staggered-parallel feel; texts fade as next appears |
 | smooth: 1.5 | Matches brand "velvet" feel, slower scroll response |
 | Device multipliers | Mobile users swipe faster; compensate with shorter scroll |

@@ -236,38 +236,104 @@ interface SceneTextBlock {
 
 The anchor is derived automatically from which property (`left` or `right`) is set in the scene config.
 
-### Timeline Timing Pattern
+### Timeline Timing Pattern (Pure Time-Based)
 
-Each chapter timeline in `src/lib/gsap/timelines/chapterN.ts` must align with `docs/Design/5 Scroll-Telling Maps.md`:
+Chapter timelines use **pure time-based positioning** with `timeToScroll()` for both positions AND durations. This ensures timelines align with derived scroll regions.
 
-1. **Frame boundaries** from Scroll-Telling Map define when text groups appear/fade
-2. **Text visibility** should span the frame duration (not compress into small windows)
-3. **Frame-by-frame replacement**: texts from Frame A fade before Frame B texts appear
-
-Example (Chapter 1):
+**Key Constants:**
 ```typescript
-// Per Scroll-Telling Map: Frame A (0-20%), Frame B (20-60%), Frame C (60-100%)
+import { timeToScroll, calculateReadingTime, BRAND_DURATIONS } from '../timing'
 
-// Frame A texts - staggered entry, fade together at frame end
-addTextLifecycle(tl, text1, 0.03, 0.18, -15)  // ~15% visible
-addTextLifecycle(tl, text2, 0.07, 0.18, -12)  // ~11% visible
-addTextLifecycle(tl, text3, 0.11, 0.18, -10)  // ~7% visible
-
-// Frame B texts - appear after Frame A fades
-addTextLifecycle(tl, text4, 0.22, 0.55, -18)  // ~33% visible
-// ... etc
+const TEXT_OVERLAP_MS = 800  // How much texts overlap (staggered-parallel)
 ```
+
+**Cursor Pattern with Sequential-Overlap:**
+```typescript
+let cursor = 0  // Tracks cumulative time in ms from chapter start
+
+// Initial breath before content
+cursor += BRAND_DURATIONS.section  // 550ms
+
+// Text 1: First text starts at cursor
+if (text1) {
+  const readTime = calculateReadingTime(getTextContent(1))
+  cursor = addTextLifecycleTimeBased(tl, text1, cursor, readTime, -15)
+}
+
+// Text 2: Overlaps with text 1 (starts TEXT_OVERLAP_MS before text1 ends)
+if (text2) {
+  const text2Start = cursor - TEXT_OVERLAP_MS
+  const readTime = calculateReadingTime(getTextContent(2))
+  cursor = addTextLifecycleTimeBased(tl, text2, text2Start, readTime, -12)
+}
+
+// Transition pause before next frame
+cursor += BRAND_DURATIONS.section
+```
+
+**Text Lifecycle Function:**
+```typescript
+function addTextLifecycleTimeBased(
+  tl: gsap.core.Timeline,
+  target: Element,
+  appearAtMs: number,
+  visibleDurMs: number,
+  drift: number,
+  skipFade = false
+): number {
+  const appearDur = BRAND_DURATIONS.section   // 550ms
+  const fadeDur = skipFade ? 0 : BRAND_DURATIONS.micro  // 230ms
+
+  // All timing via timeToScroll() for global positions/durations
+  tl.fromTo(target,
+    { opacity: 0, y: 20 },
+    { opacity: 1, y: 0, duration: timeToScroll(appearDur), ease: brandEase.enter },
+    timeToScroll(appearAtMs)
+  )
+
+  // Drift while visible
+  if (visibleDurMs > 0) {
+    tl.to(target, {
+      y: drift,
+      duration: timeToScroll(visibleDurMs),
+      ease: 'none',
+    }, timeToScroll(appearAtMs + appearDur))
+  }
+
+  // Fade out (unless bridging to next chapter)
+  if (!skipFade) {
+    tl.to(target, {
+      opacity: 0,
+      duration: timeToScroll(fadeDur),
+      ease: brandEase.exit,
+    }, timeToScroll(appearAtMs + appearDur + visibleDurMs))
+  }
+
+  return appearAtMs + appearDur + visibleDurMs + fadeDur
+}
+```
+
+**Critical Alignment:** The `TEXT_OVERLAP_MS = 800` value must match in both:
+- `src/lib/gsap/timelines/chapterN.ts` - timeline positioning
+- `src/lib/gsap/derive-regions.ts` - duration calculation
+
+This ensures timeline cursor positions align with derived chapter scroll regions.
 
 ### Duration Guidelines (from Brand Physics)
 
-- **Section transitions** (text blocks): 450-650ms feel
-- **Held breath moments**: 750-900ms
-- **Signature moments**: 900-1200ms
-- Text slabs stack with **40ms stagger** within frames
+| Token | Duration | Usage |
+|-------|----------|-------|
+| `microFast` | 140ms | Quick micro-interactions |
+| `micro` | 230ms | Normal micro, text fade out |
+| `section` | 550ms | Content transitions, text appear |
+| `sectionHeld` | 825ms | Held breath moments |
+| `signature` | 1050ms | Beat text reveals |
+
+Reading time formula: `500ms base + 200ms per word`
 
 ### Chapter Implementation Checklist
 
-When implementing a new chapter or frame:
+When implementing a new chapter timeline:
 
 1. **Read all design docs** (see "Before Implementing Any Chapter" section above)
 2. **Review storyboard image** (`docs/storyboard/Chapter N X.jpg`) for text positioning
@@ -277,10 +343,11 @@ When implementing a new chapter or frame:
    - Add/update textBlocks (num, content, type, style, position)
    - Use `sharedAssets.fg.*` or `chapterAssets.CN.*` for src paths
 5. **Update `src/lib/gsap/timelines/chapterN.ts`:**
-   - Get elements via `container.querySelector('[data-layer="id"]')` etc.
-   - Use `pos()` and `dur()` helpers for timing
-   - Use `addTextLifecycle(tl, element, appearAt, fadeOutAt, driftDistance)` for text
-   - Add frame labels with `tl.addLabel('frame-x', pos(0.XX))`
+   - Import `timeToScroll`, `calculateReadingTime`, `BRAND_DURATIONS` from `../timing`
+   - Use cursor pattern with `TEXT_OVERLAP_MS = 800`
+   - Use `timeToScroll(ms)` for ALL position and duration values
+   - Add frame labels with `tl.addLabel('frame-x', timeToScroll(cursor))`
+   - Return end cursor for debugging: `console.log('[ChapterN] Final cursor:', cursor)`
 6. **Export from `src/lib/gsap/timelines/index.ts`** if new file
 7. **Run `npm run check`** to verify TypeScript
 

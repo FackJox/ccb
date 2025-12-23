@@ -1,37 +1,114 @@
 /**
  * Chapter 1 Timeline - "The Held Breath"
  *
- * Single continuous scene with layered animations per Scroll-Telling Map:
- * - Frame A (0-20% of chapter): BG + Ceci appears, texts 1-3
- * - Frame B (20-60% of chapter): Jack appears, texts 4-6
- * - Frame C (60-100% of chapter): texts 7-8 (transparent), beat text reveal
+ * Pure time-based implementation using timeToScroll() for both positions and durations.
+ * All timing in milliseconds, converted to global scroll proportions.
  *
- * Scroll Region: 0-11% of total scroll
- * All positions are PRE-SCALED to global timeline (multiply by D = 0.11)
+ * Per Scroll-Telling Maps:
+ * - 0-20% chapter: BG + Ceci + texts 1-3
+ * - 20-60% chapter: Jack enters at ~25%, texts 4-6
+ * - 60-100% chapter: texts 7-8, beat text reveal
  *
  * Complexity: L2 (Expressive)
  */
 
 import { gsap, SplitText, brandEase } from '../register'
-import { chapterScrollRegions } from '../scroll'
+import {
+  timeToScroll,
+  calculateReadingTime,
+  BRAND_DURATIONS,
+} from '../timing'
+import { sceneConfigs } from '$data/scenes'
 
-// Chapter 1's duration as fraction of total scroll (0-1)
-const D = chapterScrollRegions[1].end - chapterScrollRegions[1].start // 0.11
+// Get text content for reading time calculations
+const textBlocks = sceneConfigs[1].textBlocks
+const getTextContent = (num: number): string =>
+  textBlocks.find((t) => t.num === num)?.content ?? ''
 
-// Helper to scale chapter-relative position to global position
-const pos = (chapterPercent: number) => chapterPercent * D
-// Helper to scale chapter-relative duration to global duration
-const dur = (chapterPercent: number) => chapterPercent * D
+// Stagger between texts appearing in the same frame (ms)
+const TEXT_STAGGER_MS = 300
+
+// Overlap: how much before previous text ends does next text start (ms)
+const TEXT_OVERLAP_MS = 800
 
 /**
- * Create Chapter 1 timeline with positions pre-scaled for master timeline
+ * Add text lifecycle animation using pure time-based positioning
+ */
+function addTextLifecycleTimeBased(
+  tl: gsap.core.Timeline,
+  target: Element,
+  appearAtMs: number,
+  visibleDurMs: number,
+  drift: number,
+  skipFade = false
+): number {
+  const appearDur = BRAND_DURATIONS.section
+  const fadeDur = skipFade ? 0 : BRAND_DURATIONS.micro
+
+  // All conversions via timeToScroll for global positions/durations
+  tl.fromTo(
+    target,
+    { opacity: 0, y: 20 },
+    {
+      opacity: 1,
+      y: 0,
+      duration: timeToScroll(appearDur),
+      ease: brandEase.enter,
+    },
+    timeToScroll(appearAtMs)
+  )
+
+  // Drift while visible
+  if (visibleDurMs > 0) {
+    tl.to(
+      target,
+      {
+        y: drift,
+        duration: timeToScroll(visibleDurMs),
+        ease: 'none',
+      },
+      timeToScroll(appearAtMs + appearDur)
+    )
+  }
+
+  // Fade out (unless bridging to next chapter)
+  if (!skipFade) {
+    tl.to(
+      target,
+      {
+        opacity: 0,
+        duration: timeToScroll(fadeDur),
+        ease: brandEase.exit,
+      },
+      timeToScroll(appearAtMs + appearDur + visibleDurMs)
+    )
+  }
+
+  // Return end time for cursor tracking
+  return appearAtMs + appearDur + visibleDurMs + fadeDur
+}
+
+/**
+ * Create Chapter 1 timeline with pure time-based positioning
  */
 export function createChapter1Timeline(container: HTMLElement): gsap.core.Timeline {
   const tl = gsap.timeline()
 
+  // Cursor tracks cumulative time in ms from chapter start
+  let cursor = 0
+
   // ============== GET ELEMENTS ==============
   const ceci = container.querySelector('[data-layer="ceci"]')
   const jack = container.querySelector('[data-layer="jack"]')
+
+  // Debug logging
+  console.log('[Chapter1] Elements found:', {
+    ceci: !!ceci,
+    jack: !!jack,
+    allLayers: container.querySelectorAll('[data-layer]').length,
+    layerIds: Array.from(container.querySelectorAll('[data-layer]')).map(el => el.getAttribute('data-layer'))
+  })
+
   const text1 = container.querySelector('[data-text-block="1"]')
   const text2 = container.querySelector('[data-text-block="2"]')
   const text3 = container.querySelector('[data-text-block="3"]')
@@ -42,75 +119,113 @@ export function createChapter1Timeline(container: HTMLElement): gsap.core.Timeli
   const text8 = container.querySelector('[data-text-block="8"]')
   const beatText = container.querySelector('[data-beat]')
 
-  // ============== FRAME A: CECI CLAIMS THE HALL (0-20% of chapter) ==============
-  tl.addLabel('frame-a', 0)
+  // ============== FRAME A: CECI CLAIMS THE HALL ==============
+  // Per Scroll-Telling Map: 0-20% of chapter
+  tl.addLabel('frame-a', timeToScroll(cursor))
 
-  // Ceci appears at 2% of chapter
+  // Initial breath before content
+  cursor += BRAND_DURATIONS.section
+
+  // Ceci appears
   if (ceci) {
-    tl.to(ceci, {
-      opacity: 1,
-      scale: 1,
-      duration: dur(0.05),
-      ease: brandEase.enter,
-    }, pos(0.02))
+    tl.to(
+      ceci,
+      {
+        opacity: 1,
+        scale: 1,
+        duration: timeToScroll(BRAND_DURATIONS.section),
+        ease: brandEase.enter,
+      },
+      timeToScroll(cursor)
+    )
+    cursor += BRAND_DURATIONS.section
   }
 
-  // Text block 1: appears at 3%, fades at 18% (~15% visible)
+  // Text 1: First narrative text
   if (text1) {
-    addTextLifecycle(tl, text1, 0.03, 0.18, -15)
+    const readTime = calculateReadingTime(getTextContent(1))
+    cursor = addTextLifecycleTimeBased(tl, text1, cursor, readTime, -15)
   }
 
-  // Text block 2: appears at 7%, fades at 18% (~11% visible)
+  // Text 2: Overlaps with text 1
   if (text2) {
-    addTextLifecycle(tl, text2, 0.07, 0.18, -12)
+    const text2Start = cursor - TEXT_OVERLAP_MS
+    const readTime = calculateReadingTime(getTextContent(2))
+    cursor = addTextLifecycleTimeBased(tl, text2, text2Start, readTime, -12)
   }
 
-  // Text block 3: appears at 11%, fades at 18% (~7% visible)
+  // Text 3: Overlaps with text 2
   if (text3) {
-    addTextLifecycle(tl, text3, 0.11, 0.18, -10)
+    const text3Start = cursor - TEXT_OVERLAP_MS
+    const readTime = calculateReadingTime(getTextContent(3))
+    cursor = addTextLifecycleTimeBased(tl, text3, text3Start, readTime, -10)
   }
 
-  // ============== FRAME B: JACK ENTERS (20-60% of chapter) ==============
-  tl.addLabel('frame-b', pos(0.20))
+  // Transition pause before Frame B
+  cursor += BRAND_DURATIONS.section
 
-  // Jack appears at 18% of chapter (just before Frame B)
+  // ============== FRAME B: JACK ENTERS ==============
+  // Per Scroll-Telling Map: 20-60% of chapter, Jack at ~25%
+  tl.addLabel('frame-b', timeToScroll(cursor))
+
+  // Jack appears
   if (jack) {
-    tl.to(jack, {
-      opacity: 1,
-      duration: dur(0.05),
-      ease: brandEase.enter,
-    }, pos(0.18))
+    tl.to(
+      jack,
+      {
+        opacity: 1,
+        duration: timeToScroll(BRAND_DURATIONS.section),
+        ease: brandEase.enter,
+      },
+      timeToScroll(cursor)
+    )
+    cursor += BRAND_DURATIONS.section
   }
 
-  // Text block 4: appears at 22%, fades at 55% (~33% visible)
+  // Text 4: First Frame B text
   if (text4) {
-    addTextLifecycle(tl, text4, 0.22, 0.55, -18)
+    const readTime = calculateReadingTime(getTextContent(4))
+    cursor = addTextLifecycleTimeBased(tl, text4, cursor, readTime, -18)
   }
 
-  // Text block 5: appears at 30%, fades at 55% (~25% visible)
+  // Text 5: Overlaps with text 4
   if (text5) {
-    addTextLifecycle(tl, text5, 0.30, 0.55, -15)
+    const text5Start = cursor - TEXT_OVERLAP_MS
+    const readTime = calculateReadingTime(getTextContent(5))
+    cursor = addTextLifecycleTimeBased(tl, text5, text5Start, readTime, -15)
   }
 
-  // Text block 6: appears at 38%, fades at 55% (~17% visible)
+  // Text 6: Overlaps with text 5
   if (text6) {
-    addTextLifecycle(tl, text6, 0.38, 0.55, -12)
+    const text6Start = cursor - TEXT_OVERLAP_MS
+    const readTime = calculateReadingTime(getTextContent(6))
+    cursor = addTextLifecycleTimeBased(tl, text6, text6Start, readTime, -12)
   }
 
-  // ============== FRAME C: SHARED MOMENT (60-100% of chapter) ==============
-  tl.addLabel('frame-c', pos(0.60))
+  // Transition pause before Frame C
+  cursor += BRAND_DURATIONS.section
 
-  // Text block 7: appears at 62%, fades at 90% (~28% visible)
+  // ============== FRAME C: SHARED MOMENT ==============
+  // Per Scroll-Telling Map: 60-100% of chapter
+  tl.addLabel('frame-c', timeToScroll(cursor))
+
+  // Text 7: First Frame C text
   if (text7) {
-    addTextLifecycle(tl, text7, 0.62, 0.90, -15)
+    const readTime = calculateReadingTime(getTextContent(7))
+    cursor = addTextLifecycleTimeBased(tl, text7, cursor, readTime, -15)
   }
 
-  // Text block 8: appears at 70%, fades at 90% (~20% visible)
+  // Text 8: Overlaps with text 7
   if (text8) {
-    addTextLifecycle(tl, text8, 0.70, 0.90, -12)
+    const text8Start = cursor - TEXT_OVERLAP_MS
+    const readTime = calculateReadingTime(getTextContent(8))
+    cursor = addTextLifecycleTimeBased(tl, text8, text8Start, readTime, -12)
   }
 
-  // Beat text at 80% of chapter
+  // Held breath before beat text
+  cursor += BRAND_DURATIONS.sectionHeld
+
+  // Beat text - signature moment
   if (beatText) {
     const beatContent = beatText.querySelector('.typography-beat') || beatText
 
@@ -120,74 +235,60 @@ export function createChapter1Timeline(container: HTMLElement): gsap.core.Timeli
         charsClass: 'beat-char',
       })
 
-      tl.fromTo(split.chars,
+      tl.fromTo(
+        split.chars,
         { opacity: 0, y: 15 },
         {
           opacity: 1,
           y: 0,
-          duration: dur(0.10),
-          stagger: dur(0.02),
+          duration: timeToScroll(BRAND_DURATIONS.signature),
+          stagger: timeToScroll(40),
           ease: brandEase.enter,
         },
-        pos(0.80)
+        timeToScroll(cursor)
       )
 
-      tl.to(beatContent, {
-        y: -10,
-        duration: dur(0.08),
-        ease: brandEase.transform,
-      }, pos(0.92))
+      // Drift after reveal
+      const beatDuration = BRAND_DURATIONS.signature + 40 * split.chars.length
+      cursor += beatDuration
 
+      tl.to(
+        beatContent,
+        {
+          y: -10,
+          duration: timeToScroll(BRAND_DURATIONS.sectionHeld),
+          ease: brandEase.transform,
+        },
+        timeToScroll(cursor)
+      )
+
+      cursor += BRAND_DURATIONS.sectionHeld
     } catch (e) {
       console.warn('[Chapter1] SplitText failed, using simple fade:', e)
-      tl.fromTo(beatText,
+      tl.fromTo(
+        beatText,
         { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: dur(0.10), ease: brandEase.enter },
-        pos(0.80)
+        {
+          opacity: 1,
+          y: 0,
+          duration: timeToScroll(BRAND_DURATIONS.signature),
+          ease: brandEase.enter,
+        },
+        timeToScroll(cursor)
       )
+      cursor += BRAND_DURATIONS.signature
     }
   }
+
+  // Final hold before chapter transition
+  cursor += BRAND_DURATIONS.section
+
+  // Log final cursor position for debugging
+  console.log('[Chapter1] Final cursor:', cursor, 'ms =', timeToScroll(cursor), 'global scroll')
 
   return tl
 }
 
-/**
- * Add text lifecycle animation (appear → drift → fade)
- * All positions are chapter-relative (0-1), scaled internally
- */
-function addTextLifecycle(
-  tl: gsap.core.Timeline,
-  target: Element,
-  appearAt: number,
-  fadeOutAt: number,
-  driftDistance: number
-): void {
-  const appearDur = 0.08 // 8% of chapter for appear
-
-  // Appear
-  tl.fromTo(target,
-    { opacity: 0, y: 20 },
-    { opacity: 1, y: 0, duration: dur(appearDur), ease: brandEase.enter },
-    pos(appearAt)
-  )
-
-  // Drift while visible
-  const driftDur = fadeOutAt - appearAt - appearDur - 0.05
-  if (driftDur > 0) {
-    tl.to(target, {
-      y: driftDistance,
-      duration: dur(driftDur),
-      ease: 'none',
-    }, pos(appearAt + appearDur))
-  }
-
-  // Fade out
-  tl.to(target, {
-    opacity: 0,
-    duration: dur(0.05),
-    ease: brandEase.exit,
-  }, pos(fadeOutAt))
-}
 
 /**
  * Get the duration of Chapter 1 as a proportion of the total experience

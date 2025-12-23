@@ -52,3 +52,6 @@ export {
   createChapterTimeline,
   type ComplexityLevel,
 } from './animations'
+
+// Timing utilities
+export * from './timing'

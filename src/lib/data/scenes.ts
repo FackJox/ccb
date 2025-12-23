@@ -52,6 +52,8 @@ export interface SceneTextBlock {
     right?: string     // e.g., '0', '5%'
     left?: string      // Alternative to right
   }
+  /** Optional: override calculated reading time (in ms) */
+  visibleDurationMs?: number
   /**
    * Cross-chapter persistence: this text continues into another chapter.
    * The target chapter must have a matching text with `bridgesFrom`.
@@ -313,6 +315,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         type: 'fragment',
         style: 'parchment',
         position: { top: '38%', left: '4%' },
+        bridgesTo: { chapter: 4, textNum: 1 },
       },
     ],
   },
@@ -370,6 +373,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         type: 'fragment',
         style: 'parchment',
         position: { top: '38%', left: '4%' },
+        bridgesFrom: { chapter: 3, textNum: 3 },
       },
       // Frame B - Sequential beat: "Un. Deux. Trois."
       {
@@ -474,6 +478,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         type: 'fragment',
         style: 'parchment',
         position: { top: '8%', right: '5%' },
+        bridgesTo: { chapter: 6, textNum: 1 },
       },
     ],
   },
@@ -551,6 +556,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         type: 'fragment',
         style: 'parchment',
         position: { top: '8%', right: '5%' },
+        bridgesFrom: { chapter: 5, textNum: 5 },
       },
       // Frame B texts - appear after persistent text fades
       {
@@ -632,6 +638,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         type: 'fragment',
         style: 'parchment',
         position: { top: '65%', left: '5%' },
+        bridgesTo: { chapter: 7, textNum: 1 },
       },
     ],
   },
@@ -681,6 +688,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
         type: 'fragment',
         style: 'parchment',
         position: { top: '65%', left: '5%' }, // Same as Ch6 text 11 for seamless transition
+        bridgesFrom: { chapter: 6, textNum: 11 },
       },
       {
         num: 2,
