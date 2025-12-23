@@ -111,28 +111,11 @@ export function createChapter5Timeline(container: HTMLElement): gsap.core.Timeli
   const bg2 = container.querySelector('[data-layer="bg2"]')
   const boots = container.querySelector('[data-layer="boots"]')
 
-  // Debug logging
-  console.log('[Chapter5] Elements found:', {
-    bg: !!bg,
-    bg2: !!bg2,
-    boots: !!boots,
-    allLayers: container.querySelectorAll('[data-layer]').length,
-    layerIds: Array.from(container.querySelectorAll('[data-layer]')).map(el => el.getAttribute('data-layer'))
-  })
-
   const text1 = container.querySelector('[data-text-block="1"]')
   const text2 = container.querySelector('[data-text-block="2"]')
   const text3 = container.querySelector('[data-text-block="3"]')
   const text4 = container.querySelector('[data-text-block="4"]')
   const text5 = container.querySelector('[data-text-block="5"]')
-
-  console.log('[Chapter5] Text elements found:', {
-    text1: !!text1,
-    text2: !!text2,
-    text3: !!text3,
-    text4: !!text4,
-    text5: !!text5,
-  })
 
   // ============== FRAME A: AUTHORITY ENTERS ==============
   tl.addLabel('frame-a', timeToScroll(cursor))
@@ -140,11 +123,11 @@ export function createChapter5Timeline(container: HTMLElement): gsap.core.Timeli
   // Initial breath before content
   cursor += BRAND_DURATIONS.section
 
-  // Boots fade in from bottom
+  // Boots fade in from top
   if (boots) {
     tl.fromTo(
       boots,
-      { opacity: 0, y: 50 },
+      { opacity: 0, y: -50 },
       {
         opacity: 1,
         y: 0,
@@ -244,9 +227,6 @@ export function createChapter5Timeline(container: HTMLElement): gsap.core.Timeli
 
   // Final hold before chapter transition
   cursor += BRAND_DURATIONS.section
-
-  // Log final cursor position for debugging
-  console.log('[Chapter5] Final cursor:', cursor, 'ms =', timeToScroll(cursor), 'global scroll')
 
   return tl
 }

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
   import type { Chapter } from '$data'
 
   interface Props {
@@ -11,10 +10,6 @@
   let { chapter, children, class: className = '' }: Props = $props()
 
   let containerEl: HTMLElement
-
-  onMount(() => {
-    console.log(`[Chapter ${chapter.id}] Mounted, complexity=${chapter.complexity}`)
-  })
 </script>
 
 <!--

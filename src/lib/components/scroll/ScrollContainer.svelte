@@ -38,17 +38,12 @@
     if (initialized) return
     initialized = true
 
-    console.log('[ScrollContainer] Initializing scroll system...')
-    console.log('[ScrollContainer] content dimensions:', content?.offsetWidth, 'x', content?.offsetHeight)
-
     // Create ScrollSmoother
-    const smoother = createScrollSmoother(wrapper, content)
-    console.log('[ScrollContainer] ScrollSmoother created:', smoother)
+    createScrollSmoother(wrapper, content)
 
     // Get the stage element - this is our pinned viewport container
     const stage = content.querySelector('#stage') as HTMLElement
     if (!stage) {
-      console.error('[ScrollContainer] Stage element not found!')
       return
     }
 
@@ -65,23 +60,17 @@
         })
       },
     })
-    console.log('[ScrollContainer] Master timeline created')
-    console.log('[ScrollContainer] Total ScrollTriggers:', ScrollTrigger.getAll().length)
 
     ScrollTrigger.refresh()
     onReady?.()
-    console.log('[ScrollContainer] Scroll system ready!')
   }
 
   onMount(() => {
-    console.log('[ScrollContainer] onMount started')
-
     // Force scroll to top to prevent browser restoring previous position
     window.scrollTo(0, 0)
 
     // Register GSAP plugins first
     registerGSAP()
-    console.log('[ScrollContainer] GSAP registered')
 
     // Calculate initial scale
     scale = calculateScale()
@@ -101,13 +90,11 @@
       if (!entry) return
 
       const { height } = entry.contentRect
-      console.log('[ScrollContainer] ResizeObserver: height =', height)
 
       if (height > 0 && !initialized) {
         // Wait for fonts before initializing
         if (document.fonts?.ready) {
           await document.fonts.ready
-          console.log('[ScrollContainer] Fonts loaded')
         }
         initScrollSystem()
       }
@@ -116,7 +103,6 @@
 
     // Now set isReady so children render - ResizeObserver will catch the height change
     isReady = true
-    console.log('[ScrollContainer] isReady set to true')
   })
 
   onDestroy(() => {

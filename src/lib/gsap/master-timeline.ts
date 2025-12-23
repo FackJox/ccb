@@ -62,22 +62,11 @@ export function createMasterTimeline(
   stage: HTMLElement,
   config: MasterTimelineConfig = {}
 ): gsap.Context {
-  console.log('[createMasterTimeline] Called with stage:', stage)
-  console.log('[createMasterTimeline] Stage dimensions:', stage?.offsetWidth, 'x', stage?.offsetHeight)
-
   const mergedConfig = { ...defaultConfig, ...config }
-  console.log('[createMasterTimeline] Config:', mergedConfig)
 
   const ctx = gsap.context(() => {
-    console.log('[createMasterTimeline] Inside gsap.context()')
-
-    // Create the master timeline with ScrollTrigger
-    // The stage is pinned for the entire scroll duration (700vh spacer)
-    console.log('[createMasterTimeline] Creating master timeline with ScrollTrigger...')
-
     // Calculate snap points if snapping is enabled
     const snapPoints = mergedConfig.snap ? calculateGlobalSnapPoints() : []
-    console.log('[createMasterTimeline] Snap points:', snapPoints)
 
     const masterTL = gsap.timeline({
       scrollTrigger: {
@@ -102,8 +91,6 @@ export function createMasterTimeline(
         }),
       },
     })
-    console.log('[createMasterTimeline] Master timeline created:', masterTL)
-    console.log('[createMasterTimeline] ScrollTrigger attached:', masterTL.scrollTrigger)
 
     // Add chapter timelines at their normalized scroll positions
     // Each chapter timeline is a child that plays during its scroll region
@@ -145,14 +132,11 @@ export function createMasterTimeline(
     // Positions in chapter1.ts are PRE-SCALED to global positions
     const chapter1Container = stage.querySelector('[data-chapter="1"]')
     if (chapter1Container) {
-      console.log('[createMasterTimeline] Found Chapter 1 container')
       const ch1TL = createChapter1Timeline(chapter1Container as HTMLElement)
       masterTL.add(ch1TL, chapterScrollRegions[1].start)
 
       // Fade out chapter 1 at end of its region
       // Start fade AT region.end so content has full region to complete
-      console.log(`[MasterTL] Chapter 1 fade OUT starts at: ${(chapterScrollRegions[1].end * 100).toFixed(2)}%`)
-      console.log(`[MasterTL] Chapter 1 region: ${(chapterScrollRegions[1].start * 100).toFixed(2)}% - ${(chapterScrollRegions[1].end * 100).toFixed(2)}%`)
       masterTL.to(chapter1Container, {
         opacity: 0,
         duration: 0.02,
@@ -171,11 +155,8 @@ export function createMasterTimeline(
       const region = chapterScrollRegions[chapterNum]
       const fadeDuration = 0.02 // 2% of total scroll for fade
 
-      console.log(`[MasterTL] Chapter ${chapterNum} region: ${(region.start * 100).toFixed(2)}% - ${(region.end * 100).toFixed(2)}%`)
-
       // Fade in at start (except chapter 1 which starts visible)
       if (chapterNum > 1) {
-        console.log(`[MasterTL] Chapter ${chapterNum} fade IN at: ${(region.start * 100).toFixed(2)}%`)
         masterTL.to(container, {
           opacity: 1,
           duration: fadeDuration,
@@ -191,7 +172,6 @@ export function createMasterTimeline(
       // Fade out at end (except chapter 9 which holds)
       // Start fade AT region.end so content has full region to complete
       if (chapterNum < 9) {
-        console.log(`[MasterTL] Chapter ${chapterNum} fade OUT at: ${(region.end * 100).toFixed(2)}%`)
         masterTL.to(container, {
           opacity: 0,
           duration: fadeDuration,

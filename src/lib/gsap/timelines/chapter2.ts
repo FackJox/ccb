@@ -109,14 +109,6 @@ export function createChapter2Timeline(container: HTMLElement): gsap.core.Timeli
   const couple = container.querySelector('[data-layer="couple"]')
   const coupleCloseup = container.querySelector('[data-layer="coupleCloseup"]')
 
-  // Debug logging
-  console.log('[Chapter2] Elements found:', {
-    couple: !!couple,
-    coupleCloseup: !!coupleCloseup,
-    allLayers: container.querySelectorAll('[data-layer]').length,
-    layerIds: Array.from(container.querySelectorAll('[data-layer]')).map(el => el.getAttribute('data-layer'))
-  })
-
   const text1 = container.querySelector('[data-text-block="1"]')
   const text2 = container.querySelector('[data-text-block="2"]')
   const text3 = container.querySelector('[data-text-block="3"]')
@@ -296,8 +288,7 @@ export function createChapter2Timeline(container: HTMLElement): gsap.core.Timeli
         )
 
         cursor += BRAND_DURATIONS.sectionHeld
-      } catch (e) {
-        console.warn('[Chapter2] SplitText failed, using simple fade:', e)
+      } catch {
         tl.fromTo(
           consentText,
           { opacity: 0, y: 20 },
@@ -377,13 +368,6 @@ export function createChapter2Timeline(container: HTMLElement): gsap.core.Timeli
 
   // Final hold before chapter transition
   cursor += BRAND_DURATIONS.section
-
-  // Log final cursor position for debugging
-  const globalScrollEnd = timeToScroll(cursor)
-  console.log('[Chapter2] Final cursor:', cursor, 'ms')
-  console.log('[Chapter2] Final cursor as global scroll:', (globalScrollEnd * 100).toFixed(3), '%')
-  console.log('[Chapter2] Chapter 2 region ends at:', '(check derive-regions output)')
-  console.log('[Chapter2] Timeline duration:', tl.duration())
 
   return tl
 }

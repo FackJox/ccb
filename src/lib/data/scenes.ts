@@ -19,6 +19,7 @@ export interface SceneLayer {
 		// CSS positioning
 		anchor: 'left' | 'right' | 'center';
 		bottom?: boolean; // Align to bottom (for characters)
+		bottomOffset?: string; // CSS offset from bottom (e.g., '5%', '20px')
 		offset?: string; // CSS offset from anchor (e.g., '5%')
 	};
 	size: {
@@ -190,7 +191,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				content: 'Let them look. Let the city breathe again.',
 				type: 'beat',
 				style: 'beat',
-				position: { top: '45%', right: '25%' }
+				position: { top: '5%', right: '0%' }
 			}
 		]
 	},
@@ -248,6 +249,12 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				style: 'parchment',
 				position: { top: '32%', left: '8%' }
 			},
+			{
+				num: 8,
+				content: '"Will you follow?" he asked.',
+				type: 'consent',
+				style: 'beat'
+			},
 			// Frame B texts (parchment style) - positioned on right side over couple-closeup
 			{
 				num: 3,
@@ -287,12 +294,6 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				style: 'parchment',
 				emphasis: true,
 				position: { top: '55%', right: '10%' }
-			},
-			{
-				num: 8,
-				content: '"Will you follow?" he asked.',
-				type: 'consent',
-				style: 'beat'
 			}
 		]
 	},
@@ -373,7 +374,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				src: sharedAssets.fg.mirrorIntact,
 				alt: assetDescriptions[sharedAssets.fg.mirrorIntact],
 				type: 'fg',
-				position: { anchor: 'right', bottom: true, offset: '5%' },
+				position: { anchor: 'right', bottom: true, bottomOffset: '10%', offset: '25%' },
 				size: { height: '70%' },
 				zIndex: 2,
 				initialOpacity: 1 // Starts visible (continues from Frame A)
@@ -383,7 +384,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				src: sharedAssets.fg.mirrorBroken,
 				alt: assetDescriptions[sharedAssets.fg.mirrorBroken],
 				type: 'fg',
-				position: { anchor: 'right', bottom: true, offset: '5%' },
+				position: { anchor: 'right', bottom: true, bottomOffset: '10%', offset: '25%' },
 				size: { height: '70%' },
 				zIndex: 2,
 				initialOpacity: 0 // Hidden until swap
@@ -393,7 +394,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				src: sharedAssets.fg.coupleStanding,
 				alt: assetDescriptions[sharedAssets.fg.coupleStanding],
 				type: 'fg',
-				position: { anchor: 'left', bottom: true, offset: '5%' },
+				position: { anchor: 'left', bottom: true, offset: '25%' },
 				size: { height: '85%' },
 				zIndex: 1,
 				initialOpacity: 0 // Hidden until reveal
@@ -410,24 +411,27 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				position: { top: '38%', left: '4%' },
 				bridgesFrom: { chapter: 3, textNum: 3 }
 			},
-			// Frame B - Sequential beat: "Un. Deux. Trois."
+			// Frame B - Sequential beat: "Un. Deux. Trois." - staggered horizontally
 			{
 				num: 2,
 				content: '"Un."',
 				type: 'beat',
-				style: 'beat'
+				style: 'beat',
+				position: { top: '20%', left: '25%' }
 			},
 			{
 				num: 3,
 				content: '"Deux."',
 				type: 'beat',
-				style: 'beat'
+				style: 'beat',
+				position: { top: '25%', left: '42%' }
 			},
 			{
 				num: 4,
 				content: '"Trois."',
 				type: 'beat',
-				style: 'beat'
+				style: 'beat',
+				position: { top: '30%', left: '60%' }
 			},
 			// Frame B - Narrative text
 			{

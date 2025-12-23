@@ -34,7 +34,6 @@ let _derivedDurationSeconds: number | null = null
 export function getDerivedDurationSeconds(): number {
   if (_derivedDurationSeconds === null) {
     _derivedDurationSeconds = calculateTotalDuration()
-    console.log('[timing] Derived total duration:', _derivedDurationSeconds, 'seconds')
   }
   return _derivedDurationSeconds
 }

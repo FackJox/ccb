@@ -21,14 +21,8 @@ let registered = false
  */
 export function registerGSAP(): void {
   if (registered) {
-    console.log('[registerGSAP] Already registered, skipping')
     return
   }
-
-  console.log('[registerGSAP] Registering plugins...')
-  console.log('[registerGSAP] gsap:', gsap)
-  console.log('[registerGSAP] ScrollTrigger:', ScrollTrigger)
-  console.log('[registerGSAP] ScrollSmoother:', ScrollSmoother)
 
   gsap.registerPlugin(
     ScrollTrigger,
@@ -39,7 +33,6 @@ export function registerGSAP(): void {
     ScrollToPlugin
   )
 
-  console.log('[registerGSAP] Plugins registered successfully')
   registered = true
 }
 

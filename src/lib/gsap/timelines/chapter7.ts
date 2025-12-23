@@ -116,15 +116,6 @@ export function createChapter7Timeline(container: HTMLElement): gsap.core.Timeli
   const bgExterior = container.querySelector('[data-layer="bgExterior"]')
   const bg2 = container.querySelector('[data-layer="bg2"]')
 
-  // Debug logging
-  console.log('[Chapter7] Elements found:', {
-    bg: !!bg,
-    bgExterior: !!bgExterior,
-    bg2: !!bg2,
-    allLayers: container.querySelectorAll('[data-layer]').length,
-    layerIds: Array.from(container.querySelectorAll('[data-layer]')).map(el => el.getAttribute('data-layer'))
-  })
-
   // Text blocks
   const text1 = container.querySelector('[data-text-block="1"]')
   const text2 = container.querySelector('[data-text-block="2"]')
@@ -133,16 +124,6 @@ export function createChapter7Timeline(container: HTMLElement): gsap.core.Timeli
   const text5 = container.querySelector('[data-text-block="5"]')
   const text6 = container.querySelector('[data-text-block="6"]')
   const text7 = container.querySelector('[data-text-block="7"]')
-
-  console.log('[Chapter7] Text elements found:', {
-    text1: !!text1,
-    text2: !!text2,
-    text3: !!text3,
-    text4: !!text4,
-    text5: !!text5,
-    text6: !!text6,
-    text7: !!text7,
-  })
 
   // ============== FRAME A: CROWD SCENE ==============
   tl.addLabel('frame-a', timeToScroll(cursor))
@@ -303,9 +284,6 @@ export function createChapter7Timeline(container: HTMLElement): gsap.core.Timeli
 
   // Final hold before chapter transition
   cursor += BRAND_DURATIONS.section
-
-  // Log final cursor position for debugging
-  console.log('[Chapter7] Final cursor:', cursor, 'ms =', timeToScroll(cursor), 'global scroll')
 
   return tl
 }

@@ -35,32 +35,19 @@ export function createScrollSmoother(
   content: string | HTMLElement = '#smooth-content',
   config: ScrollSmootherConfig = {}
 ): ScrollSmoother {
-  console.log('[createScrollSmoother] Called with:', { wrapper, content, config })
-
   // Kill existing instance if present
   if (smootherInstance) {
-    console.log('[createScrollSmoother] Killing existing instance')
     smootherInstance.kill()
     smootherInstance = null
   }
 
   const mergedConfig = { ...defaultScrollConfig, ...config }
-  console.log('[createScrollSmoother] Merged config:', mergedConfig)
 
-  try {
-    console.log('[createScrollSmoother] Creating ScrollSmoother.create()...')
-    smootherInstance = ScrollSmoother.create({
-      wrapper,
-      content,
-      ...mergedConfig,
-    })
-    console.log('[createScrollSmoother] ScrollSmoother created:', smootherInstance)
-    console.log('[createScrollSmoother] smoother.wrapper():', smootherInstance?.wrapper())
-    console.log('[createScrollSmoother] smoother.content():', smootherInstance?.content())
-  } catch (error) {
-    console.error('[createScrollSmoother] ERROR:', error)
-    throw error
-  }
+  smootherInstance = ScrollSmoother.create({
+    wrapper,
+    content,
+    ...mergedConfig,
+  })
 
   return smootherInstance
 }
@@ -105,16 +92,6 @@ const HARDCODED_SCROLL_REGIONS = {
 export const chapterScrollRegions: Record<number, { start: number; end: number }> =
   USE_DERIVED_REGIONS ? deriveScrollRegions() : HARDCODED_SCROLL_REGIONS
 
-// Temporary logging to compare derived vs hardcoded regions
-if (typeof window !== 'undefined') {
-  const derived = deriveScrollRegions()
-  console.log('=== SCROLL REGIONS ===')
-  console.log('Using derived regions:', USE_DERIVED_REGIONS)
-  console.log('Chapter 1 region:', chapterScrollRegions[1])
-  console.log('Chapter 1 span:', chapterScrollRegions[1].end - chapterScrollRegions[1].start)
-  console.log('All derived regions:', derived)
-  console.log('Hardcoded regions:', HARDCODED_SCROLL_REGIONS)
-}
 
 export type ChapterNumber = keyof typeof chapterScrollRegions
 

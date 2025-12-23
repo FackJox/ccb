@@ -126,16 +126,6 @@ export function createChapter9Timeline(container: HTMLElement): gsap.core.Timeli
   const bg3 = container.querySelector('[data-layer="bg3"]')
   const fg = container.querySelector('[data-layer="couple"]')
 
-  // Debug logging
-  console.log('[Chapter9] Elements found:', {
-    bg: !!bg,
-    bg2: !!bg2,
-    bg3: !!bg3,
-    fg: !!fg,
-    allLayers: container.querySelectorAll('[data-layer]').length,
-    layerIds: Array.from(container.querySelectorAll('[data-layer]')).map(el => el.getAttribute('data-layer'))
-  })
-
   // Text blocks
   const text1 = container.querySelector('[data-text-block="1"]')
   const text2 = container.querySelector('[data-text-block="2"]')
@@ -146,18 +136,6 @@ export function createChapter9Timeline(container: HTMLElement): gsap.core.Timeli
   const text7 = container.querySelector('[data-text-block="7"]')
   const text8 = container.querySelector('[data-text-block="8"]')
   const text9 = container.querySelector('[data-text-block="9"]')
-
-  console.log('[Chapter9] Text elements found:', {
-    text1: !!text1,
-    text2: !!text2,
-    text3: !!text3,
-    text4: !!text4,
-    text5: !!text5,
-    text6: !!text6,
-    text7: !!text7,
-    text8: !!text8,
-    text9: !!text9,
-  })
 
   // ============== FRAME A: DAWN ROOM - FG FIRST ==============
   tl.addLabel('frame-a', timeToScroll(cursor))
@@ -423,9 +401,6 @@ export function createChapter9Timeline(container: HTMLElement): gsap.core.Timeli
 
   // Final transition out (signature duration for deliberate fade)
   cursor += BRAND_DURATIONS.signature
-
-  // Log final cursor position for debugging
-  console.log('[Chapter9] Final cursor:', cursor, 'ms =', timeToScroll(cursor), 'global scroll')
 
   return tl
 }

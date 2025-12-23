@@ -59,7 +59,7 @@
     }
 
     if (layer.position.bottom) {
-      styles.push('bottom: 0')
+      styles.push(`bottom: ${layer.position.bottomOffset || '0'}`)
     } else {
       styles.push('top: 0')
     }
@@ -115,12 +115,14 @@
       <div class="text-container" data-text-container>
         {#each config.textBlocks as block (block.num)}
           {#if block.type === 'beat' || block.type === 'consent'}
-            <!-- Beat/consent text - dramatic full-width typographic moment -->
+            <!-- Beat/consent text - dramatic typographic moment (full-width default, or positioned) -->
             <div
               class="text-block beat"
+              class:beat-positioned={!!block.position}
               data-text-block={block.num}
               data-beat={block.type === 'beat' ? '' : undefined}
               data-consent={block.type === 'consent' ? '' : undefined}
+              style={block.position ? getTextBlockStyle(block) : ''}
             >
               <TypographyBeat
                 content={block.content}
@@ -276,9 +278,9 @@
     font-weight: 600;
   }
 
-  /* Beat text - dramatic full-width typographic moment at top */
+  /* Beat text - dramatic full-width typographic moment (default: centered at top) */
   .text-block.beat {
-    /* Position at top, spanning full width */
+    /* Default: full-width centered at top */
     top: 8%;
     left: 0;
     right: 0;
@@ -293,6 +295,14 @@
     filter: none;
 
     /* Let TypographyBeat handle all styling */
+  }
+
+  /* Positioned beat - when position is specified, use individual positioning */
+  .text-block.beat.beat-positioned {
+    width: auto;
+    max-width: none;
+    right: auto;  /* Clear full-width defaults */
+    /* top/left/right come from inline style */
   }
 
   .text-block.beat::before {

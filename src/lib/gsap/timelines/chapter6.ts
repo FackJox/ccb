@@ -108,18 +108,6 @@ export function createChapter6Timeline(container: HTMLElement): gsap.core.Timeli
   const bgC2 = container.querySelector('[data-layer="bgC2"]')
   const coupleCloseup = container.querySelector('[data-layer="coupleCloseup"]')
 
-  // Debug logging
-  console.log('[Chapter6] Elements found:', {
-    bg: !!bg,
-    bgExterior: !!bgExterior,
-    bgC2: !!bgC2,
-    coupleStanding: !!coupleStanding,
-    mirrorBroken: !!mirrorBroken,
-    coupleCloseup: !!coupleCloseup,
-    allLayers: container.querySelectorAll('[data-layer]').length,
-    layerIds: Array.from(container.querySelectorAll('[data-layer]')).map(el => el.getAttribute('data-layer'))
-  })
-
   // Text blocks
   const text1 = container.querySelector('[data-text-block="1"]')
   const text2 = container.querySelector('[data-text-block="2"]')
@@ -132,20 +120,6 @@ export function createChapter6Timeline(container: HTMLElement): gsap.core.Timeli
   const text9 = container.querySelector('[data-text-block="9"]')
   const text10 = container.querySelector('[data-text-block="10"]')
   const text11 = container.querySelector('[data-text-block="11"]')
-
-  console.log('[Chapter6] Text elements found:', {
-    text1: !!text1,
-    text2: !!text2,
-    text3: !!text3,
-    text4: !!text4,
-    text5: !!text5,
-    text6: !!text6,
-    text7: !!text7,
-    text8: !!text8,
-    text9: !!text9,
-    text10: !!text10,
-    text11: !!text11,
-  })
 
   // ============== FRAME A: BRIDGED TEXT FROM CH5 ==============
   tl.addLabel('frame-a', timeToScroll(cursor))
@@ -389,9 +363,6 @@ export function createChapter6Timeline(container: HTMLElement): gsap.core.Timeli
 
   // Final hold before chapter transition
   cursor += BRAND_DURATIONS.section
-
-  // Log final cursor position for debugging
-  console.log('[Chapter6] Final cursor:', cursor, 'ms =', timeToScroll(cursor), 'global scroll')
 
   return tl
 }

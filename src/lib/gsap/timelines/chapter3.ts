@@ -102,14 +102,6 @@ export function createChapter3Timeline(container: HTMLElement): gsap.core.Timeli
   const bg = container.querySelector('[data-layer="bg"]')
   const coupleDip = container.querySelector('[data-layer="coupleDip"]')
 
-  // Debug logging
-  console.log('[Chapter3] Elements found:', {
-    bg: !!bg,
-    coupleDip: !!coupleDip,
-    allLayers: container.querySelectorAll('[data-layer]').length,
-    layerIds: Array.from(container.querySelectorAll('[data-layer]')).map(el => el.getAttribute('data-layer'))
-  })
-
   const text1 = container.querySelector('[data-text-block="1"]')
   const text2 = container.querySelector('[data-text-block="2"]')
   const text3 = container.querySelector('[data-text-block="3"]')
@@ -183,9 +175,6 @@ export function createChapter3Timeline(container: HTMLElement): gsap.core.Timeli
 
   // Final hold before chapter transition
   cursor += BRAND_DURATIONS.section
-
-  // Log final cursor position for debugging
-  console.log('[Chapter3] Final cursor:', cursor, 'ms =', timeToScroll(cursor), 'global scroll')
 
   return tl
 }

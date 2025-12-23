@@ -118,29 +118,12 @@ export function createChapter8Timeline(container: HTMLElement): gsap.core.Timeli
   const bg2 = container.querySelector('[data-layer="bg2"]')
   const bg3 = container.querySelector('[data-layer="bg3"]')
 
-  // Debug logging
-  console.log('[Chapter8] Elements found:', {
-    bg: !!bg,
-    bg2: !!bg2,
-    bg3: !!bg3,
-    allLayers: container.querySelectorAll('[data-layer]').length,
-    layerIds: Array.from(container.querySelectorAll('[data-layer]')).map(el => el.getAttribute('data-layer'))
-  })
-
   // Text blocks
   const text1 = container.querySelector('[data-text-block="1"]')
   const text2 = container.querySelector('[data-text-block="2"]')
   const text3 = container.querySelector('[data-text-block="3"]')
   const text4 = container.querySelector('[data-text-block="4"]')
   const text5 = container.querySelector('[data-text-block="5"]')
-
-  console.log('[Chapter8] Text elements found:', {
-    text1: !!text1,
-    text2: !!text2,
-    text3: !!text3,
-    text4: !!text4,
-    text5: !!text5,
-  })
 
   // ============== FRAME A: STREET SCENE ==============
   tl.addLabel('frame-a', timeToScroll(cursor))
@@ -240,9 +223,6 @@ export function createChapter8Timeline(container: HTMLElement): gsap.core.Timeli
 
   // Final hold before chapter transition (sectionHeld per transitionOut)
   cursor += BRAND_DURATIONS.sectionHeld
-
-  // Log final cursor position for debugging
-  console.log('[Chapter8] Final cursor:', cursor, 'ms =', timeToScroll(cursor), 'global scroll')
 
   return tl
 }

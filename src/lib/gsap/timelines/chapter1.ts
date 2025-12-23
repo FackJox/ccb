@@ -101,14 +101,6 @@ export function createChapter1Timeline(container: HTMLElement): gsap.core.Timeli
   const ceci = container.querySelector('[data-layer="ceci"]')
   const jack = container.querySelector('[data-layer="jack"]')
 
-  // Debug logging
-  console.log('[Chapter1] Elements found:', {
-    ceci: !!ceci,
-    jack: !!jack,
-    allLayers: container.querySelectorAll('[data-layer]').length,
-    layerIds: Array.from(container.querySelectorAll('[data-layer]')).map(el => el.getAttribute('data-layer'))
-  })
-
   const text1 = container.querySelector('[data-text-block="1"]')
   const text2 = container.querySelector('[data-text-block="2"]')
   const text3 = container.querySelector('[data-text-block="3"]')
@@ -266,8 +258,7 @@ export function createChapter1Timeline(container: HTMLElement): gsap.core.Timeli
       )
 
       cursor += BRAND_DURATIONS.sectionHeld
-    } catch (e) {
-      console.warn('[Chapter1] SplitText failed, using simple fade:', e)
+    } catch {
       tl.fromTo(
         beatText,
         { opacity: 0, y: 20 },
@@ -285,13 +276,6 @@ export function createChapter1Timeline(container: HTMLElement): gsap.core.Timeli
 
   // Final hold before chapter transition
   cursor += BRAND_DURATIONS.section
-
-  // Log final cursor position for debugging
-  const globalScrollEnd = timeToScroll(cursor)
-  console.log('[Chapter1] Final cursor:', cursor, 'ms')
-  console.log('[Chapter1] Final cursor as global scroll:', (globalScrollEnd * 100).toFixed(3), '%')
-  console.log('[Chapter1] Chapter 1 region ends at:', '(check derive-regions output)')
-  console.log('[Chapter1] Timeline duration:', tl.duration())
 
   return tl
 }

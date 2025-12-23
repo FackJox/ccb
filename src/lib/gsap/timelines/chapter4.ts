@@ -111,29 +111,11 @@ export function createChapter4Timeline(container: HTMLElement): gsap.core.Timeli
   const mirrorBroken = container.querySelector('[data-layer="mirrorBroken"]')
   const coupleStanding = container.querySelector('[data-layer="coupleStanding"]')
 
-  // Debug logging
-  console.log('[Chapter4] Elements found:', {
-    bg: !!bg,
-    mirrorIntact: !!mirrorIntact,
-    mirrorBroken: !!mirrorBroken,
-    coupleStanding: !!coupleStanding,
-    allLayers: container.querySelectorAll('[data-layer]').length,
-    layerIds: Array.from(container.querySelectorAll('[data-layer]')).map(el => el.getAttribute('data-layer'))
-  })
-
   const text1 = container.querySelector('[data-text-block="1"]')
   const text2 = container.querySelector('[data-text-block="2"]')  // "Un."
   const text3 = container.querySelector('[data-text-block="3"]')  // "Deux."
   const text4 = container.querySelector('[data-text-block="4"]')  // "Trois."
   const text5 = container.querySelector('[data-text-block="5"]')  // Narrative
-
-  console.log('[Chapter4] Text elements found:', {
-    text1: !!text1,
-    text2: !!text2,
-    text3: !!text3,
-    text4: !!text4,
-    text5: !!text5,
-  })
 
   // ============== FRAME A: MIRROR SCENE ==============
   tl.addLabel('frame-a', timeToScroll(cursor))
@@ -293,9 +275,6 @@ export function createChapter4Timeline(container: HTMLElement): gsap.core.Timeli
 
   // Final hold before chapter transition
   cursor += BRAND_DURATIONS.section
-
-  // Log final cursor position for debugging
-  console.log('[Chapter4] Final cursor:', cursor, 'ms =', timeToScroll(cursor), 'global scroll')
 
   return tl
 }
