@@ -1,51 +1,123 @@
 /**
  * Chapter 9 Timeline - "Residue & Dawn" (L2 Expressive)
  *
- * Frame 9A (0-25% of chapter): Dawn room, couple appears first
- * - FG fades in first (characters anchor the scene)
- * - Text 1 appears (upper-left)
+ * Pure time-based implementation using timeToScroll() for both positions and durations.
+ * All timing in milliseconds, converted to global scroll proportions.
+ *
+ * Frame A (dawn room): FG appears first, then BG materializes
+ * - FG (couple) fades in first at x: 55% (characters anchor the scene)
+ * - Text 1 appears: "At dawn, they broomed glass..."
  * - BG fades in (world materializes around them)
- * - FG and Text 1 fade out
+ * - FG fades out
  *
- * Frame 9B (25-50% of chapter): Same room, new composition
- * - Text 2 appears (right-side)
- * - FG fades in at NEW left position
- * - FG and Text 2 fade out
+ * Frame B (same room, new composition): FG repositions to left
+ * - FG repositions to x: 5% while hidden
+ * - Text 2 appears: "For a long time, the smell..."
+ * - FG fades in at new position
+ * - FG fades out
  *
- * Frame 9C (50-70% of chapter): CJ Door
- * - BG2 (CJ door) crossfades in
- * - Text 3 appears (lower-right)
- * - Text 3 fades out
+ * Frame C (CJ door): bg → bg2 crossfade
+ * - Crossfade to backstage door with CJ chalk mark
+ * - Text 3 appears: "On the backstage door..."
  *
- * Frame 9D (70-100% of chapter): Brooms Floor - Stacked Poem
- * - BG3 (brooms floor) crossfades in
- * - Texts 4-7 appear sequentially (stacked poem)
- * - BG3 and Texts 4-7 fade out together
- * - Texts 8-9 appear on black ("Old as anything", "New as dawn")
+ * Frame D (brooms floor): bg2 → bg3, stacked poem, final texts on black
+ * - Crossfade to brooms floor scene
+ * - Stacked poem (texts 4-7) with tight stagger
+ * - bg3 + poem texts fade out together
+ * - Texts 8-9 appear on black: "Old as anything.", "New as dawn."
+ * - holdAfter: 1500ms (longest in experience - final chapter)
  *
- * Scroll Region: 90-100% of total scroll (10% duration)
- * Complexity: L2 - melancholic satisfaction, tender/slow feel
+ * Scroll Region: 88-100% of total scroll (12% duration)
+ * Complexity: L2 (Expressive) - quiet epilogue, intimate aftermath
  *
  * "Breath, not bounce" - elements fade and drift like smoke or fabric.
- * This is the epilogue: still important, but intimate and restrained.
+ * This is the soft landing zone - intimate aftermath, not continued drama.
  */
 
 import { gsap, brandEase } from '../register'
-import { chapterScrollRegions } from '../scroll'
+import {
+  timeToScroll,
+  calculateReadingTime,
+  BRAND_DURATIONS,
+} from '../timing'
+import { sceneConfigs } from '$data/scenes'
 
-// Chapter 9's duration as fraction of total scroll (0-1)
-const D = chapterScrollRegions[9].end - chapterScrollRegions[9].start // 0.10
+// Get text content for reading time calculations
+const textBlocks = sceneConfigs[9].textBlocks
+const getTextContent = (num: number): string =>
+  textBlocks.find((t) => t.num === num)?.content ?? ''
 
-// Helper to scale chapter-relative position to global position
-const pos = (chapterPercent: number) => chapterPercent * D
-// Helper to scale chapter-relative duration to global duration
-const dur = (chapterPercent: number) => chapterPercent * D
+// Overlap: how much before previous text ends does next text start (ms)
+const TEXT_OVERLAP_MS = 800
+
+// Tighter stagger for poem rhythm (texts 4-7)
+const POEM_STAGGER_MS = 400
 
 /**
- * Create Chapter 9 timeline with positions pre-scaled for master timeline
+ * Add text lifecycle animation using pure time-based positioning
+ */
+function addTextLifecycleTimeBased(
+  tl: gsap.core.Timeline,
+  target: Element,
+  appearAtMs: number,
+  visibleDurMs: number,
+  drift: number,
+  skipFade = false
+): number {
+  const appearDur = BRAND_DURATIONS.section
+  const fadeDur = skipFade ? 0 : BRAND_DURATIONS.micro
+
+  // All conversions via timeToScroll for global positions/durations
+  tl.fromTo(
+    target,
+    { opacity: 0, y: 20 },
+    {
+      opacity: 1,
+      y: 0,
+      duration: timeToScroll(appearDur),
+      ease: brandEase.enter,
+    },
+    timeToScroll(appearAtMs)
+  )
+
+  // Drift while visible
+  if (visibleDurMs > 0) {
+    tl.to(
+      target,
+      {
+        y: drift,
+        duration: timeToScroll(visibleDurMs),
+        ease: 'none',
+      },
+      timeToScroll(appearAtMs + appearDur)
+    )
+  }
+
+  // Fade out (unless bridging to next chapter)
+  if (!skipFade) {
+    tl.to(
+      target,
+      {
+        opacity: 0,
+        duration: timeToScroll(fadeDur),
+        ease: brandEase.exit,
+      },
+      timeToScroll(appearAtMs + appearDur + visibleDurMs)
+    )
+  }
+
+  // Return end time for cursor tracking
+  return appearAtMs + appearDur + visibleDurMs + fadeDur
+}
+
+/**
+ * Create Chapter 9 timeline with pure time-based positioning
  */
 export function createChapter9Timeline(container: HTMLElement): gsap.core.Timeline {
   const tl = gsap.timeline()
+
+  // Cursor tracks cumulative time in ms from chapter start
+  let cursor = 0
 
   // ============== GET ELEMENTS ==============
   // Layers
@@ -53,6 +125,16 @@ export function createChapter9Timeline(container: HTMLElement): gsap.core.Timeli
   const bg2 = container.querySelector('[data-layer="bg2"]')
   const bg3 = container.querySelector('[data-layer="bg3"]')
   const fg = container.querySelector('[data-layer="couple"]')
+
+  // Debug logging
+  console.log('[Chapter9] Elements found:', {
+    bg: !!bg,
+    bg2: !!bg2,
+    bg3: !!bg3,
+    fg: !!fg,
+    allLayers: container.querySelectorAll('[data-layer]').length,
+    layerIds: Array.from(container.querySelectorAll('[data-layer]')).map(el => el.getAttribute('data-layer'))
+  })
 
   // Text blocks
   const text1 = container.querySelector('[data-text-block="1"]')
@@ -65,355 +147,296 @@ export function createChapter9Timeline(container: HTMLElement): gsap.core.Timeli
   const text8 = container.querySelector('[data-text-block="8"]')
   const text9 = container.querySelector('[data-text-block="9"]')
 
-  // ============== FRAME 9A: COUPLE FIRST (0-25% of chapter) ==============
-  tl.addLabel('frame-9a', 0)
+  console.log('[Chapter9] Text elements found:', {
+    text1: !!text1,
+    text2: !!text2,
+    text3: !!text3,
+    text4: !!text4,
+    text5: !!text5,
+    text6: !!text6,
+    text7: !!text7,
+    text8: !!text8,
+    text9: !!text9,
+  })
 
-  // Set initial FG position for Frame A (right side)
+  // ============== FRAME A: DAWN ROOM - FG FIRST ==============
+  tl.addLabel('frame-a', timeToScroll(cursor))
+
+  // Set initial FG position (right side)
   if (fg) {
-    tl.set(fg, { x: '55%' }, 0) // Push to right
+    tl.set(fg, { x: '55%' }, 0)
   }
 
-  // Step 1: FG fades in at 2%
+  // Initial breath before content
+  cursor += BRAND_DURATIONS.section
+
+  // FG (couple) fades in FIRST - characters anchor the scene
   if (fg) {
     tl.to(
       fg,
       {
         opacity: 1,
-        duration: dur(0.05),
+        duration: timeToScroll(BRAND_DURATIONS.section),
         ease: brandEase.enter,
       },
-      pos(0.02)
+      timeToScroll(cursor)
     )
   }
 
-  // Step 2: Text 1 appears at 6%, fades at 22%
+  cursor += BRAND_DURATIONS.section
+
+  // Text 1: "At dawn, they broomed glass..."
   if (text1) {
-    addTextLifecycle(tl, text1, 0.06, 0.22, -8)
+    const readTime = calculateReadingTime(getTextContent(1))
+    cursor = addTextLifecycleTimeBased(tl, text1, cursor, readTime, -8)
   }
 
-  // Step 3: BG fades in at 10% (world materializes around characters)
+  // BG fades in (world materializes around characters)
+  // Overlaps with text 1 reading
   if (bg) {
     tl.to(
       bg,
       {
         opacity: 1,
-        duration: dur(0.07),
+        duration: timeToScroll(BRAND_DURATIONS.section),
         ease: brandEase.enter,
       },
-      pos(0.10)
+      timeToScroll(cursor - BRAND_DURATIONS.section)
     )
   }
 
-  // Step 4: FG fades out at 20%
+  // FG fades out before Frame B
   if (fg) {
     tl.to(
       fg,
       {
         opacity: 0,
-        duration: dur(0.04),
+        duration: timeToScroll(BRAND_DURATIONS.micro),
         ease: brandEase.exit,
       },
-      pos(0.20)
+      timeToScroll(cursor)
     )
   }
 
-  // ============== FRAME 9B: NEW POSITION (25-50% of chapter) ==============
-  tl.addLabel('frame-9b', pos(0.25))
+  cursor += BRAND_DURATIONS.micro
+
+  // Transition pause before Frame B
+  cursor += BRAND_DURATIONS.section
+
+  // ============== FRAME B: SAME ROOM, FG REPOSITIONS ==============
+  tl.addLabel('frame-b', timeToScroll(cursor))
 
   // Reposition FG while hidden (instant) - move to left side
   if (fg) {
-    tl.set(fg, { x: '5%' }, pos(0.25))
+    tl.set(fg, { x: '5%' }, timeToScroll(cursor))
   }
 
-  // Step 5: Text 2 appears at 27%, fades at 45%
+  // Text 2: "For a long time, the smell..."
+  let text2ReadTime = 0
   if (text2) {
-    addTextLifecycle(tl, text2, 0.27, 0.45, -8)
+    text2ReadTime = calculateReadingTime(getTextContent(2))
+    cursor = addTextLifecycleTimeBased(tl, text2, cursor, text2ReadTime, -8)
   }
 
-  // Step 6: FG fades in at new position at 30%
-  if (fg) {
+  // FG fades in at new position (midway through text 2)
+  if (fg && text2ReadTime > 0) {
+    const fgFadeInStart = cursor - text2ReadTime / 2 - BRAND_DURATIONS.section - BRAND_DURATIONS.micro
     tl.to(
       fg,
       {
         opacity: 1,
-        duration: dur(0.05),
+        duration: timeToScroll(BRAND_DURATIONS.section),
         ease: brandEase.enter,
       },
-      pos(0.30)
+      timeToScroll(fgFadeInStart)
     )
   }
 
-  // FG fades out at 45%
+  // FG fades out
   if (fg) {
     tl.to(
       fg,
       {
         opacity: 0,
-        duration: dur(0.04),
+        duration: timeToScroll(BRAND_DURATIONS.micro),
         ease: brandEase.exit,
       },
-      pos(0.45)
+      timeToScroll(cursor)
     )
   }
 
-  // ============== FRAME 9C: CJ DOOR (50-70% of chapter) ==============
-  tl.addLabel('frame-9c', pos(0.50))
+  cursor += BRAND_DURATIONS.micro
 
-  // BG fades out as BG2 fades in
-  if (bg) {
+  // Transition pause before Frame C
+  cursor += BRAND_DURATIONS.section
+
+  // ============== FRAME C: CJ DOOR ==============
+  tl.addLabel('frame-c', timeToScroll(cursor))
+
+  // Crossfade: bg → bg2 (backstage door with CJ chalk mark)
+  if (bg && bg2) {
     tl.to(
       bg,
       {
         opacity: 0,
-        duration: dur(0.07),
+        duration: timeToScroll(BRAND_DURATIONS.section),
         ease: brandEase.exit,
       },
-      pos(0.50)
+      timeToScroll(cursor)
     )
-  }
 
-  // Step 1: BG2 (CJ door) crossfades in
-  if (bg2) {
     tl.to(
       bg2,
       {
         opacity: 1,
-        duration: dur(0.07),
+        duration: timeToScroll(BRAND_DURATIONS.section),
         ease: brandEase.enter,
       },
-      pos(0.50)
+      timeToScroll(cursor)
     )
   }
 
-  // Step 2: Text 3 appears at 55%, fades at 68%
+  cursor += BRAND_DURATIONS.section
+
+  // Text 3: "On the backstage door..."
   if (text3) {
-    addTextLifecycle(tl, text3, 0.55, 0.68, -8)
+    const readTime = calculateReadingTime(getTextContent(3))
+    cursor = addTextLifecycleTimeBased(tl, text3, cursor, readTime, -8)
   }
 
-  // ============== FRAME 9D: BROOMS FLOOR (70-100% of chapter) ==============
-  tl.addLabel('frame-9d', pos(0.70))
+  // Transition pause before Frame D
+  cursor += BRAND_DURATIONS.section
 
-  // BG2 fades out as BG3 fades in
-  if (bg2) {
+  // ============== FRAME D: BROOMS FLOOR - STACKED POEM ==============
+  tl.addLabel('frame-d', timeToScroll(cursor))
+
+  // Crossfade: bg2 → bg3 (brooms floor scene)
+  if (bg2 && bg3) {
     tl.to(
       bg2,
       {
         opacity: 0,
-        duration: dur(0.07),
+        duration: timeToScroll(BRAND_DURATIONS.section),
         ease: brandEase.exit,
       },
-      pos(0.70)
+      timeToScroll(cursor)
     )
-  }
 
-  // Step 4: BG3 (brooms floor) crossfades in
-  if (bg3) {
     tl.to(
       bg3,
       {
         opacity: 1,
-        duration: dur(0.07),
+        duration: timeToScroll(BRAND_DURATIONS.section),
         ease: brandEase.enter,
       },
-      pos(0.70)
+      timeToScroll(cursor)
     )
   }
 
-  // Steps 5-8: Stacked poem texts appear sequentially with 3% stagger
-  // Set initial y offset for all poem texts
-  ;[text4, text5, text6, text7, text8, text9].forEach((t) => {
-    if (t) tl.set(t, { y: 20 }, 0)
+  cursor += BRAND_DURATIONS.section
+
+  // STACKED POEM: Texts 4-7 appear sequentially with tight stagger
+  const poemTexts = [text4, text5, text6, text7].filter(Boolean) as Element[]
+  const poemStartCursor = cursor
+
+  poemTexts.forEach((text, i) => {
+    const textNum = i + 4
+    const textStart = poemStartCursor + (i * POEM_STAGGER_MS)
+    const readTime = calculateReadingTime(getTextContent(textNum))
+
+    // Appear with section timing
+    tl.fromTo(
+      text,
+      { opacity: 0, y: 20 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: timeToScroll(BRAND_DURATIONS.section),
+        ease: brandEase.enter,
+      },
+      timeToScroll(textStart)
+    )
+
+    // Drift while visible
+    tl.to(
+      text,
+      {
+        y: -6,
+        duration: timeToScroll(readTime),
+        ease: 'none',
+      },
+      timeToScroll(textStart + BRAND_DURATIONS.section)
+    )
   })
 
-  if (text4) {
-    tl.to(
-      text4,
-      {
-        opacity: 1,
-        y: 0,
-        duration: dur(0.05),
-        ease: brandEase.enter,
-      },
-      pos(0.72)
-    )
-  }
-  if (text5) {
-    tl.to(
-      text5,
-      {
-        opacity: 1,
-        y: 0,
-        duration: dur(0.05),
-        ease: brandEase.enter,
-      },
-      pos(0.75)
-    )
-  }
-  if (text6) {
-    tl.to(
-      text6,
-      {
-        opacity: 1,
-        y: 0,
-        duration: dur(0.05),
-        ease: brandEase.enter,
-      },
-      pos(0.78)
-    )
-  }
-  if (text7) {
-    tl.to(
-      text7,
-      {
-        opacity: 1,
-        y: 0,
-        duration: dur(0.05),
-        ease: brandEase.enter,
-      },
-      pos(0.81)
-    )
-  }
+  // Cursor advances to when last poem text is fully visible + reading time
+  const lastPoemStart = poemStartCursor + (3 * POEM_STAGGER_MS)
+  const lastPoemRead = calculateReadingTime(getTextContent(7))
+  cursor = lastPoemStart + BRAND_DURATIONS.section + lastPoemRead
 
-  // Step 9: BG3 + texts 4-7 fade out at 88%
+  // Hold for reading the stacked poem
+  cursor += BRAND_DURATIONS.sectionHeld
+
+  // Fade out bg3 + texts 4-7 together (transition to black)
   if (bg3) {
     tl.to(
       bg3,
       {
         opacity: 0,
-        duration: dur(0.05),
+        duration: timeToScroll(BRAND_DURATIONS.section),
         ease: brandEase.exit,
       },
-      pos(0.88)
-    )
-  }
-  if (text4) {
-    tl.to(
-      text4,
-      {
-        opacity: 0,
-        duration: dur(0.05),
-        ease: brandEase.exit,
-      },
-      pos(0.88)
-    )
-  }
-  if (text5) {
-    tl.to(
-      text5,
-      {
-        opacity: 0,
-        duration: dur(0.05),
-        ease: brandEase.exit,
-      },
-      pos(0.88)
-    )
-  }
-  if (text6) {
-    tl.to(
-      text6,
-      {
-        opacity: 0,
-        duration: dur(0.05),
-        ease: brandEase.exit,
-      },
-      pos(0.88)
-    )
-  }
-  if (text7) {
-    tl.to(
-      text7,
-      {
-        opacity: 0,
-        duration: dur(0.05),
-        ease: brandEase.exit,
-      },
-      pos(0.88)
+      timeToScroll(cursor)
     )
   }
 
-  // Steps 10-11: Final two texts appear on black
+  poemTexts.forEach((text) => {
+    tl.to(
+      text,
+      {
+        opacity: 0,
+        duration: timeToScroll(BRAND_DURATIONS.section),
+        ease: brandEase.exit,
+      },
+      timeToScroll(cursor)
+    )
+  })
+
+  cursor += BRAND_DURATIONS.section
+
+  // FINAL TEXTS ON BLACK: Texts 8-9
+  // Text 8: "Old as anything."
   if (text8) {
-    tl.to(
-      text8,
-      {
-        opacity: 1,
-        y: 0,
-        duration: dur(0.05),
-        ease: brandEase.enter,
-      },
-      pos(0.91)
-    )
+    const readTime = calculateReadingTime(getTextContent(8))
+    cursor = addTextLifecycleTimeBased(tl, text8, cursor, readTime, -6)
   }
+
+  // Text 9: "New as dawn." - overlaps with text 8
   if (text9) {
-    tl.to(
-      text9,
-      {
-        opacity: 1,
-        y: 0,
-        duration: dur(0.05),
-        ease: brandEase.enter,
-      },
-      pos(0.95)
-    )
+    const text9Start = cursor - TEXT_OVERLAP_MS
+    const readTime = calculateReadingTime(getTextContent(9))
+    cursor = addTextLifecycleTimeBased(tl, text9, text9Start, readTime, -6)
   }
+
+  // FINAL HOLD: 1500ms (from chapter definition - longest in experience)
+  cursor += 1500
+
+  // Final transition out (signature duration for deliberate fade)
+  cursor += BRAND_DURATIONS.signature
+
+  // Log final cursor position for debugging
+  console.log('[Chapter9] Final cursor:', cursor, 'ms =', timeToScroll(cursor), 'global scroll')
 
   return tl
 }
 
 /**
- * Add text lifecycle animation (appear -> drift -> fade)
- * All positions are chapter-relative (0-1), scaled internally
- */
-function addTextLifecycle(
-  tl: gsap.core.Timeline,
-  target: Element,
-  appearAt: number,
-  fadeOutAt: number,
-  driftDistance: number
-): void {
-  const appearDur = 0.05 // 5% of chapter for appear
-
-  // Appear
-  tl.fromTo(
-    target,
-    { opacity: 0, y: 20 },
-    { opacity: 1, y: 0, duration: dur(appearDur), ease: brandEase.enter },
-    pos(appearAt)
-  )
-
-  // Drift while visible
-  const driftDur = fadeOutAt - appearAt - appearDur - 0.03
-  if (driftDur > 0) {
-    tl.to(
-      target,
-      {
-        y: driftDistance,
-        duration: dur(driftDur),
-        ease: 'none', // Linear drift for scrubbed feel
-      },
-      pos(appearAt + appearDur)
-    )
-  }
-
-  // Fade out
-  tl.to(
-    target,
-    {
-      opacity: 0,
-      duration: dur(0.03),
-      ease: brandEase.exit,
-    },
-    pos(fadeOutAt)
-  )
-}
-
-/**
  * Get the duration of Chapter 9 as a proportion of the total experience
- * Based on scroll region: 90% - 100% = 0.10
+ * Based on scroll region: 88% - 100% = 0.12
  */
-export const CHAPTER_9_DURATION = 0.10
+export const CHAPTER_9_DURATION = 0.12
 
 /**
  * Chapter 9 scroll position in master timeline
  */
-export const CHAPTER_9_START = 0.90
+export const CHAPTER_9_START = 0.88
