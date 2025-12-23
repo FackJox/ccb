@@ -1,173 +1,342 @@
 /**
  * Chapter 2 Timeline - "The Offer"
  *
- * Frame A (0-60% of chapter): Table scene with progressive text
+ * Pure time-based implementation using timeToScroll() for both positions and durations.
+ * All timing in milliseconds, converted to global scroll proportions.
+ *
+ * Frame A (first ~60%): Table scene with progressive text
  * - BG visible from start
  * - FG couple fades in with subtle zoom (1.0→1.03)
- * - Text blocks 1-2 appear with lifecycle animations
+ * - Text blocks 1-2 appear with staggered-overlap pattern
  *
- * Frame B (60-100% of chapter): Intimate closeup transition
+ * Frame B (remaining ~40%): Intimate closeup transition
  * - FG couple (table) fades out
  * - Text 3 ("Consent lives in small sentences...") appears
  * - couple-closeup fades in
- * - Text 4 ("Her palm hovered...") appears
- * - Text 5 ("Will you follow?") as consent beat
+ * - Text 4 ("Her palm hovered...") overlaps
+ * - Text 5 ("Will you follow?") as consent signature beat
  * - Slow zoom on couple-closeup at exit
- *
- * Scroll Region: 11-20% of total scroll (9% duration)
- * All positions are PRE-SCALED to global timeline (multiply by D = 0.09)
  *
  * Complexity: L2 (Expressive)
  */
 
-import { gsap, brandEase } from '../register'
-import { chapterScrollRegions } from '../scroll'
+import { gsap, SplitText, brandEase } from '../register'
+import {
+  timeToScroll,
+  calculateReadingTime,
+  BRAND_DURATIONS,
+} from '../timing'
+import { sceneConfigs } from '$data/scenes'
 
-// Chapter 2's duration as fraction of total scroll (0-1)
-const D = chapterScrollRegions[2].end - chapterScrollRegions[2].start // 0.09
+// Get text content for reading time calculations
+const textBlocks = sceneConfigs[2].textBlocks
+const getTextContent = (num: number): string =>
+  textBlocks.find((t) => t.num === num)?.content ?? ''
 
-// Helper to scale chapter-relative position to global position
-const pos = (chapterPercent: number) => chapterPercent * D
-// Helper to scale chapter-relative duration to global duration
-const dur = (chapterPercent: number) => chapterPercent * D
+// Overlap: how much before previous text ends does next text start (ms)
+const TEXT_OVERLAP_MS = 800
 
 /**
- * Create Chapter 2 timeline with positions pre-scaled for master timeline
+ * Add text lifecycle animation using pure time-based positioning
+ */
+function addTextLifecycleTimeBased(
+  tl: gsap.core.Timeline,
+  target: Element,
+  appearAtMs: number,
+  visibleDurMs: number,
+  drift: number,
+  skipFade = false
+): number {
+  const appearDur = BRAND_DURATIONS.section
+  const fadeDur = skipFade ? 0 : BRAND_DURATIONS.micro
+
+  // All conversions via timeToScroll for global positions/durations
+  tl.fromTo(
+    target,
+    { opacity: 0, y: 20 },
+    {
+      opacity: 1,
+      y: 0,
+      duration: timeToScroll(appearDur),
+      ease: brandEase.enter,
+    },
+    timeToScroll(appearAtMs)
+  )
+
+  // Drift while visible
+  if (visibleDurMs > 0) {
+    tl.to(
+      target,
+      {
+        y: drift,
+        duration: timeToScroll(visibleDurMs),
+        ease: 'none',
+      },
+      timeToScroll(appearAtMs + appearDur)
+    )
+  }
+
+  // Fade out (unless bridging to next chapter)
+  if (!skipFade) {
+    tl.to(
+      target,
+      {
+        opacity: 0,
+        duration: timeToScroll(fadeDur),
+        ease: brandEase.exit,
+      },
+      timeToScroll(appearAtMs + appearDur + visibleDurMs)
+    )
+  }
+
+  // Return end time for cursor tracking
+  return appearAtMs + appearDur + visibleDurMs + fadeDur
+}
+
+/**
+ * Create Chapter 2 timeline with pure time-based positioning
  */
 export function createChapter2Timeline(container: HTMLElement): gsap.core.Timeline {
   const tl = gsap.timeline()
 
+  // Cursor tracks cumulative time in ms from chapter start
+  let cursor = 0
+
   // ============== GET ELEMENTS ==============
-  // Frame A elements
   const couple = container.querySelector('[data-layer="couple"]')
+  const coupleCloseup = container.querySelector('[data-layer="coupleCloseup"]')
+
+  // Debug logging
+  console.log('[Chapter2] Elements found:', {
+    couple: !!couple,
+    coupleCloseup: !!coupleCloseup,
+    allLayers: container.querySelectorAll('[data-layer]').length,
+    layerIds: Array.from(container.querySelectorAll('[data-layer]')).map(el => el.getAttribute('data-layer'))
+  })
+
   const text1 = container.querySelector('[data-text-block="1"]')
   const text2 = container.querySelector('[data-text-block="2"]')
-  // Frame B elements
-  const coupleCloseup = container.querySelector('[data-layer="coupleCloseup"]')
   const text3 = container.querySelector('[data-text-block="3"]')
   const text4 = container.querySelector('[data-text-block="4"]')
   const consentText = container.querySelector('[data-consent]')
 
-  // ============== FRAME A: TABLE SCENE (0-60% of chapter) ==============
-  tl.addLabel('frame-a', 0)
+  // ============== FRAME A: TABLE SCENE ==============
+  tl.addLabel('frame-a', timeToScroll(cursor))
 
-  // FG couple fades in at 2% of chapter
+  // Initial breath before content
+  cursor += BRAND_DURATIONS.section
+
+  // Couple layer fades in with subtle zoom
   if (couple) {
-    tl.to(couple, {
-      opacity: 1,
-      duration: dur(0.05),
-      ease: brandEase.enter,
-    }, pos(0.02))
-
-    // Subtle zoom while scene is active (1.0 → 1.03)
-    tl.to(couple, {
-      scale: 1.03,
-      duration: dur(0.53),
-      ease: 'none',
-    }, pos(0.02))
-  }
-
-  // Text block 1: appears at 5%, fades at 50% (~45% visible)
-  if (text1) {
-    addTextLifecycle(tl, text1, 0.05, 0.50, -12)
-  }
-
-  // Text block 2: appears at 15%, fades at 55% (~40% visible)
-  if (text2) {
-    addTextLifecycle(tl, text2, 0.15, 0.55, -10)
-  }
-
-  // ============== FRAME B: INTIMATE CLOSEUP (60-100% of chapter) ==============
-  tl.addLabel('frame-b', pos(0.60))
-
-  // FG couple (table scene) fades out at 55% (overlaps with text2 fadeout)
-  if (couple) {
-    tl.to(couple, {
-      opacity: 0,
-      duration: dur(0.08),
-      ease: brandEase.exit,
-    }, pos(0.55))
-  }
-
-  // Text block 3: appears at 62%, fades at 88% (~26% visible)
-  if (text3) {
-    addTextLifecycle(tl, text3, 0.62, 0.88, -10)
-  }
-
-  // couple-closeup fades in at 65%
-  if (coupleCloseup) {
-    tl.to(coupleCloseup, {
-      opacity: 1,
-      duration: dur(0.08),
-      ease: brandEase.enter,
-    }, pos(0.65))
-
-    // Slow zoom on couple-closeup (1.0 → 1.03) during Frame B exit
-    tl.to(coupleCloseup, {
-      scale: 1.03,
-      duration: dur(0.30),
-      ease: 'none',
-    }, pos(0.70))
-  }
-
-  // Text block 4: appears at 72%, fades at 92% (~20% visible)
-  if (text4) {
-    addTextLifecycle(tl, text4, 0.72, 0.92, -8)
-  }
-
-  // Consent text ("Will you follow?"): appears at 88% as beat
-  if (consentText) {
-    tl.fromTo(consentText,
-      { opacity: 0, y: 15 },
+    tl.to(
+      couple,
       {
         opacity: 1,
-        y: 0,
-        duration: dur(0.08),
+        duration: timeToScroll(BRAND_DURATIONS.section),
         ease: brandEase.enter,
       },
-      pos(0.88)
+      timeToScroll(cursor)
+    )
+
+    // Store zoom start position for later
+    const zoomStartMs = cursor
+    cursor += BRAND_DURATIONS.section
+
+    // Text 1: First narrative text
+    if (text1) {
+      const readTime = calculateReadingTime(getTextContent(1))
+      cursor = addTextLifecycleTimeBased(tl, text1, cursor, readTime, -12)
+    }
+
+    // Text 2: Overlaps with text 1
+    if (text2) {
+      const text2Start = cursor - TEXT_OVERLAP_MS
+      const readTime = calculateReadingTime(getTextContent(2))
+      cursor = addTextLifecycleTimeBased(tl, text2, text2Start, readTime, -10)
+    }
+
+    // Calculate zoom duration to cover Frame A
+    const zoomDuration = cursor - zoomStartMs + BRAND_DURATIONS.section
+    tl.to(
+      couple,
+      {
+        scale: 1.03,
+        duration: timeToScroll(zoomDuration),
+        ease: 'none',
+      },
+      timeToScroll(zoomStartMs)
+    )
+  } else {
+    // Still add texts even if couple layer is missing
+    if (text1) {
+      const readTime = calculateReadingTime(getTextContent(1))
+      cursor = addTextLifecycleTimeBased(tl, text1, cursor, readTime, -12)
+    }
+
+    if (text2) {
+      const text2Start = cursor - TEXT_OVERLAP_MS
+      const readTime = calculateReadingTime(getTextContent(2))
+      cursor = addTextLifecycleTimeBased(tl, text2, text2Start, readTime, -10)
+    }
+  }
+
+  // Transition pause before Frame B
+  cursor += BRAND_DURATIONS.section
+
+  // ============== FRAME B: INTIMATE CLOSEUP ==============
+  tl.addLabel('frame-b', timeToScroll(cursor))
+
+  // Couple (table scene) fades out, coupleCloseup fades in simultaneously
+  if (couple) {
+    tl.to(
+      couple,
+      {
+        opacity: 0,
+        duration: timeToScroll(BRAND_DURATIONS.section),
+        ease: brandEase.exit,
+      },
+      timeToScroll(cursor)
     )
   }
 
-  return tl
-}
+  if (coupleCloseup) {
+    tl.to(
+      coupleCloseup,
+      {
+        opacity: 1,
+        duration: timeToScroll(BRAND_DURATIONS.section),
+        ease: brandEase.enter,
+      },
+      timeToScroll(cursor)
+    )
 
-/**
- * Add text lifecycle animation (appear → drift → fade)
- * All positions are chapter-relative (0-1), scaled internally
- */
-function addTextLifecycle(
-  tl: gsap.core.Timeline,
-  target: Element,
-  appearAt: number,
-  fadeOutAt: number,
-  driftDistance: number
-): void {
-  const appearDur = 0.08 // 8% of chapter for appear
+    // Store zoom start for coupleCloseup
+    const closeupZoomStart = cursor
+    cursor += BRAND_DURATIONS.section
 
-  // Appear
-  tl.fromTo(target,
-    { opacity: 0, y: 20 },
-    { opacity: 1, y: 0, duration: dur(appearDur), ease: brandEase.enter },
-    pos(appearAt)
-  )
+    // Text 3: First Frame B text
+    if (text3) {
+      const readTime = calculateReadingTime(getTextContent(3))
+      cursor = addTextLifecycleTimeBased(tl, text3, cursor, readTime, -10)
+    }
 
-  // Drift while visible
-  const driftDur = fadeOutAt - appearAt - appearDur - 0.05
-  if (driftDur > 0) {
-    tl.to(target, {
-      y: driftDistance,
-      duration: dur(driftDur),
-      ease: 'none',
-    }, pos(appearAt + appearDur))
+    // Text 4: Overlaps with text 3
+    if (text4) {
+      const text4Start = cursor - TEXT_OVERLAP_MS
+      const readTime = calculateReadingTime(getTextContent(4))
+      cursor = addTextLifecycleTimeBased(tl, text4, text4Start, readTime, -8)
+    }
+
+    // Held breath before consent text
+    cursor += BRAND_DURATIONS.sectionHeld
+
+    // Consent text ("Will you follow?") - signature moment
+    if (consentText) {
+      const consentContent = consentText.querySelector('.typography-beat') || consentText
+
+      try {
+        const split = new SplitText(consentContent, {
+          type: 'chars,words',
+          charsClass: 'beat-char',
+        })
+
+        tl.fromTo(
+          split.chars,
+          { opacity: 0, y: 15 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: timeToScroll(BRAND_DURATIONS.signature),
+            stagger: timeToScroll(40),
+            ease: brandEase.enter,
+          },
+          timeToScroll(cursor)
+        )
+
+        // Calculate total reveal duration
+        const beatDuration = BRAND_DURATIONS.signature + 40 * split.chars.length
+        cursor += beatDuration
+
+        // Drift after reveal
+        tl.to(
+          consentContent,
+          {
+            y: -10,
+            duration: timeToScroll(BRAND_DURATIONS.sectionHeld),
+            ease: brandEase.transform,
+          },
+          timeToScroll(cursor)
+        )
+
+        cursor += BRAND_DURATIONS.sectionHeld
+      } catch (e) {
+        console.warn('[Chapter2] SplitText failed, using simple fade:', e)
+        tl.fromTo(
+          consentText,
+          { opacity: 0, y: 20 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: timeToScroll(BRAND_DURATIONS.signature),
+            ease: brandEase.enter,
+          },
+          timeToScroll(cursor)
+        )
+        cursor += BRAND_DURATIONS.signature
+      }
+    }
+
+    // Calculate zoom duration for coupleCloseup (covers Frame B)
+    const closeupZoomDuration = cursor - closeupZoomStart + BRAND_DURATIONS.section
+    tl.to(
+      coupleCloseup,
+      {
+        scale: 1.03,
+        duration: timeToScroll(closeupZoomDuration),
+        ease: 'none',
+      },
+      timeToScroll(closeupZoomStart)
+    )
+  } else {
+    // Still add texts even if coupleCloseup layer is missing
+    cursor += BRAND_DURATIONS.section
+
+    if (text3) {
+      const readTime = calculateReadingTime(getTextContent(3))
+      cursor = addTextLifecycleTimeBased(tl, text3, cursor, readTime, -10)
+    }
+
+    if (text4) {
+      const text4Start = cursor - TEXT_OVERLAP_MS
+      const readTime = calculateReadingTime(getTextContent(4))
+      cursor = addTextLifecycleTimeBased(tl, text4, text4Start, readTime, -8)
+    }
+
+    cursor += BRAND_DURATIONS.sectionHeld
+
+    if (consentText) {
+      tl.fromTo(
+        consentText,
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: timeToScroll(BRAND_DURATIONS.signature),
+          ease: brandEase.enter,
+        },
+        timeToScroll(cursor)
+      )
+      cursor += BRAND_DURATIONS.signature
+    }
   }
 
-  // Fade out
-  tl.to(target, {
-    opacity: 0,
-    duration: dur(0.05),
-    ease: brandEase.exit,
-  }, pos(fadeOutAt))
+  // Final hold before chapter transition
+  cursor += BRAND_DURATIONS.section
+
+  // Log final cursor position for debugging
+  console.log('[Chapter2] Final cursor:', cursor, 'ms =', timeToScroll(cursor), 'global scroll')
+
+  return tl
 }
 
 /**

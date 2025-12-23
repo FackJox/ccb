@@ -1,152 +1,301 @@
 /**
  * Chapter 4 Timeline - "The Crack"
  *
- * Frame A (0-45% of chapter): Mirror scene with persistent text from Chapter 3
- * - Text 1 (mirror text) visible immediately (continues from Chapter 3)
- * - Mirror intact visible
- * - Text 1 fades out at 40%
+ * Pure time-based implementation using timeToScroll() for both positions and durations.
+ * All timing in milliseconds, converted to global scroll proportions.
  *
- * Frame B (45-100% of chapter): Mirror shatter sequence
- * - Mirror falls (Y translate down)
- * - Mirror crossfade (intact → broken)
+ * Frame A (first ~40%): Mirror scene with text bridged from Chapter 3
+ * - Text 1 (mirror text) visible immediately (continues from Chapter 3)
+ * - Text 1 fades out after reading time
+ * - Mirror intact visible, starts to fall
+ *
+ * Frame B (remaining ~60%): Mirror shatter sequence
+ * - Mirror crossfade (intact → broken with jitter)
  * - Sequential beat: "Un." → "Deux." → "Trois."
  * - Couple standing fades in
  * - Narrative text appears
  *
- * Scroll Region: 27-38% of total scroll (11% duration)
  * Complexity: L2 (Expressive)
- *
- * All positions are PRE-SCALED to global timeline (multiply by D = 0.11)
+ * Motion Allowed: FG swap with jitter, beat text, layer fades
+ * Motion Forbidden: No animated shards, no particles
  */
 
 import { gsap, brandEase } from '../register'
-import { chapterScrollRegions } from '../scroll'
+import {
+  timeToScroll,
+  calculateReadingTime,
+  BRAND_DURATIONS,
+} from '../timing'
+import { sceneConfigs } from '$data/scenes'
 
-// Chapter 4's duration as fraction of total scroll (0-1)
-const D = chapterScrollRegions[4].end - chapterScrollRegions[4].start // 0.11
+// Get text content for reading time calculations
+const textBlocks = sceneConfigs[4].textBlocks
+const getTextContent = (num: number): string =>
+  textBlocks.find((t) => t.num === num)?.content ?? ''
 
-// Helper to scale chapter-relative position to global position
-const pos = (chapterPercent: number) => chapterPercent * D
-// Helper to scale chapter-relative duration to global duration
-const dur = (chapterPercent: number) => chapterPercent * D
+// Overlap: how much before previous text ends does next text start (ms)
+const TEXT_OVERLAP_MS = 800
+
+// Beat text stagger timing (ms between each beat word)
+const BEAT_STAGGER_MS = 150
 
 /**
- * Create Chapter 4 timeline with positions pre-scaled for master timeline
+ * Add text lifecycle animation using pure time-based positioning
+ */
+function addTextLifecycleTimeBased(
+  tl: gsap.core.Timeline,
+  target: Element,
+  appearAtMs: number,
+  visibleDurMs: number,
+  drift: number,
+  skipFade = false
+): number {
+  const appearDur = BRAND_DURATIONS.section
+  const fadeDur = skipFade ? 0 : BRAND_DURATIONS.micro
+
+  // All conversions via timeToScroll for global positions/durations
+  tl.fromTo(
+    target,
+    { opacity: 0, y: 20 },
+    {
+      opacity: 1,
+      y: 0,
+      duration: timeToScroll(appearDur),
+      ease: brandEase.enter,
+    },
+    timeToScroll(appearAtMs)
+  )
+
+  // Drift while visible
+  if (visibleDurMs > 0) {
+    tl.to(
+      target,
+      {
+        y: drift,
+        duration: timeToScroll(visibleDurMs),
+        ease: 'none',
+      },
+      timeToScroll(appearAtMs + appearDur)
+    )
+  }
+
+  // Fade out (unless bridging to next chapter)
+  if (!skipFade) {
+    tl.to(
+      target,
+      {
+        opacity: 0,
+        duration: timeToScroll(fadeDur),
+        ease: brandEase.exit,
+      },
+      timeToScroll(appearAtMs + appearDur + visibleDurMs)
+    )
+  }
+
+  // Return end time for cursor tracking
+  return appearAtMs + appearDur + visibleDurMs + fadeDur
+}
+
+/**
+ * Create Chapter 4 timeline with pure time-based positioning
  */
 export function createChapter4Timeline(container: HTMLElement): gsap.core.Timeline {
   const tl = gsap.timeline()
 
+  // Cursor tracks cumulative time in ms from chapter start
+  let cursor = 0
+
   // ============== GET ELEMENTS ==============
-  // Layers
+  const bg = container.querySelector('[data-layer="bg"]')
   const mirrorIntact = container.querySelector('[data-layer="mirrorIntact"]')
   const mirrorBroken = container.querySelector('[data-layer="mirrorBroken"]')
   const coupleStanding = container.querySelector('[data-layer="coupleStanding"]')
-  // Text blocks
+
+  // Debug logging
+  console.log('[Chapter4] Elements found:', {
+    bg: !!bg,
+    mirrorIntact: !!mirrorIntact,
+    mirrorBroken: !!mirrorBroken,
+    coupleStanding: !!coupleStanding,
+    allLayers: container.querySelectorAll('[data-layer]').length,
+    layerIds: Array.from(container.querySelectorAll('[data-layer]')).map(el => el.getAttribute('data-layer'))
+  })
+
   const text1 = container.querySelector('[data-text-block="1"]')
   const text2 = container.querySelector('[data-text-block="2"]')  // "Un."
   const text3 = container.querySelector('[data-text-block="3"]')  // "Deux."
   const text4 = container.querySelector('[data-text-block="4"]')  // "Trois."
   const text5 = container.querySelector('[data-text-block="5"]')  // Narrative
 
-  // ============== FRAME A: MIRROR SCENE (0-45% of chapter) ==============
-  tl.addLabel('frame-a', 0)
+  console.log('[Chapter4] Text elements found:', {
+    text1: !!text1,
+    text2: !!text2,
+    text3: !!text3,
+    text4: !!text4,
+    text5: !!text5,
+  })
 
-  // Text 1 (mirror text) - visible immediately to continue from Chapter 3
+  // ============== FRAME A: MIRROR SCENE ==============
+  tl.addLabel('frame-a', timeToScroll(cursor))
+
+  // Initial breath before content
+  cursor += BRAND_DURATIONS.section
+
+  // Text 1 is already visible (bridged from Chapter 3)
+  // Set it to visible state, then fade out after reading time
   if (text1) {
+    // Ensure text is visible at chapter start
     tl.set(text1, { opacity: 1, y: 0 }, 0)
-    // Fade out before mirror falls
-    tl.to(text1, {
-      opacity: 0,
-      duration: dur(0.08),
-      ease: brandEase.exit,
-    }, pos(0.40))
+
+    // Calculate reading time for this text
+    const readTime = calculateReadingTime(getTextContent(1))
+
+    // Fade out after reading time
+    tl.to(
+      text1,
+      {
+        opacity: 0,
+        y: -8,
+        duration: timeToScroll(BRAND_DURATIONS.micro),
+        ease: brandEase.exit,
+      },
+      timeToScroll(cursor + readTime)
+    )
+    cursor += readTime + BRAND_DURATIONS.micro
   }
 
-  // ============== FRAME B: MIRROR SHATTER SEQUENCE (45-100% of chapter) ==============
-  tl.addLabel('frame-b', pos(0.45))
-
-  // 1. Mirror falls (intact mirror translates down)
+  // Mirror starts to fall (translates down before shatter)
   if (mirrorIntact) {
-    tl.to(mirrorIntact, {
-      y: 30,  // Fall distance in pixels
-      duration: dur(0.10),
-      ease: brandEase.transform,
-    }, pos(0.45))
+    tl.to(
+      mirrorIntact,
+      {
+        y: 30,
+        duration: timeToScroll(BRAND_DURATIONS.section),
+        ease: brandEase.exit,
+      },
+      timeToScroll(cursor)
+    )
   }
 
-  // 2. Mirror crossfade (intact → broken)
+  // Transition pause
+  cursor += BRAND_DURATIONS.section
+
+  // ============== FRAME B: MIRROR SHATTER SEQUENCE ==============
+  tl.addLabel('frame-b', timeToScroll(cursor))
+
+  // Mirror swap: mirrorIntact → mirrorBroken crossfade with jitter
   if (mirrorIntact && mirrorBroken) {
     // Set broken mirror to same fallen position
-    tl.set(mirrorBroken, { y: 30 }, pos(0.55))
-    // Crossfade
-    tl.to(mirrorIntact, {
-      opacity: 0,
-      duration: dur(0.04),
-      ease: brandEase.transform,
-    }, pos(0.55))
-    tl.to(mirrorBroken, {
-      opacity: 1,
-      duration: dur(0.04),
-      ease: brandEase.transform,
-    }, pos(0.55))
+    tl.set(mirrorBroken, { y: 30 }, timeToScroll(cursor))
+
+    // Quick crossfade (micro duration ~230ms)
+    tl.to(
+      mirrorIntact,
+      {
+        opacity: 0,
+        x: '+=2',  // 2px jitter for impact feel
+        duration: timeToScroll(BRAND_DURATIONS.micro),
+        ease: brandEase.exit,
+      },
+      timeToScroll(cursor)
+    )
+
+    tl.to(
+      mirrorBroken,
+      {
+        opacity: 1,
+        duration: timeToScroll(BRAND_DURATIONS.micro),
+        ease: brandEase.enter,
+      },
+      timeToScroll(cursor)
+    )
+
+    cursor += BRAND_DURATIONS.micro
   }
 
-  // 3. Sequential beat: "Un." → "Deux." → "Trois."
-  // Each word appears, holds briefly, then fades as next appears
-  if (text2) {
-    tl.fromTo(text2,
-      { opacity: 0, y: 10 },
-      { opacity: 1, y: 0, duration: dur(0.03), ease: brandEase.enter },
-      pos(0.58)
-    )
-    tl.to(text2,
-      { opacity: 0, duration: dur(0.02), ease: brandEase.exit },
-      pos(0.61)
-    )
-  }
+  // Held breath after impact - moment of shock
+  cursor += BRAND_DURATIONS.sectionHeld
 
-  if (text3) {
-    tl.fromTo(text3,
-      { opacity: 0, y: 10 },
-      { opacity: 1, y: 0, duration: dur(0.03), ease: brandEase.enter },
-      pos(0.62)
-    )
-    tl.to(text3,
-      { opacity: 0, duration: dur(0.02), ease: brandEase.exit },
-      pos(0.65)
-    )
-  }
+  // Beat text sequence: "Un. Deux. Trois."
+  // Beats OVERLAP - each starts before the previous finishes (punchy, rapid-fire)
+  const beatTexts = [text2, text3, text4].filter(Boolean) as Element[]
+  const BEAT_OVERLAP_STAGGER = BRAND_DURATIONS.signature + BEAT_STAGGER_MS  // 1200ms between beat starts
 
-  if (text4) {
-    tl.fromTo(text4,
-      { opacity: 0, y: 10 },
-      { opacity: 1, y: 0, duration: dur(0.03), ease: brandEase.enter },
-      pos(0.66)
-    )
-    tl.to(text4,
-      { opacity: 0, duration: dur(0.02), ease: brandEase.exit },
-      pos(0.70)
-    )
-  }
+  beatTexts.forEach((beat, i) => {
+    // Overlapping stagger: each beat starts 1200ms after previous
+    const beatStart = cursor + (i * BEAT_OVERLAP_STAGGER)
 
-  // 4. Couple fades in (during "Deux." beat)
-  if (coupleStanding) {
-    tl.to(coupleStanding, {
-      opacity: 1,
-      duration: dur(0.08),
-      ease: brandEase.enter,
-    }, pos(0.62))
-  }
-
-  // 5. Narrative text appears after beat sequence
-  if (text5) {
-    tl.fromTo(text5,
+    // Appear with signature timing
+    tl.fromTo(
+      beat,
       { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: dur(0.08), ease: brandEase.enter },
-      pos(0.72)
+      {
+        opacity: 1,
+        y: 0,
+        duration: timeToScroll(BRAND_DURATIONS.signature),
+        ease: brandEase.enter,
+      },
+      timeToScroll(beatStart)
+    )
+
+    // Drift up while visible
+    tl.to(
+      beat,
+      {
+        y: -15,
+        duration: timeToScroll(BRAND_DURATIONS.sectionHeld),
+        ease: 'none',
+      },
+      timeToScroll(beatStart + BRAND_DURATIONS.signature)
+    )
+
+    // Fade out
+    tl.to(
+      beat,
+      {
+        opacity: 0,
+        duration: timeToScroll(BRAND_DURATIONS.micro),
+        ease: brandEase.exit,
+      },
+      timeToScroll(beatStart + BRAND_DURATIONS.signature + BRAND_DURATIONS.sectionHeld)
+    )
+  })
+
+  // Cursor advances to when LAST beat finishes (not sum of all beats)
+  // Last beat starts at: cursor + (n-1) * stagger
+  // Last beat ends at: that + signature + sectionHeld + micro
+  if (beatTexts.length > 0) {
+    const lastBeatStart = cursor + (beatTexts.length - 1) * BEAT_OVERLAP_STAGGER
+    const beatLifecycle = BRAND_DURATIONS.signature + BRAND_DURATIONS.sectionHeld + BRAND_DURATIONS.micro
+    cursor = lastBeatStart + beatLifecycle
+  }
+
+  // coupleStanding fades in during/after beat sequence
+  if (coupleStanding) {
+    // Start fade slightly before cursor (overlap with last beat)
+    const coupleStart = cursor - BRAND_DURATIONS.section
+    tl.to(
+      coupleStanding,
+      {
+        opacity: 1,
+        duration: timeToScroll(BRAND_DURATIONS.section),
+        ease: brandEase.enter,
+      },
+      timeToScroll(coupleStart)
     )
   }
-  // Narrative text holds until chapter end (natural chapter fade handles exit)
+
+  // Text 5: Narrative close
+  if (text5) {
+    const readTime = calculateReadingTime(getTextContent(5))
+    cursor = addTextLifecycleTimeBased(tl, text5, cursor, readTime, -10)
+  }
+
+  // Final hold before chapter transition
+  cursor += BRAND_DURATIONS.section
+
+  // Log final cursor position for debugging
+  console.log('[Chapter4] Final cursor:', cursor, 'ms =', timeToScroll(cursor), 'global scroll')
 
   return tl
 }

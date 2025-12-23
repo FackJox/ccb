@@ -1,132 +1,193 @@
 /**
  * Chapter 3 Timeline - "Consent as Choreography"
  *
- * Frame A (0-100% of chapter): Dip pose reveal from black
- * - Scene starts black (C2 faded out)
- * - FG (couple in dip) fades in first from darkness
- * - BG (ballroom) fades in behind them
- * - Text blocks 1-2 appear with lifecycle animations
+ * Pure time-based implementation using timeToScroll() for both positions and durations.
+ * All timing in milliseconds, converted to global scroll proportions.
  *
- * Scroll Region: 20-27% of total scroll (7% duration)
- * Complexity: L2 (restrained, monastic - focus on stillness)
+ * Frame A (first ~70%): Dip pose reveal from black
+ * - FG (coupleDip) fades in FIRST from darkness
+ * - BG fades in behind them
+ * - Text blocks 1-2 appear with staggered-overlap pattern
  *
- * All positions are PRE-SCALED to global timeline (multiply by D = 0.07)
+ * Frame B (remaining ~30%): Mirror introduction
+ * - Text 3 appears (bridges to Chapter 4, no fade out)
+ *
+ * Complexity: L2 (Expressive, monastic restraint)
+ * Motion Forbidden: NO zoom (composition is static/anchored)
  */
 
 import { gsap, brandEase } from '../register'
-import { chapterScrollRegions } from '../scroll'
+import {
+  timeToScroll,
+  calculateReadingTime,
+  BRAND_DURATIONS,
+} from '../timing'
+import { sceneConfigs } from '$data/scenes'
 
-// Chapter 3's duration as fraction of total scroll (0-1)
-const D = chapterScrollRegions[3].end - chapterScrollRegions[3].start // 0.07
+// Get text content for reading time calculations
+const textBlocks = sceneConfigs[3].textBlocks
+const getTextContent = (num: number): string =>
+  textBlocks.find((t) => t.num === num)?.content ?? ''
 
-// Helper to scale chapter-relative position to global position
-const pos = (chapterPercent: number) => chapterPercent * D
-// Helper to scale chapter-relative duration to global duration
-const dur = (chapterPercent: number) => chapterPercent * D
+// Overlap: how much before previous text ends does next text start (ms)
+const TEXT_OVERLAP_MS = 800
 
 /**
- * Create Chapter 3 timeline with positions pre-scaled for master timeline
+ * Add text lifecycle animation using pure time-based positioning
+ */
+function addTextLifecycleTimeBased(
+  tl: gsap.core.Timeline,
+  target: Element,
+  appearAtMs: number,
+  visibleDurMs: number,
+  drift: number,
+  skipFade = false
+): number {
+  const appearDur = BRAND_DURATIONS.section
+  const fadeDur = skipFade ? 0 : BRAND_DURATIONS.micro
+
+  // All conversions via timeToScroll for global positions/durations
+  tl.fromTo(
+    target,
+    { opacity: 0, y: 20 },
+    {
+      opacity: 1,
+      y: 0,
+      duration: timeToScroll(appearDur),
+      ease: brandEase.enter,
+    },
+    timeToScroll(appearAtMs)
+  )
+
+  // Drift while visible
+  if (visibleDurMs > 0) {
+    tl.to(
+      target,
+      {
+        y: drift,
+        duration: timeToScroll(visibleDurMs),
+        ease: 'none',
+      },
+      timeToScroll(appearAtMs + appearDur)
+    )
+  }
+
+  // Fade out (unless bridging to next chapter)
+  if (!skipFade) {
+    tl.to(
+      target,
+      {
+        opacity: 0,
+        duration: timeToScroll(fadeDur),
+        ease: brandEase.exit,
+      },
+      timeToScroll(appearAtMs + appearDur + visibleDurMs)
+    )
+  }
+
+  // Return end time for cursor tracking
+  return appearAtMs + appearDur + visibleDurMs + fadeDur
+}
+
+/**
+ * Create Chapter 3 timeline with pure time-based positioning
  */
 export function createChapter3Timeline(container: HTMLElement): gsap.core.Timeline {
   const tl = gsap.timeline()
 
+  // Cursor tracks cumulative time in ms from chapter start
+  let cursor = 0
+
   // ============== GET ELEMENTS ==============
   const bg = container.querySelector('[data-layer="bg"]')
   const coupleDip = container.querySelector('[data-layer="coupleDip"]')
-  // Frame A texts
+
+  // Debug logging
+  console.log('[Chapter3] Elements found:', {
+    bg: !!bg,
+    coupleDip: !!coupleDip,
+    allLayers: container.querySelectorAll('[data-layer]').length,
+    layerIds: Array.from(container.querySelectorAll('[data-layer]')).map(el => el.getAttribute('data-layer'))
+  })
+
   const text1 = container.querySelector('[data-text-block="1"]')
   const text2 = container.querySelector('[data-text-block="2"]')
-  // Frame B text
   const text3 = container.querySelector('[data-text-block="3"]')
 
-  // ============== FRAME A: DIP POSE REVEAL (0-100% of chapter) ==============
-  tl.addLabel('frame-a', 0)
+  // ============== FRAME A: DIP POSE REVEAL ==============
+  tl.addLabel('frame-a', timeToScroll(cursor))
 
-  // Step 1: FG couple fades in first from black (2-17% of chapter)
-  // Couple emerges from darkness before the scene is revealed
+  // Initial breath before content
+  cursor += BRAND_DURATIONS.section
+
+  // Step 1: FG couple fades in FIRST from black
+  // (Reverse of typical pattern - couple emerges from darkness before scene)
   if (coupleDip) {
-    tl.to(coupleDip, {
-      opacity: 1,
-      duration: dur(0.15),
-      ease: brandEase.enter,
-    }, pos(0.02))
-  }
-
-  // Step 2: BG ballroom fades in behind (20-38% of chapter)
-  // Scene materializes around the couple after they're visible
-  if (bg) {
-    tl.to(bg, {
-      opacity: 1,
-      duration: dur(0.18),
-      ease: brandEase.enter,
-    }, pos(0.20))
-  }
-
-  // Step 3: Text block 1 appears (35-52% visible)
-  // Note: Chapter fade starts at ~71% (due to 2% fade on 7% chapter), so texts must complete earlier
-  if (text1) {
-    addTextLifecycle(tl, text1, 0.35, 0.52, -8)
-  }
-
-  // Step 4: Text block 2 appears with stagger (40-52% visible)
-  if (text2) {
-    addTextLifecycle(tl, text2, 0.40, 0.52, -6)
-  }
-
-  // ============== FRAME B: MIRROR INTRODUCTION (55-71% of chapter) ==============
-  // Must appear before chapter fade starts at ~71%
-  tl.addLabel('frame-b', pos(0.55))
-
-  // Step 5: Text block 3 appears at 55%, giving ~16% of chapter to read before fade
-  if (text3) {
-    // Appear
-    tl.fromTo(text3,
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: dur(0.08), ease: brandEase.enter },
-      pos(0.55)
+    tl.to(
+      coupleDip,
+      {
+        opacity: 1,
+        duration: timeToScroll(BRAND_DURATIONS.section),
+        ease: brandEase.enter,
+      },
+      timeToScroll(cursor)
     )
-    // No fade out - text holds to chapter end (bridges to Chapter 4)
+    cursor += BRAND_DURATIONS.section
   }
+
+  // Step 2: BG ballroom fades in behind them
+  if (bg) {
+    tl.to(
+      bg,
+      {
+        opacity: 1,
+        duration: timeToScroll(BRAND_DURATIONS.section),
+        ease: brandEase.enter,
+      },
+      timeToScroll(cursor)
+    )
+    cursor += BRAND_DURATIONS.section
+  }
+
+  // Text 1: First narrative text
+  if (text1) {
+    const readTime = calculateReadingTime(getTextContent(1))
+    cursor = addTextLifecycleTimeBased(tl, text1, cursor, readTime, -8)
+  }
+
+  // Text 2: Overlaps with text 1
+  if (text2) {
+    const text2Start = cursor - TEXT_OVERLAP_MS
+    const readTime = calculateReadingTime(getTextContent(2))
+    cursor = addTextLifecycleTimeBased(tl, text2, text2Start, readTime, -6)
+  }
+
+  // Transition pause before Frame B
+  cursor += BRAND_DURATIONS.section
+
+  // ============== FRAME B: MIRROR INTRODUCTION ==============
+  tl.addLabel('frame-b', timeToScroll(cursor))
+
+  // Text 3: Mirror text - BRIDGES TO CHAPTER 4 (skipFade = true)
+  if (text3) {
+    const readTime = calculateReadingTime(getTextContent(3))
+    cursor = addTextLifecycleTimeBased(
+      tl,
+      text3,
+      cursor,
+      readTime,
+      -5,
+      true // skipFade = true because this text bridges to Chapter 4
+    )
+  }
+
+  // Final hold before chapter transition
+  cursor += BRAND_DURATIONS.section
+
+  // Log final cursor position for debugging
+  console.log('[Chapter3] Final cursor:', cursor, 'ms =', timeToScroll(cursor), 'global scroll')
 
   return tl
-}
-
-/**
- * Add text lifecycle animation (appear -> drift -> fade)
- * All positions are chapter-relative (0-1), scaled internally
- */
-function addTextLifecycle(
-  tl: gsap.core.Timeline,
-  target: Element,
-  appearAt: number,
-  fadeOutAt: number,
-  driftDistance: number
-): void {
-  const appearDur = 0.08 // 8% of chapter for appear
-
-  // Appear
-  tl.fromTo(target,
-    { opacity: 0, y: 20 },
-    { opacity: 1, y: 0, duration: dur(appearDur), ease: brandEase.enter },
-    pos(appearAt)
-  )
-
-  // Drift while visible
-  const driftDur = fadeOutAt - appearAt - appearDur - 0.05
-  if (driftDur > 0) {
-    tl.to(target, {
-      y: driftDistance,
-      duration: dur(driftDur),
-      ease: 'none',
-    }, pos(appearAt + appearDur))
-  }
-
-  // Fade out
-  tl.to(target, {
-    opacity: 0,
-    duration: dur(0.05),
-    ease: brandEase.exit,
-  }, pos(fadeOutAt))
 }
 
 /**
