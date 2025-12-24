@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "panda codegen --silent && vite dev",
-		"build": "panda codegen && vite build",
+		"build": "svelte-kit sync && panda codegen && vite build",
 		"preview": "vite preview",
 		"prepare": "panda codegen && svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",

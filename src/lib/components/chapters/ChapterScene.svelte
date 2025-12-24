@@ -30,8 +30,20 @@
     // Offset value only - anchor side is handled by data-anchor attribute in CSS
     if (block.position.left) {
       styles.push(`left: ${block.position.left}`)
+      // For positioned beats, clear the opposite side (beats have left:0, right:0 by default)
+      if (block.type === 'beat' || block.type === 'consent') {
+        styles.push('right: auto')
+      }
     } else if (block.position.right) {
       styles.push(`right: ${block.position.right}`)
+      // For positioned beats, clear the opposite side
+      if (block.type === 'beat' || block.type === 'consent') {
+        styles.push('left: auto')
+      }
+    }
+    // For positioned beats, prevent line wrapping
+    if (block.type === 'beat' || block.type === 'consent') {
+      styles.push('white-space: nowrap')
     }
     return styles.join('; ')
   }

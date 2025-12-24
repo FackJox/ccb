@@ -634,7 +634,6 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				content: 'The glass flared like a phantom stage.',
 				type: 'fragment',
 				style: 'parchment',
-				emphasis: true,
 				position: { top: '32%', right: '10%' }
 			},
 			{
@@ -681,7 +680,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				content: 'he answered, the word leaving him before he could stop it.',
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '50%', right: '5%' }
+				position: { top: '55%', right: '5%' }
 			},
 			// Frame E texts - return to exterior, crowd response
 			{
@@ -962,7 +961,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 					'On the backstage door, someone had chalked a bright C/J with a streak of flour—no one claiming it; everyone knowing.',
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '55%', right: '3%' }
+				position: { top: '55%', right: '13%' }
 			},
 			// Frame D - Stacked Poem
 			{
