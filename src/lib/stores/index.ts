@@ -27,3 +27,12 @@ export {
   prevChapter,
   resetChapter,
 } from './chapter.svelte'
+
+export {
+  setVioletActive,
+  setVioletIntensity,
+  getVioletActive,
+  getVioletIntensity,
+  createVioletState,
+  resetVioletState,
+} from './violet.svelte'

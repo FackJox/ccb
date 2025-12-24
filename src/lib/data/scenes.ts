@@ -514,13 +514,20 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				bridgesFrom: { chapter: 5, textNum: 2 }, // Intra-chapter bridge
 				bridgeDriftEnd: -6
 			},
-			// Frame C text (5C)
+			// Frame C text (5C) - Beat text dramatic emphasis
 			{
 				num: 4,
-				content: "'End this!' a captain barked. 'Curtains closed. Lights out.'",
+				content: "'End this!'",
+				type: 'beat',
+				style: 'beat',
+				position: { top: '5%', left: '0%' }
+			},
+			{
+				num: 6,
+				content: "a captain barked. 'Curtains closed. Lights out.'",
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '8%', left: '15%' }
+				position: { top: '18%', left: '15%' }
 			},
 			// Frame D text (5D) - persists into Chapter 6A
 			{
@@ -661,13 +668,20 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				style: 'parchment',
 				position: { top: '15%', right: '5%' }
 			},
+			// Beat text - "Always," dramatic emphasis
 			{
 				num: 8,
-				content: '"Always," he answered, the word leaving him before he could stop it.',
+				content: '"Always,"',
+				type: 'beat',
+				style: 'beat',
+				position: { top: '35%', right: '0%' }
+			},
+			{
+				num: 12,
+				content: 'he answered, the word leaving him before he could stop it.',
 				type: 'fragment',
 				style: 'parchment',
-				emphasis: true,
-				position: { top: '45%', right: '5%' }
+				position: { top: '50%', right: '5%' }
 			},
 			// Frame E texts - return to exterior, crowd response
 			{
@@ -753,7 +767,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 					"The patrol tried to push through, but the crowd moved shoulder to shoulder, too entranced to part. Any force would have meant striking civilians. The soldiers cursed, stuck in the tide they'd meant to control.",
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '45%', right: '0' }
+				position: { top: '45%', right: '50%' }
 			},
 			// Frame B texts - exterior windows silhouette
 			{
@@ -775,7 +789,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 			{
 				num: 5,
 				content:
-					'Heat gathered and traveled. Not spectacle; agreement. She felt his choice and answered with one of her own: her hand rose to the back of his neck, gentle, deliberate.',
+					'The heat gathered. Not spectacle; agreement. She felt his choice and answered with one of her own: her hand rose to the back of his neck, gentle, deliberate.',
 				type: 'fragment',
 				style: 'parchment',
 				position: { top: '8%', left: '3%' }

@@ -7,12 +7,13 @@
   } from '$components'
   import { ChapterScene } from '$components/chapters'
   import { chapters } from '$data'
-  import { createScrollState } from '$stores'
+  import { createScrollState, createVioletState } from '$stores'
 
   let isLoading = $state(true)
   let isReady = $state(false)
 
   const scrollState = createScrollState()
+  const violetState = createVioletState()
 
   function handleLoadComplete() {
     isLoading = false
@@ -42,10 +43,10 @@
     {/each}
   </ScrollContainer>
 
-  <!-- Violet mask for L3 chapter transitions -->
+  <!-- Violet mask: timeline-driven, appears with C6 text 2, fades with C8 text 4 -->
   <VioletMask
-    active={scrollState.chapter.complexity === 'L3'}
-    intensity={scrollState.chapterProgress * 0.6}
+    active={violetState.active}
+    intensity={0.6}
   />
 {/if}
 

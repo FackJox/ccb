@@ -24,6 +24,7 @@ import {
   BRAND_DURATIONS,
 } from '../timing'
 import { sceneConfigs } from '$data/scenes'
+import { setVioletActive } from '$stores'
 
 // Get text content and config for reading time calculations and bridge handling
 const textBlocks = sceneConfigs[6].textBlocks
@@ -121,6 +122,7 @@ export function createChapter6Timeline(container: HTMLElement): gsap.core.Timeli
   const text9 = container.querySelector('[data-text-block="9"]')
   const text10 = container.querySelector('[data-text-block="10"]')
   const text11 = container.querySelector('[data-text-block="11"]')
+  const text12 = container.querySelector('[data-text-block="12"]')
 
   // ============== FRAME A: BRIDGED TEXT FROM CH5 ==============
   tl.addLabel('frame-a', timeToScroll(cursor))
@@ -158,6 +160,13 @@ export function createChapter6Timeline(container: HTMLElement): gsap.core.Timeli
 
   // ============== FRAME B: BUILD TO HERO ==============
   tl.addLabel('frame-b', timeToScroll(cursor))
+
+  // Activate violet light when text 2 appears ("violet spill surging into the windows")
+  // Use tween with callbacks for bi-directional scrubbing support
+  const violetOnTween = gsap.fromTo({}, {}, { duration: 0.001 })
+  violetOnTween.eventCallback('onStart', () => setVioletActive(true))
+  violetOnTween.eventCallback('onReverseComplete', () => setVioletActive(false))
+  tl.add(violetOnTween, timeToScroll(cursor))
 
   // Text 2: "She killed the main lanterns..."
   if (text2) {
@@ -297,11 +306,18 @@ export function createChapter6Timeline(container: HTMLElement): gsap.core.Timeli
     cursor = addTextLifecycleTimeBased(tl, text7, cursor, readTime, -8)
   }
 
-  // Text 8: "'Always,' he answered..." - overlaps with text 7
+  // Text 8: Beat - "'Always,'"
   if (text8) {
     const text8Start = cursor - TEXT_OVERLAP_MS
     const readTime = calculateReadingTime(getTextContent(8))
-    cursor = addTextLifecycleTimeBased(tl, text8, text8Start, readTime, -6)
+    cursor = addTextLifecycleTimeBased(tl, text8, text8Start, readTime, -4)
+  }
+
+  // Text 12: "he answered..." - follows the beat
+  if (text12) {
+    const text12Start = cursor - TEXT_OVERLAP_MS
+    const readTime = calculateReadingTime(getTextContent(12))
+    cursor = addTextLifecycleTimeBased(tl, text12, text12Start, readTime, -6)
   }
 
   // Transition pause before Frame E

@@ -9,7 +9,7 @@
     ScrollTrigger,
   } from '$gsap'
   import { createMasterTimeline } from '$gsap/master-timeline'
-  import { setScrollProgress, setIsScrolling } from '$stores'
+  import { setScrollProgress, setIsScrolling, resetVioletState } from '$stores'
   import { calculateScale } from '$utils'
 
   interface Props {
@@ -69,6 +69,9 @@
     // Force scroll to top to prevent browser restoring previous position
     window.scrollTo(0, 0)
 
+    // Reset state (important for hot reload)
+    resetVioletState()
+
     // Register GSAP plugins first
     registerGSAP()
 
@@ -116,6 +119,7 @@
     }
     killAllScrollTriggers()
     killScrollSmoother()
+    resetVioletState()
   })
 </script>
 

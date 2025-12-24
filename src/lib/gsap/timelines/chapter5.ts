@@ -117,6 +117,7 @@ export function createChapter5Timeline(container: HTMLElement): gsap.core.Timeli
   const text3 = container.querySelector('[data-text-block="3"]')
   const text4 = container.querySelector('[data-text-block="4"]')
   const text5 = container.querySelector('[data-text-block="5"]')
+  const text6 = container.querySelector('[data-text-block="6"]')
 
   // ============== FRAME A: AUTHORITY ENTERS ==============
   tl.addLabel('frame-a', timeToScroll(cursor))
@@ -272,10 +273,17 @@ export function createChapter5Timeline(container: HTMLElement): gsap.core.Timeli
   // ============== FRAME C: CAPTAIN'S ORDER ==============
   tl.addLabel('frame-c', timeToScroll(cursor))
 
-  // Text 4
+  // Text 4: Beat - "'End this!'"
   if (text4) {
     const readTime = calculateReadingTime(getTextContent(4))
-    cursor = addTextLifecycleTimeBased(tl, text4, cursor, readTime, -6)
+    cursor = addTextLifecycleTimeBased(tl, text4, cursor, readTime, -4)
+  }
+
+  // Text 6: "a captain barked..." - follows the beat
+  if (text6) {
+    const text6Start = cursor - TEXT_OVERLAP_MS
+    const readTime = calculateReadingTime(getTextContent(6))
+    cursor = addTextLifecycleTimeBased(tl, text6, text6Start, readTime, -6)
   }
 
   // Transition pause before Frame D

@@ -37,6 +37,7 @@ import {
   BRAND_DURATIONS,
 } from '../timing'
 import { sceneConfigs } from '$data/scenes'
+import { setVioletActive } from '$stores'
 
 // Get text content for reading time calculations
 const textBlocks = sceneConfigs[8].textBlocks
@@ -210,6 +211,13 @@ export function createChapter8Timeline(container: HTMLElement): gsap.core.Timeli
     const readTime = calculateReadingTime(getTextContent(4))
     cursor = addTextLifecycleTimeBased(tl, text4, cursor, readTime, -8)
   }
+
+  // Deactivate violet light when text 4 fades out ("The violet lights guttered out")
+  // Use tween with callbacks for bi-directional scrubbing support
+  const violetOffTween = gsap.fromTo({}, {}, { duration: 0.001 })
+  violetOffTween.eventCallback('onStart', () => setVioletActive(false))
+  violetOffTween.eventCallback('onReverseComplete', () => setVioletActive(true))
+  tl.add(violetOffTween, timeToScroll(cursor))
 
   // Text 5: "In the dark, Ceci rested her forehead..." - overlaps with text 4
   if (text5) {
