@@ -34,7 +34,7 @@ export const BRAND_DURATIONS = {
 export type BrandDurationKey = keyof typeof BRAND_DURATIONS
 
 // ============== READING TIME FORMULA ==============
-const READING_BASE_MS = 500 // Minimum visibility for any text
+const READING_BASE_MS = 1000 // Minimum visibility (higher = short texts stay longer)
 const READING_MS_PER_WORD = 200 // ~300 WPM comfortable reading
 
 /**

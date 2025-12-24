@@ -228,23 +228,29 @@
 
   /* Install prompt styles */
   .install-prompt {
-    margin-top: 2rem;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10001;
     padding: 1.5rem 2rem;
-    background: rgba(11, 5, 8, 0.8);
+    background: rgba(11, 5, 8, 0.95);
     border: 1px solid rgba(162, 72, 255, 0.3);
     border-radius: 12px;
     text-align: center;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     animation: fadeIn 0.5s cubic-bezier(0.33, 0, 0.15, 1);
   }
 
   @keyframes fadeIn {
     from {
       opacity: 0;
-      transform: scale(0.95);
+      transform: translate(-50%, -50%) scale(0.95);
     }
     to {
       opacity: 1;
-      transform: scale(1);
+      transform: translate(-50%, -50%) scale(1);
     }
   }
 

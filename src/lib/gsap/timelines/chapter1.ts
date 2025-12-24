@@ -230,6 +230,10 @@ export function createChapter1Timeline(container: HTMLElement): gsap.core.Timeli
       // Make the container visible first (master timeline sets it to opacity: 0)
       tl.set(beatText, { opacity: 1, y: 0 }, timeToScroll(cursor))
 
+      // Calculate total duration of character reveal
+      const beatDuration = BRAND_DURATIONS.signature + 40 * split.chars.length
+
+      // Character reveal animation
       tl.fromTo(
         split.chars,
         { opacity: 0, y: 15 },
@@ -243,21 +247,18 @@ export function createChapter1Timeline(container: HTMLElement): gsap.core.Timeli
         timeToScroll(cursor)
       )
 
-      // Drift after reveal
-      const beatDuration = BRAND_DURATIONS.signature + 40 * split.chars.length
-      cursor += beatDuration
-
+      // Drift runs in parallel with reveal (same start time, longer duration)
       tl.to(
         beatContent,
         {
           y: -10,
-          duration: timeToScroll(BRAND_DURATIONS.sectionHeld),
+          duration: timeToScroll(beatDuration + BRAND_DURATIONS.sectionHeld),
           ease: brandEase.transform,
         },
         timeToScroll(cursor)
       )
 
-      cursor += BRAND_DURATIONS.sectionHeld
+      cursor += beatDuration + BRAND_DURATIONS.sectionHeld
     } catch {
       tl.fromTo(
         beatText,
