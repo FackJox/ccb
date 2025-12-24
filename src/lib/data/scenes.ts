@@ -998,15 +998,9 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				content: 'Old as anything.',
 				type: 'beat',
 				style: 'beat',
-				position: { top: '26%', center: true }
-			},
-			{
-				num: 9,
-				content: 'New as dawn.',
-				type: 'beat',
-				style: 'beat',
-				position: { top: '48%', center: true }
+				position: { top: '20%', center: true }
 			}
+			// Text 9 ("New as dawn.") rendered as overlay in +page.svelte above closing curtain
 		]
 	}
 };

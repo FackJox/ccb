@@ -81,6 +81,11 @@
 <!-- Theatre curtain: sits between content and loading screen -->
 <TheatreCurtain bind:this={curtain} />
 
+<!-- Final text overlay: animated by Chapter 9 timeline, positioned above curtain -->
+<div class="final-text-overlay" data-final-text>
+  <p class="final-text">New as dawn.</p>
+</div>
+
 <!-- Violet mask: timeline-driven, appears with C6 text 2, fades with C8 text 4 -->
 <VioletMask
   active={violetState.active}
@@ -98,5 +103,26 @@
     padding: 0;
     overflow: hidden;
     background: #0B0508;
+  }
+
+  .final-text-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9500; /* Above curtain (9000), below loading screen (10000) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    /* Initial state - GSAP will animate this */
+    opacity: 0;
+  }
+
+  .final-text {
+    font-family: 'Canela Bold', Georgia, serif;
+    font-size: 2.5rem;
+    color: #F4E3C9;
+    letter-spacing: 0.05em;
+    text-align: center;
+    margin: 0;
   }
 </style>

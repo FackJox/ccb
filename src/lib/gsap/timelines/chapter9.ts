@@ -135,7 +135,8 @@ export function createChapter9Timeline(container: HTMLElement): gsap.core.Timeli
   const text6 = container.querySelector('[data-text-block="6"]')
   const text7 = container.querySelector('[data-text-block="7"]')
   const text8 = container.querySelector('[data-text-block="8"]')
-  const text9 = container.querySelector('[data-text-block="9"]')
+  // text9 ("New as dawn.") is rendered as overlay in +page.svelte above the closing curtain
+  const finalTextOverlay = document.querySelector('[data-final-text]')
 
   // ============== FRAME A: DAWN ROOM - FG FIRST ==============
   tl.addLabel('frame-a', timeToScroll(cursor))
@@ -389,12 +390,38 @@ export function createChapter9Timeline(container: HTMLElement): gsap.core.Timeli
     cursor = addTextLifecycleTimeBased(tl, text8, cursor, readTime, -6)
   }
 
-  // Text 9: "New as dawn." - overlaps with text 8
-  // Curtain close is triggered by scroll progress in +page.svelte
-  if (text9) {
+  // Text 9: "New as dawn." - rendered as overlay above the closing curtain
+  // Uses same timing pattern as other text blocks for consistency
+  if (finalTextOverlay) {
     const text9Start = cursor - TEXT_OVERLAP_MS
-    const readTime = calculateReadingTime(getTextContent(9))
-    cursor = addTextLifecycleTimeBased(tl, text9, text9Start, readTime, -6, true) // skipFade=true so text stays visible behind closing curtain
+    const readTime = calculateReadingTime('New as dawn.')
+
+    // Fade in with standard section timing
+    tl.fromTo(
+      finalTextOverlay,
+      { opacity: 0, y: 20 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: timeToScroll(BRAND_DURATIONS.section),
+        ease: brandEase.enter,
+      },
+      timeToScroll(text9Start)
+    )
+
+    // Drift while visible
+    tl.to(
+      finalTextOverlay,
+      {
+        y: -6,
+        duration: timeToScroll(readTime),
+        ease: 'none',
+      },
+      timeToScroll(text9Start + BRAND_DURATIONS.section)
+    )
+
+    // Update cursor to track end of text 9
+    cursor = text9Start + BRAND_DURATIONS.section + readTime
   }
 
   // FINAL HOLD: 1500ms (from chapter definition - longest in experience)

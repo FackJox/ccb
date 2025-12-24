@@ -5,8 +5,7 @@
  * Based on scroll progress - closes near end, reopens when scrolling back.
  */
 
-// Threshold: curtain closes when scroll progress >= this value
-// This corresponds to when "New as dawn." appears in Chapter 9
+// Threshold: curtain starts closing when scroll progress >= this value
 const CLOSE_THRESHOLD = 0.97
 
 let scrollProgress = $state(0)
