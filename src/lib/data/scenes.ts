@@ -972,7 +972,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				content: 'Upstairs, their brooms stopped;',
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '8%', right: '3%' },
+				position: { top: '6%', right: '3%' },
 				visibleDurationMs: 3600 // 2x base (1800ms)
 			},
 			{
@@ -980,7 +980,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				content: 'their feet met.',
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '20%', right: '8%' },
+				position: { top: '18%', right: '8%' },
 				visibleDurationMs: 3200 // 2x base (1600ms)
 			},
 			{
@@ -996,7 +996,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				content: 'Her breath met his.',
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '44%', right: '8%' }
+				position: { top: '46%', right: '13%' }
 			},
 			{
 				num: 8,

@@ -158,6 +158,19 @@ function addConsentTextAnimation(
     )
 
     cursor += BRAND_DURATIONS.sectionHeld
+
+    // Fade out the consent text
+    tl.to(
+      consentText,
+      {
+        opacity: 0,
+        duration: timeToScroll(BRAND_DURATIONS.micro),
+        ease: brandEase.exit,
+      },
+      timeToScroll(cursor)
+    )
+
+    cursor += BRAND_DURATIONS.micro
   } catch (err) {
     console.error('[Chapter2] SplitText failed:', err)
     // Fallback: simple fade in
@@ -173,6 +186,18 @@ function addConsentTextAnimation(
       timeToScroll(cursor)
     )
     cursor += BRAND_DURATIONS.signature
+
+    // Fade out
+    tl.to(
+      consentText,
+      {
+        opacity: 0,
+        duration: timeToScroll(BRAND_DURATIONS.micro),
+        ease: brandEase.exit,
+      },
+      timeToScroll(cursor)
+    )
+    cursor += BRAND_DURATIONS.micro
   }
 
   return cursor
