@@ -355,7 +355,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 					"When the mirror on the far wall slipped its wire and crashed, the silence struck like a held breath—but Ceci didn't flinch.",
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '38%', left: '4%' },
+				position: { top: '38%', left: '14%' },
 				bridgesTo: { chapter: 4, textNum: 1 },
 				bridgeDriftEnd: -5
 			}
@@ -415,7 +415,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 					"When the mirror on the far wall slipped its wire and crashed, the silence struck like a held breath—but Ceci didn't flinch.",
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '38%', left: '4%' },
+				position: { top: '38%', left: '14%' },
 				bridgesFrom: { chapter: 3, textNum: 3 },
 				bridgeDriftEnd: -5
 			},
@@ -520,7 +520,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				content: "'End this!' a captain barked. 'Curtains closed. Lights out.'",
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '8%', right: '15%' }
+				position: { top: '8%', left: '15%' }
 			},
 			// Frame D text (5D) - persists into Chapter 6A
 			{
@@ -529,7 +529,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 					"Ceci's chin lifted by a fraction—recognition, defiance, maybe destiny. Ceci moved first.",
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '28%', right: '15%' },
+				position: { top: '28%', right: '25%' },
 				bridgesTo: { chapter: 6, textNum: 1 },
 				bridgeDriftEnd: -5
 			}
@@ -609,7 +609,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 					"Ceci's chin lifted by a fraction—recognition, defiance, maybe destiny. Ceci moved first.",
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '28%', right: '15%' },
+				position: { top: '28%', right: '25%' },
 				bridgesFrom: { chapter: 5, textNum: 5 },
 				bridgeDriftEnd: -5
 			},
@@ -643,14 +643,14 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				content: 'A gasp rose from the square. Hundreds of faces turned upward.',
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '40%', right: '5%' }
+				position: { top: '20%', right: '5%' }
 			},
 			{
 				num: 6,
 				content: 'Only shadows remained: Ceci and Jack, framed in violet fire.',
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '65%', right: '5%' }
+				position: { top: '20%', left: '5%' }
 			},
 			// Frame D texts - intimate consent moment
 			{
