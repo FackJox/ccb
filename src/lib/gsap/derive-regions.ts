@@ -21,7 +21,8 @@ const BRAND_DURATIONS = {
 } as const
 
 // ============== READING TIME FORMULA ==============
-const READING_BASE_MS = 500
+// IMPORTANT: Keep in sync with timing-constants.ts
+const READING_BASE_MS = 1000
 const READING_MS_PER_WORD = 200
 
 function calculateReadingTime(text: string): number {

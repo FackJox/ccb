@@ -23,21 +23,26 @@
   const config = $derived(getSceneConfig(chapterId))
 
   // Helper to generate text block positioning styles
+  // Uses CSS custom properties so CSS can apply safe margins via max()
   function getTextBlockStyle(block: SceneTextBlock): string {
     if (!block.position) return ''
     const styles: string[] = []
-    if (block.position.top) styles.push(`top: ${block.position.top}`)
+
+    if (block.position.top) styles.push(`--text-top: ${block.position.top}`)
+
     // Center positioning is handled entirely by CSS
     if (block.position.center) {
       // No left/right needed - CSS handles centering via left:50% + translateX(-50%)
     } else if (block.position.left) {
-      styles.push(`left: ${block.position.left}`)
+      // Pass position as CSS variable for safe margin clamping
+      styles.push(`--text-left: ${block.position.left}`)
       // For positioned beats, clear the opposite side (beats have left:0, right:0 by default)
       if (block.type === 'beat' || block.type === 'consent') {
         styles.push('right: auto')
       }
     } else if (block.position.right) {
-      styles.push(`right: ${block.position.right}`)
+      // Pass position as CSS variable for safe margin clamping
+      styles.push(`--text-right: ${block.position.right}`)
       // For positioned beats, clear the opposite side
       if (block.type === 'beat' || block.type === 'consent') {
         styles.push('left: auto')
@@ -176,6 +181,10 @@
     height: 393px;
     overflow: hidden;
     background: #0B0508; /* velvetSoot fallback */
+
+    /* Scale to fit viewport - --scale is set by ScrollContainer */
+    transform: scale(var(--scale, 1));
+    transform-origin: center center;
   }
 
   .layer-container {
@@ -215,11 +224,20 @@
     /* No flex - children are absolutely positioned to overlap */
   }
 
+  /*
+   * Safe Text Positioning System
+   *
+   * Uses CSS custom properties with max() to enforce minimum safe margins.
+   * This ensures text never clips viewport edges on any device/aspect ratio.
+   *
+   * Pattern: Position values are passed as --text-left, --text-right, --text-top
+   * CSS applies max(value, SAFE_MARGIN) to enforce minimum distance from edges.
+   */
+
   /* Base text block - parchment style (default) */
-  /* Position is set via inline styles + data-anchor attribute */
+  /* Position is set via CSS custom properties + data-anchor attribute */
   .text-block {
     position: absolute;
-    top: 25%;    /* Fallback - overridden by inline style */
     max-width: 300px;
     padding: 16px 20px;
     background: #F4E3C9; /* bakeryParchment */
@@ -229,6 +247,10 @@
     line-height: 1.5;
     pointer-events: auto;
     will-change: transform, opacity;
+
+    /* Position using CSS custom properties with safe margin clamping */
+    /* max() ensures minimum 5% distance from edges */
+    top: max(var(--text-top, 25%), 3%);
 
     /* Realistic torn paper effect using SVG clip-path */
     clip-path: url(#torn-paper-clip);
@@ -240,14 +262,16 @@
     opacity: 0;
   }
 
-  /* Anchor-based positioning - CSS handles left/right exclusivity */
+  /* Anchor-based positioning with safe margins via max() */
   .text-block[data-anchor="right"] {
-    right: 0;  /* Default offset, overridden by inline style */
+    /* Enforce minimum 5% from right edge */
+    right: max(var(--text-right, 0%), 5%);
     left: auto;
   }
 
   .text-block[data-anchor="left"] {
-    left: 0;   /* Default offset, overridden by inline style */
+    /* Enforce minimum 5% from left edge */
+    left: max(var(--text-left, 0%), 5%);
     right: auto;
   }
 
@@ -302,13 +326,13 @@
 
   /* Beat text - dramatic full-width typographic moment (default: centered at top) */
   .text-block.beat {
-    /* Default: full-width centered at top */
-    top: 8%;
-    left: 0;
-    right: 0;
+    /* Default: full-width centered with safe horizontal margins */
+    top: max(var(--text-top, 8%), 3%);
+    left: 5%;
+    right: 5%;
     transform: none;
-    width: 100%;
-    max-width: 100%;
+    width: auto;
+    max-width: 90%; /* Constrain width to leave safe margins */
 
     /* Reset parchment styles */
     background: transparent;
@@ -324,12 +348,24 @@
     width: auto;
     max-width: none;
     right: auto;  /* Clear full-width defaults */
-    /* top/left/right come from inline style */
+  }
+
+  /* Positioned beat anchored right - with safe margin */
+  .text-block.beat.beat-positioned[data-anchor="right"] {
+    right: max(var(--text-right, 0%), 5%);
+    left: auto;
+  }
+
+  /* Positioned beat anchored left - with safe margin */
+  .text-block.beat.beat-positioned[data-anchor="left"] {
+    left: max(var(--text-left, 0%), 5%);
+    right: auto;
   }
 
   /* Centered positioned beat */
   .text-block.beat.beat-positioned[data-anchor="center"] {
     left: 50%;
+    right: auto;
     transform: translateX(-50%);
   }
 
