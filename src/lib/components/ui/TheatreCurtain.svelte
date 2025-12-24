@@ -13,8 +13,7 @@
 
   /**
    * Opens the theatre curtain with a signature reveal animation.
-   * Left/right curtains slide off-screen and are hidden.
-   * Upper curtain rises partially and stays visible as a valance.
+   * All curtains slide off-screen and are hidden.
    */
   export async function open(): Promise<void> {
     registerGSAP()
@@ -56,6 +55,52 @@
     curtainLeft.style.visibility = 'hidden'
     curtainRight.style.visibility = 'hidden'
     curtainUpper.style.visibility = 'hidden'
+  }
+
+  /**
+   * Closes the theatre curtain - reverse of open animation.
+   * All curtains slide back into view.
+   */
+  export async function close(): Promise<void> {
+    registerGSAP()
+
+    // Make curtains visible again before animating
+    curtainLeft.style.visibility = 'visible'
+    curtainRight.style.visibility = 'visible'
+    curtainUpper.style.visibility = 'visible'
+
+    const tl = gsap.timeline()
+
+    // Close all curtains simultaneously - slow, theatrical close
+    tl.to(
+      curtainLeft,
+      {
+        x: '0%',
+        duration: CURTAIN_DURATION,
+        ease: EASE_CURTAIN,
+      },
+      0
+    )
+      .to(
+        curtainRight,
+        {
+          x: '0%',
+          duration: CURTAIN_DURATION,
+          ease: EASE_CURTAIN,
+        },
+        0
+      )
+      .to(
+        curtainUpper,
+        {
+          y: '0%',
+          duration: CURTAIN_DURATION,
+          ease: EASE_CURTAIN,
+        },
+        0
+      )
+
+    await tl.play()
   }
 </script>
 

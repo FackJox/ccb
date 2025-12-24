@@ -52,6 +52,7 @@ export interface SceneTextBlock {
 		top?: string; // e.g., '15%', '35%'
 		right?: string; // e.g., '0', '5%'
 		left?: string; // Alternative to right
+		center?: boolean; // Center horizontally
 	};
 	/** Optional: override calculated reading time (in ms) */
 	visibleDurationMs?: number;
@@ -997,14 +998,14 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				content: 'Old as anything.',
 				type: 'beat',
 				style: 'beat',
-				position: { top: '26%', right: '0%' }
+				position: { top: '26%', center: true }
 			},
 			{
 				num: 9,
 				content: 'New as dawn.',
 				type: 'beat',
 				style: 'beat',
-				position: { top: '48%', right: '0%' }
+				position: { top: '48%', center: true }
 			}
 		]
 	}

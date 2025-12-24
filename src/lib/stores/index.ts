@@ -36,3 +36,8 @@ export {
   createVioletState,
   resetVioletState,
 } from './violet.svelte'
+
+export {
+  setCurtainScrollProgress,
+  createCurtainState,
+} from './curtain.svelte'

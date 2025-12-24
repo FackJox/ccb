@@ -390,10 +390,11 @@ export function createChapter9Timeline(container: HTMLElement): gsap.core.Timeli
   }
 
   // Text 9: "New as dawn." - overlaps with text 8
+  // Curtain close is triggered by scroll progress in +page.svelte
   if (text9) {
     const text9Start = cursor - TEXT_OVERLAP_MS
     const readTime = calculateReadingTime(getTextContent(9))
-    cursor = addTextLifecycleTimeBased(tl, text9, text9Start, readTime, -6)
+    cursor = addTextLifecycleTimeBased(tl, text9, text9Start, readTime, -6, true) // skipFade=true so text stays visible behind closing curtain
   }
 
   // FINAL HOLD: 1500ms (from chapter definition - longest in experience)

@@ -8,20 +8,52 @@
   } from '$components'
   import { ChapterScene } from '$components/chapters'
   import { chapters } from '$data'
-  import { createScrollState, createVioletState } from '$stores'
+  import { createScrollState, createVioletState, createCurtainState, setCurtainScrollProgress } from '$stores'
 
   let isLoading = $state(true)
   let isReady = $state(false)
+  let curtainIsOpen = $state(false)
+  let curtainAnimating = $state(false)
 
   const scrollState = createScrollState()
   const violetState = createVioletState()
+  const curtainState = createCurtainState()
 
   // Reference to curtain component for triggering reveal
   let curtain: TheatreCurtain
 
+  // Feed scroll progress to curtain store
+  $effect(() => {
+    setCurtainScrollProgress(scrollState.progress)
+  })
+
+  // Watch for curtain state changes (works both directions)
+  $effect(() => {
+    if (!curtain || curtainAnimating || isLoading) return
+
+    const shouldBeClosed = curtainState.shouldClose
+
+    if (shouldBeClosed && curtainIsOpen) {
+      // Close the curtain
+      curtainAnimating = true
+      curtain.close().then(() => {
+        curtainIsOpen = false
+        curtainAnimating = false
+      })
+    } else if (!shouldBeClosed && !curtainIsOpen && !isLoading) {
+      // Reopen the curtain (user scrolled back)
+      curtainAnimating = true
+      curtain.open().then(() => {
+        curtainIsOpen = true
+        curtainAnimating = false
+      })
+    }
+  })
+
   async function handleLoadingFadeComplete() {
     // Open the theatre curtain
     await curtain.open()
+    curtainIsOpen = true
     // Remove loading screen from DOM
     isLoading = false
   }

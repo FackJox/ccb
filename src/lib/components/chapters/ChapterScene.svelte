@@ -27,8 +27,10 @@
     if (!block.position) return ''
     const styles: string[] = []
     if (block.position.top) styles.push(`top: ${block.position.top}`)
-    // Offset value only - anchor side is handled by data-anchor attribute in CSS
-    if (block.position.left) {
+    // Center positioning is handled entirely by CSS
+    if (block.position.center) {
+      // No left/right needed - CSS handles centering via left:50% + translateX(-50%)
+    } else if (block.position.left) {
       styles.push(`left: ${block.position.left}`)
       // For positioned beats, clear the opposite side (beats have left:0, right:0 by default)
       if (block.type === 'beat' || block.type === 'consent') {
@@ -49,8 +51,9 @@
   }
 
   // Helper to determine anchor side for CSS positioning
-  function getTextBlockAnchor(block: SceneTextBlock): 'left' | 'right' | null {
+  function getTextBlockAnchor(block: SceneTextBlock): 'left' | 'right' | 'center' | null {
     if (!block.position) return null
+    if (block.position.center) return 'center'
     if (block.position.left) return 'left'
     if (block.position.right) return 'right'
     return null
@@ -248,6 +251,12 @@
     right: auto;
   }
 
+  .text-block[data-anchor="center"] {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+  }
+
   /*
    * Torn edge highlight - simulates the lighter fiber edge of torn paper
    */
@@ -316,6 +325,12 @@
     max-width: none;
     right: auto;  /* Clear full-width defaults */
     /* top/left/right come from inline style */
+  }
+
+  /* Centered positioned beat */
+  .text-block.beat.beat-positioned[data-anchor="center"] {
+    left: 50%;
+    transform: translateX(-50%);
   }
 
   .text-block.beat::before {
