@@ -527,7 +527,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				content: "a captain barked. 'Curtains closed. Lights out.'",
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '18%', left: '15%' }
+				position: { top: '18%', left: '35%' }
 			},
 			// Frame D text (5D) - persists into Chapter 6A
 			{
@@ -674,7 +674,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				content: '"Always,"',
 				type: 'beat',
 				style: 'beat',
-				position: { top: '35%', right: '0%' }
+				position: { top: '35%', right: '5%' }
 			},
 			{
 				num: 12,
@@ -996,16 +996,16 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 			{
 				num: 8,
 				content: 'Old as anything.',
-				type: 'fragment',
-				style: 'parchment',
-				position: { top: '56%', right: '3%' }
+				type: 'beat',
+				style: 'beat',
+				position: { top: '26%', right: '0%' }
 			},
 			{
 				num: 9,
 				content: 'New as dawn.',
-				type: 'fragment',
-				style: 'parchment',
-				position: { top: '68%', right: '3%' }
+				type: 'beat',
+				style: 'beat',
+				position: { top: '48%', right: '0%' }
 			}
 		]
 	}

@@ -122,6 +122,7 @@
               data-text-block={block.num}
               data-beat={block.type === 'beat' ? '' : undefined}
               data-consent={block.type === 'consent' ? '' : undefined}
+              data-anchor={getTextBlockAnchor(block)}
               style={block.position ? getTextBlockStyle(block) : ''}
             >
               <TypographyBeat
