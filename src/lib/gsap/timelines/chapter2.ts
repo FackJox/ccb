@@ -319,119 +319,40 @@ export function createChapter2Timeline(container: HTMLElement): gsap.core.Timeli
     const closeupZoomStart = cursor
     cursor += BRAND_DURATIONS.section
 
-    // Text 3: "Consent lives in small sentences." - short, impactful opener
-    if (text3) {
-      const readTime = calculateReadingTime(getTextContent(3))
-      cursor = addTextLifecycleTimeBased(tl, text3, cursor, readTime, -8)
-    }
-
-    // Text 4: "She tipped her head..." - overlaps with text 3
+    // Text 4: "Consent lives in small sentences." - short, impactful opener
     if (text4) {
-      const text4Start = cursor - TEXT_OVERLAP_MS
       const readTime = calculateReadingTime(getTextContent(4))
-      cursor = addTextLifecycleTimeBased(tl, text4, text4Start, readTime, -10)
+      cursor = addTextLifecycleTimeBased(tl, text4, cursor, readTime, -8)
     }
 
-    // Text 5 & 6: "Not control." and "Permission." - quick succession, dramatic pause between
+    // Text 5: "She tipped her head..." - overlaps with text 4
     if (text5) {
       const text5Start = cursor - TEXT_OVERLAP_MS
       const readTime = calculateReadingTime(getTextContent(5))
-      cursor = addTextLifecycleTimeBased(tl, text5, text5Start, readTime, -5)
+      cursor = addTextLifecycleTimeBased(tl, text5, text5Start, readTime, -10)
     }
 
+    // Text 6: "Her palm hovered..." - overlaps with text 5
     if (text6) {
-      // "Not control." - tight dramatic pairing with text 7
-      const text6Start = cursor - 400 // Tighter overlap for dramatic effect
-      const block6 = textBlocks.find((t) => t.num === 6)
-      const readTime = block6?.visibleDurationMs ?? calculateReadingTime(getTextContent(6))
+      const text6Start = cursor - TEXT_OVERLAP_MS
+      const readTime = calculateReadingTime(getTextContent(6))
       cursor = addTextLifecycleTimeBased(tl, text6, text6Start, readTime, -5)
     }
 
+    // Text 7: "Not control." - tight dramatic pairing with text 8
     if (text7) {
-      // "Permission." - paired with text 6 for tension
-      const text7Start = cursor - TEXT_OVERLAP_MS
+      const text7Start = cursor - 400 // Tighter overlap for dramatic effect
       const block7 = textBlocks.find((t) => t.num === 7)
       const readTime = block7?.visibleDurationMs ?? calculateReadingTime(getTextContent(7))
-      cursor = addTextLifecycleTimeBased(tl, text7, text7Start, readTime, -8)
+      cursor = addTextLifecycleTimeBased(tl, text7, text7Start, readTime, -5)
     }
 
-    // Held breath before consent text
-    cursor += BRAND_DURATIONS.sectionHeld
-
-    // Consent text ("Will you follow?") - signature moment
-    console.log('[Chapter2] Consent text cursor position:', cursor, 'ms, scroll:', timeToScroll(cursor))
-    if (consentText) {
-      // Target the .beat-text span inside TypographyBeat (that's where the actual text is)
-      const beatTextSpan = consentText.querySelector('.beat-text')
-      const consentContent = beatTextSpan || consentText.querySelector('.typography-beat') || consentText
-
-      console.log('[Chapter2] Consent content element:', consentContent, 'text:', consentContent?.textContent)
-
-      try {
-        const split = new SplitText(consentContent, {
-          type: 'chars,words',
-          charsClass: 'beat-char',
-        })
-
-        console.log('[Chapter2] SplitText created, chars:', split.chars?.length)
-
-        // First, make the parent container visible
-        tl.to(
-          consentText,
-          {
-            opacity: 1,
-            y: 0,
-            duration: timeToScroll(BRAND_DURATIONS.micro),
-            ease: brandEase.enter,
-          },
-          timeToScroll(cursor)
-        )
-
-        // Then animate characters
-        tl.fromTo(
-          split.chars,
-          { opacity: 0, y: 15 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: timeToScroll(BRAND_DURATIONS.signature),
-            stagger: timeToScroll(40),
-            ease: brandEase.enter,
-          },
-          timeToScroll(cursor)
-        )
-
-        // Calculate total reveal duration
-        const beatDuration = BRAND_DURATIONS.signature + 40 * split.chars.length
-        cursor += beatDuration
-
-        // Drift after reveal
-        tl.to(
-          consentContent,
-          {
-            y: -10,
-            duration: timeToScroll(BRAND_DURATIONS.sectionHeld),
-            ease: brandEase.transform,
-          },
-          timeToScroll(cursor)
-        )
-
-        cursor += BRAND_DURATIONS.sectionHeld
-      } catch (err) {
-        console.error('[Chapter2] SplitText failed:', err)
-        tl.fromTo(
-          consentText,
-          { opacity: 0, y: 20 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: timeToScroll(BRAND_DURATIONS.signature),
-            ease: brandEase.enter,
-          },
-          timeToScroll(cursor)
-        )
-        cursor += BRAND_DURATIONS.signature
-      }
+    // Text 8: "Permission." - paired with text 7 for tension
+    if (text8) {
+      const text8Start = cursor - TEXT_OVERLAP_MS
+      const block8 = textBlocks.find((t) => t.num === 8)
+      const readTime = block8?.visibleDurationMs ?? calculateReadingTime(getTextContent(8))
+      cursor = addTextLifecycleTimeBased(tl, text8, text8Start, readTime, -8)
     }
 
     // Calculate zoom duration for coupleCloseup (covers Frame B)
@@ -449,52 +370,35 @@ export function createChapter2Timeline(container: HTMLElement): gsap.core.Timeli
     // Still add texts even if coupleCloseup layer is missing
     cursor += BRAND_DURATIONS.section
 
-    if (text3) {
-      const readTime = calculateReadingTime(getTextContent(3))
-      cursor = addTextLifecycleTimeBased(tl, text3, cursor, readTime, -8)
-    }
-
     if (text4) {
-      const text4Start = cursor - TEXT_OVERLAP_MS
       const readTime = calculateReadingTime(getTextContent(4))
-      cursor = addTextLifecycleTimeBased(tl, text4, text4Start, readTime, -10)
+      cursor = addTextLifecycleTimeBased(tl, text4, cursor, readTime, -8)
     }
 
     if (text5) {
       const text5Start = cursor - TEXT_OVERLAP_MS
       const readTime = calculateReadingTime(getTextContent(5))
-      cursor = addTextLifecycleTimeBased(tl, text5, text5Start, readTime, -5)
+      cursor = addTextLifecycleTimeBased(tl, text5, text5Start, readTime, -10)
     }
 
     if (text6) {
-      const text6Start = cursor - 400
-      const block6 = textBlocks.find((t) => t.num === 6)
-      const readTime = block6?.visibleDurationMs ?? calculateReadingTime(getTextContent(6))
+      const text6Start = cursor - TEXT_OVERLAP_MS
+      const readTime = calculateReadingTime(getTextContent(6))
       cursor = addTextLifecycleTimeBased(tl, text6, text6Start, readTime, -5)
     }
 
     if (text7) {
-      const text7Start = cursor - TEXT_OVERLAP_MS
+      const text7Start = cursor - 400
       const block7 = textBlocks.find((t) => t.num === 7)
       const readTime = block7?.visibleDurationMs ?? calculateReadingTime(getTextContent(7))
-      cursor = addTextLifecycleTimeBased(tl, text7, text7Start, readTime, -8)
+      cursor = addTextLifecycleTimeBased(tl, text7, text7Start, readTime, -5)
     }
 
-    cursor += BRAND_DURATIONS.sectionHeld
-
-    if (consentText) {
-      tl.fromTo(
-        consentText,
-        { opacity: 0, y: 20 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: timeToScroll(BRAND_DURATIONS.signature),
-          ease: brandEase.enter,
-        },
-        timeToScroll(cursor)
-      )
-      cursor += BRAND_DURATIONS.signature
+    if (text8) {
+      const text8Start = cursor - TEXT_OVERLAP_MS
+      const block8 = textBlocks.find((t) => t.num === 8)
+      const readTime = block8?.visibleDurationMs ?? calculateReadingTime(getTextContent(8))
+      cursor = addTextLifecycleTimeBased(tl, text8, text8Start, readTime, -8)
     }
   }
 
