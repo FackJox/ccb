@@ -26,6 +26,16 @@
 </div>
 
 <style>
+  /*
+   * Utopia Fluid Typography
+   * Reference viewport: 852px (landscape mobile frame)
+   * Min viewport: 320px
+   * Max viewport: 1200px
+   *
+   * Formula: clamp(min, min + (max - min) * ((100vw - minVp) / (maxVp - minVp)), max)
+   * Simplified using vi unit: clamp(min, calc(base + growth * vi), max)
+   */
+
   .typography-beat {
     /* Full width positioning - spans the viewport */
     position: relative;
@@ -52,28 +62,32 @@
     display: block;
     max-width: 90%;
 
-    /* Slight letter spacing for gravitas */
-    letter-spacing: 0.04em;
+    /* Fluid letter spacing - tighter on small screens */
+    letter-spacing: clamp(0.02em, 0.04em, 0.06em);
 
     /* Allow GSAP to animate */
     will-change: opacity, transform;
   }
 
-  /* ==================== SIZE VARIANTS ==================== */
+  /* ==================== SIZE VARIANTS (Utopia Fluid Scale) ==================== */
 
   .normal {
-    font-size: clamp(1.25rem, 4vw, 1.75rem);
+    /* Min: 1rem (16px) at 320px, Max: 1.75rem (28px) at 1200px */
+    font-size: clamp(1rem, 0.8rem + 1.5vw, 1.75rem);
     padding: 1.5rem 2rem;
   }
 
   .large {
-    font-size: clamp(1.75rem, 5vw, 2.5rem);
-    letter-spacing: 0.06em;
+    /* Min: 1.125rem (18px) at 320px, Max: 2.5rem (40px) at 1200px */
+    /* More aggressive scaling to fit long beat text on mobile */
+    font-size: clamp(1.125rem, 0.5rem + 3vw, 2.5rem);
+    letter-spacing: clamp(0.02em, 0.04em, 0.06em);
   }
 
   .hero {
-    font-size: clamp(2.5rem, 8vw, 4rem);
-    letter-spacing: 0.1em;
+    /* Min: 1.5rem (24px) at 320px, Max: 4rem (64px) at 1200px */
+    font-size: clamp(1.5rem, 0.5rem + 5vw, 4rem);
+    letter-spacing: clamp(0.04em, 0.08em, 0.1em);
     text-transform: uppercase;
     padding: 3rem 2rem;
   }

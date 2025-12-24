@@ -6,14 +6,25 @@
  */
 
 // ============== EXPERIENCE DURATION ==============
-// Master control for scroll pacing. This is the single source of truth.
-// Higher = slower scroll (more distance to cover)
-export const PERFECT_DURATION_SECONDS = 360 // 4x slower than original 90s
+// Derived from actual content (reading times + transitions)
+// This keeps timeToScroll() in sync with derive-regions proportions
+import { calculateTotalDuration } from './derive-regions'
+export const PERFECT_DURATION_SECONDS = calculateTotalDuration()
+
+// ============== SCROLL SPEED MULTIPLIER ==============
+// Controls how much scrolling is needed. Higher = slower scroll experience.
+// 1 = baseline, 4 = 4x more scrolling required
+const SCROLL_MULTIPLIER = 4
 
 // ============== SCROLL DISTANCE ==============
-// Derived from duration. Base ratio: 90 seconds = 700vh (original design)
-const VH_PER_SECOND = 700 / 90 // ≈ 7.78
-export const SCROLL_DISTANCE_VH = Math.round(PERFECT_DURATION_SECONDS * VH_PER_SECOND)
+// Base: 90 seconds of content = 700vh at natural pace
+const BASE_VH_PER_SECOND = 700 / 90 // ≈ 7.78
+export const SCROLL_DISTANCE_VH = Math.round(PERFECT_DURATION_SECONDS * BASE_VH_PER_SECOND * SCROLL_MULTIPLIER)
+
+// DEBUG
+console.log('[TimingConstants] PERFECT_DURATION_SECONDS:', PERFECT_DURATION_SECONDS)
+console.log('[TimingConstants] SCROLL_MULTIPLIER:', SCROLL_MULTIPLIER)
+console.log('[TimingConstants] SCROLL_DISTANCE_VH:', SCROLL_DISTANCE_VH)
 
 // ============== BRAND DURATION TOKENS (from design docs) ==============
 export const BRAND_DURATIONS = {

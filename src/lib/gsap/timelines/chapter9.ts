@@ -322,7 +322,9 @@ export function createChapter9Timeline(container: HTMLElement): gsap.core.Timeli
   poemTexts.forEach((text, i) => {
     const textNum = i + 4
     const textStart = poemStartCursor + (i * POEM_STAGGER_MS)
-    const readTime = calculateReadingTime(getTextContent(textNum))
+    // Use visibleDurationMs from config if set (texts 4-6 are doubled for tension)
+    const block = textBlocks.find((t) => t.num === textNum)
+    const readTime = block?.visibleDurationMs ?? calculateReadingTime(getTextContent(textNum))
 
     // Appear with section timing
     tl.fromTo(

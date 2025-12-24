@@ -234,16 +234,28 @@
    * CSS applies max(value, SAFE_MARGIN) to enforce minimum distance from edges.
    */
 
+  /*
+   * Parchment Text Blocks - Utopia Fluid Typography
+   * Scales font-size and max-width based on viewport
+   */
+
   /* Base text block - parchment style (default) */
   /* Position is set via CSS custom properties + data-anchor attribute */
   .text-block {
     position: absolute;
-    max-width: 300px;
-    padding: 16px 20px;
+
+    /* Fluid max-width: 200px at 320px viewport, 300px at 852px+ */
+    max-width: clamp(180px, 15vw + 130px, 300px);
+
+    /* Fluid padding */
+    padding: clamp(12px, 1vw + 8px, 16px) clamp(14px, 1.5vw + 8px, 20px);
+
     background: #F4E3C9; /* bakeryParchment */
     color: #0B0508; /* velvetSoot */
     font-family: 'Spectral', Georgia, serif;
-    font-size: 0.875rem;
+
+    /* Fluid font-size: 0.75rem at 320px, 0.875rem at 852px+ */
+    font-size: clamp(0.75rem, 0.6rem + 0.5vw, 0.875rem);
     line-height: 1.5;
     pointer-events: auto;
     will-change: transform, opacity;

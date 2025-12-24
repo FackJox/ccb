@@ -92,6 +92,10 @@ const HARDCODED_SCROLL_REGIONS = {
 export const chapterScrollRegions: Record<number, { start: number; end: number }> =
   USE_DERIVED_REGIONS ? deriveScrollRegions() : HARDCODED_SCROLL_REGIONS
 
+// DEBUG: Log derived regions
+console.log('[Scroll] Chapter regions:', chapterScrollRegions)
+console.log('[Scroll] Chapter 2 region:', chapterScrollRegions[2])
+
 
 export type ChapterNumber = keyof typeof chapterScrollRegions
 

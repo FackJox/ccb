@@ -124,6 +124,12 @@ export function createChapter6Timeline(container: HTMLElement): gsap.core.Timeli
   const text11 = container.querySelector('[data-text-block="11"]')
   const text12 = container.querySelector('[data-text-block="12"]')
 
+  // ============== INITIAL SETUP ==============
+  // Mirror continues from Ch4/5 in "dropped" position (y: 30 from Ch4 drop animation)
+  if (mirrorBroken) {
+    tl.set(mirrorBroken, { y: 30 }, 0)
+  }
+
   // ============== FRAME A: BRIDGED TEXT FROM CH5 ==============
   tl.addLabel('frame-a', timeToScroll(cursor))
 

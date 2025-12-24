@@ -56,20 +56,38 @@ function calculateFrameDuration(
     const block = textBlocks.find((t) => t.num === textNum)
     if (!block) continue
 
-    const appearDur = BRAND_DURATIONS.section
-    const visibleDur = block.visibleDurationMs ?? calculateReadingTime(block.content)
-    const fadeDur = block.bridgesTo ? 0 : BRAND_DURATIONS.micro
-    const textLifecycle = appearDur + visibleDur + fadeDur
+    const isSignatureMoment = block.type === 'beat' || block.type === 'consent'
 
-    if (isFirstText) {
-      // First text starts at cursor
-      cursor += textLifecycle
-      isFirstText = false
+    // Signature moments (beat/consent) have special timing:
+    // - Held breath before
+    // - Signature duration + character stagger
+    // - Held breath after (drift)
+    if (isSignatureMoment) {
+      // Held breath before signature moment
+      cursor += BRAND_DURATIONS.sectionHeld
+
+      // Signature reveal: base + character stagger (~40ms per char)
+      const charCount = block.content.length
+      const revealDur = BRAND_DURATIONS.signature + (40 * charCount)
+      cursor += revealDur
+
+      // Drift after reveal
+      cursor += BRAND_DURATIONS.sectionHeld
     } else {
-      // Subsequent texts overlap with previous
-      const textStart = cursor - TEXT_OVERLAP_MS
-      const textEnd = textStart + textLifecycle
-      cursor = textEnd
+      // Normal text: section appear + reading time + fade
+      const appearDur = BRAND_DURATIONS.section
+      const visibleDur = block.visibleDurationMs ?? calculateReadingTime(block.content)
+      const fadeDur = block.bridgesTo ? 0 : BRAND_DURATIONS.micro
+      const textLifecycle = appearDur + visibleDur + fadeDur
+
+      if (isFirstText) {
+        cursor += textLifecycle
+        isFirstText = false
+      } else {
+        const textStart = cursor - TEXT_OVERLAP_MS
+        const textEnd = textStart + textLifecycle
+        cursor = textEnd
+      }
     }
   }
 
@@ -113,13 +131,8 @@ function calculateChapterDuration(
     }
   })
 
-  // Check if chapter has beat text (signature moment) - add held breath
-  const hasBeatText = textBlocks.some((t) => t.type === 'beat')
-  const hasConsentText = textBlocks.some((t) => t.type === 'consent')
-  if (hasBeatText || hasConsentText) {
-    duration += BRAND_DURATIONS.sectionHeld // held breath before beat
-    duration += BRAND_DURATIONS.sectionHeld // drift after beat
-  }
+  // Note: Beat/consent timing is now calculated within calculateFrameDuration
+  // No additional chapter-level adjustment needed
 
   // Final hold before chapter transition
   duration += BRAND_DURATIONS.section + transOut
@@ -140,6 +153,10 @@ export function deriveScrollRegions(): Record<number, { start: number; end: numb
   })
 
   const totalMs = durationsMs.reduce((a, b) => a + b, 0)
+
+  // DEBUG: Log total duration
+  console.log('[DeriveRegions] Chapter durations (ms):', durationsMs)
+  console.log('[DeriveRegions] Total duration:', totalMs, 'ms =', totalMs / 1000, 'seconds')
 
   // Convert to proportions
   const regions: Record<number, { start: number; end: number }> = {}

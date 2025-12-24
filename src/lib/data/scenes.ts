@@ -192,13 +192,13 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				style: 'parchment',
 				position: { top: '45%', right: '25%' }
 			},
-			// Beat text - centered via .beat class, no position needed
+			// Beat text - centered horizontally
 			{
 				num: 9,
 				content: 'Let them look. Let the city breathe again.',
 				type: 'beat',
 				style: 'beat',
-				position: { top: '5%', right: '0%' }
+				position: { top: '5%', center: true }
 			}
 		]
 	},
@@ -292,7 +292,8 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				type: 'fragment',
 				style: 'parchment',
 				emphasis: true,
-				position: { top: '42%', right: '25%' }
+				position: { top: '42%', right: '25%' },
+				visibleDurationMs: 2800 // 2x base (1400ms) for tension
 			},
 			{
 				num: 7,
@@ -300,7 +301,8 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				type: 'fragment',
 				style: 'parchment',
 				emphasis: true,
-				position: { top: '55%', right: '20%' }
+				position: { top: '55%', right: '20%' },
+				visibleDurationMs: 2400 // 2x base (1200ms) for tension
 			}
 		]
 	},
@@ -964,27 +966,30 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				style: 'parchment',
 				position: { top: '55%', right: '13%' }
 			},
-			// Frame D - Stacked Poem
+			// Frame D - Stacked Poem (doubled duration for tension)
 			{
 				num: 4,
 				content: 'Upstairs, their brooms stopped;',
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '8%', right: '3%' }
+				position: { top: '8%', right: '3%' },
+				visibleDurationMs: 3600 // 2x base (1800ms)
 			},
 			{
 				num: 5,
 				content: 'their feet met.',
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '20%', right: '3%' }
+				position: { top: '20%', right: '3%' },
+				visibleDurationMs: 3200 // 2x base (1600ms)
 			},
 			{
 				num: 6,
 				content: 'A hold.',
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '32%', right: '3%' }
+				position: { top: '32%', right: '3%' },
+				visibleDurationMs: 2800 // 2x base (1400ms)
 			},
 			{
 				num: 7,

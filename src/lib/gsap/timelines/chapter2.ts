@@ -118,6 +118,25 @@ export function createChapter2Timeline(container: HTMLElement): gsap.core.Timeli
   const text7 = container.querySelector('[data-text-block="7"]')
   const consentText = container.querySelector('[data-consent]')
 
+  // DEBUG: Log found elements
+  console.log('[Chapter2] Elements found:', {
+    couple: !!couple,
+    coupleCloseup: !!coupleCloseup,
+    text1: !!text1,
+    text2: !!text2,
+    text3: !!text3,
+    text4: !!text4,
+    text5: !!text5,
+    text6: !!text6,
+    text7: !!text7,
+    consentText: !!consentText,
+    consentTextElement: consentText,
+  })
+
+  // DEBUG: Also try finding by data-text-block="8"
+  const text8 = container.querySelector('[data-text-block="8"]')
+  console.log('[Chapter2] Text block 8 by number:', !!text8, text8)
+
   // ============== FRAME A: TABLE SCENE ==============
   tl.addLabel('frame-a', timeToScroll(cursor))
 
@@ -233,16 +252,18 @@ export function createChapter2Timeline(container: HTMLElement): gsap.core.Timeli
     }
 
     if (text6) {
-      // Short pause then "Permission." appears - tight dramatic pairing
+      // "Not control." - tight dramatic pairing with text 7
       const text6Start = cursor - 400 // Tighter overlap for dramatic effect
-      const readTime = calculateReadingTime(getTextContent(6))
+      const block6 = textBlocks.find((t) => t.num === 6)
+      const readTime = block6?.visibleDurationMs ?? calculateReadingTime(getTextContent(6))
       cursor = addTextLifecycleTimeBased(tl, text6, text6Start, readTime, -5)
     }
 
-    // Text 7: "Her palm hovered..." - final narrative before consent
     if (text7) {
+      // "Permission." - paired with text 6 for tension
       const text7Start = cursor - TEXT_OVERLAP_MS
-      const readTime = calculateReadingTime(getTextContent(7))
+      const block7 = textBlocks.find((t) => t.num === 7)
+      const readTime = block7?.visibleDurationMs ?? calculateReadingTime(getTextContent(7))
       cursor = addTextLifecycleTimeBased(tl, text7, text7Start, readTime, -8)
     }
 
@@ -250,8 +271,13 @@ export function createChapter2Timeline(container: HTMLElement): gsap.core.Timeli
     cursor += BRAND_DURATIONS.sectionHeld
 
     // Consent text ("Will you follow?") - signature moment
+    console.log('[Chapter2] Consent text cursor position:', cursor, 'ms, scroll:', timeToScroll(cursor))
     if (consentText) {
-      const consentContent = consentText.querySelector('.typography-beat') || consentText
+      // Target the .beat-text span inside TypographyBeat (that's where the actual text is)
+      const beatTextSpan = consentText.querySelector('.beat-text')
+      const consentContent = beatTextSpan || consentText.querySelector('.typography-beat') || consentText
+
+      console.log('[Chapter2] Consent content element:', consentContent, 'text:', consentContent?.textContent)
 
       try {
         const split = new SplitText(consentContent, {
@@ -259,6 +285,21 @@ export function createChapter2Timeline(container: HTMLElement): gsap.core.Timeli
           charsClass: 'beat-char',
         })
 
+        console.log('[Chapter2] SplitText created, chars:', split.chars?.length)
+
+        // First, make the parent container visible
+        tl.to(
+          consentText,
+          {
+            opacity: 1,
+            y: 0,
+            duration: timeToScroll(BRAND_DURATIONS.micro),
+            ease: brandEase.enter,
+          },
+          timeToScroll(cursor)
+        )
+
+        // Then animate characters
         tl.fromTo(
           split.chars,
           { opacity: 0, y: 15 },
@@ -288,7 +329,8 @@ export function createChapter2Timeline(container: HTMLElement): gsap.core.Timeli
         )
 
         cursor += BRAND_DURATIONS.sectionHeld
-      } catch {
+      } catch (err) {
+        console.error('[Chapter2] SplitText failed:', err)
         tl.fromTo(
           consentText,
           { opacity: 0, y: 20 },
@@ -338,13 +380,15 @@ export function createChapter2Timeline(container: HTMLElement): gsap.core.Timeli
 
     if (text6) {
       const text6Start = cursor - 400
-      const readTime = calculateReadingTime(getTextContent(6))
+      const block6 = textBlocks.find((t) => t.num === 6)
+      const readTime = block6?.visibleDurationMs ?? calculateReadingTime(getTextContent(6))
       cursor = addTextLifecycleTimeBased(tl, text6, text6Start, readTime, -5)
     }
 
     if (text7) {
       const text7Start = cursor - TEXT_OVERLAP_MS
-      const readTime = calculateReadingTime(getTextContent(7))
+      const block7 = textBlocks.find((t) => t.num === 7)
+      const readTime = block7?.visibleDurationMs ?? calculateReadingTime(getTextContent(7))
       cursor = addTextLifecycleTimeBased(tl, text7, text7Start, readTime, -8)
     }
 
@@ -368,6 +412,17 @@ export function createChapter2Timeline(container: HTMLElement): gsap.core.Timeli
 
   // Final hold before chapter transition
   cursor += BRAND_DURATIONS.section
+
+  console.log('[Chapter2] Final cursor:', cursor, 'ms, scroll:', timeToScroll(cursor))
+
+  // Compare with chapter region
+  import('../scroll').then(({ chapterScrollRegions }) => {
+    const region = chapterScrollRegions[2]
+    const regionDuration = region.end - region.start
+    console.log('[Chapter2] Region:', region, 'duration:', regionDuration)
+    console.log('[Chapter2] Timeline scroll duration:', timeToScroll(cursor))
+    console.log('[Chapter2] Match?', Math.abs(regionDuration - timeToScroll(cursor)) < 0.01)
+  })
 
   return tl
 }
