@@ -13,6 +13,7 @@
   let progress = $state(0)
   let isComplete = $state(false)
   let showInstallPrompt = $state(false)
+  let isStarting = $state(false) // Prevents double-tap
 
   // Platform detection
   let isIOS = $state(false)
@@ -57,6 +58,12 @@
     onFadeComplete?.()
   }
 
+  function handleStart() {
+    if (isStarting) return // Prevent double-tap
+    isStarting = true
+    fadeOutContent()
+  }
+
   onMount(async () => {
     // Detect platform
     const ua = navigator.userAgent
@@ -80,11 +87,7 @@
       return
     }
 
-    // Short delay before fade animation
-    await new Promise((resolve) => setTimeout(resolve, 300))
-
-    // Fade out content and notify parent
-    await fadeOutContent()
+    // User will tap "Tap to Begin" button to proceed
   })
 </script>
 
@@ -106,7 +109,13 @@
     </div>
 
     {#if isComplete && !showInstallPrompt}
-      <p class="loading-ready">Ready</p>
+      <button
+        class="loading-enter"
+        onclick={handleStart}
+        disabled={isStarting}
+      >
+        {isStarting ? 'Curtain rising...' : 'Tap to Begin'}
+      </button>
     {/if}
 
     {#if showInstallPrompt}
@@ -206,14 +215,43 @@
     text-align: right;
   }
 
-  .loading-ready {
+  .loading-enter {
     margin-top: 1.5rem;
     font-family: 'Canela Bold', Georgia, serif;
     font-size: 0.875rem;
     color: #a248ff;
+    background: transparent;
+    border: 1px solid rgba(162, 72, 255, 0.5);
+    padding: 0.75rem 2rem;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    animation: pulse 1s ease-in-out infinite;
+    cursor: pointer;
+    animation: pulse 1.5s ease-in-out infinite;
+    pointer-events: auto; /* Override parent's pointer-events: none */
+    transition: all 0.2s ease;
+
+    /* Safari-specific fixes */
+    appearance: none;
+    -webkit-appearance: none;
+    -webkit-tap-highlight-color: rgba(162, 72, 255, 0.3);
+    touch-action: manipulation; /* Prevents 300ms delay on iOS */
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .loading-enter:hover {
+    background: rgba(162, 72, 255, 0.1);
+    border-color: #a248ff;
+  }
+
+  .loading-enter:active {
+    transform: scale(0.98);
+    background: rgba(162, 72, 255, 0.15);
+  }
+
+  .loading-enter:disabled {
+    animation: none;
+    opacity: 0.7;
   }
 
   @keyframes pulse {
