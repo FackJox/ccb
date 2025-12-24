@@ -2,9 +2,9 @@
   import { curtainAssets } from '$data'
   import { registerGSAP, gsap } from '$gsap'
 
-  // Brand motion tokens
-  const SIGNATURE_DURATION = 1.05
-  const EASE_ENTER = 'power2.out' // ease-brand-enter
+  // Dramatic theatre curtain timing
+  const CURTAIN_DURATION = 2.5 // Slow, theatrical reveal
+  const EASE_CURTAIN = 'power2.inOut' // Smooth acceleration and deceleration
 
   // Element references
   let curtainLeft: HTMLImageElement
@@ -21,13 +21,13 @@
 
     const tl = gsap.timeline()
 
-    // Open all curtains simultaneously
+    // Open all curtains simultaneously - slow, theatrical reveal
     tl.to(
       curtainLeft,
       {
         x: '-100%',
-        duration: SIGNATURE_DURATION,
-        ease: EASE_ENTER,
+        duration: CURTAIN_DURATION,
+        ease: EASE_CURTAIN,
       },
       0
     )
@@ -35,26 +35,27 @@
         curtainRight,
         {
           x: '100%',
-          duration: SIGNATURE_DURATION,
-          ease: EASE_ENTER,
+          duration: CURTAIN_DURATION,
+          ease: EASE_CURTAIN,
         },
         0
       )
       .to(
         curtainUpper,
         {
-          y: '-40%',
-          duration: SIGNATURE_DURATION,
-          ease: EASE_ENTER,
+          y: '-100%',
+          duration: CURTAIN_DURATION,
+          ease: EASE_CURTAIN,
         },
         0
       )
 
     await tl.play()
 
-    // Hide left/right after animation (upper stays visible as valance)
+    // Hide all curtains after animation completes
     curtainLeft.style.visibility = 'hidden'
     curtainRight.style.visibility = 'hidden'
+    curtainUpper.style.visibility = 'hidden'
   }
 </script>
 
@@ -98,6 +99,7 @@
     left: 0;
     width: 100%;
     height: auto;
+    z-index: 2; /* In front of left/right curtains */
   }
 
   .curtain-left,

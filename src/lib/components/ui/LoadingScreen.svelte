@@ -33,9 +33,6 @@
     // Brief pause (heartbeat snag)
     await new Promise((resolve) => setTimeout(resolve, 150))
 
-    // Make background transparent so curtains reveal content behind
-    isFading = true
-
     // Notify parent to open curtains
     onFadeComplete?.()
   }
@@ -62,7 +59,6 @@
 <div
   bind:this={loadingScreen}
   class="loading-screen"
-  class:fading={isFading}
   aria-live="polite"
   aria-busy={!isComplete}
 >
