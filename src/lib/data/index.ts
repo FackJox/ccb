@@ -29,6 +29,7 @@ export {
 
 // Assets
 export {
+  curtainAssets,
   sharedAssets,
   chapterAssets,
   allAssetPaths,

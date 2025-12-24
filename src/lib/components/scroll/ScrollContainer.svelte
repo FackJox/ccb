@@ -151,6 +151,9 @@
     inset: 0;
     overflow: hidden;
     background: var(--colors-velvet-soot, #0B0508);
+    /* Safe area insets for notched devices (iPhone) */
+    padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+    box-sizing: border-box;
   }
 
   .scroll-content {
@@ -160,7 +163,8 @@
   .stage {
     position: relative;
     width: 100%;
-    height: 100vh;
+    height: 100vh; /* Fallback for older browsers */
+    height: 100svh; /* Small viewport height - accounts for mobile toolbar */
     display: flex;
     align-items: center;
     justify-content: center;

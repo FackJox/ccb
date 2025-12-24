@@ -36,9 +36,16 @@
 	overflow: hidden;
 	position: fixed;
 	height: 100%;
+	height: 100svh; /* Small viewport - accounts for mobile toolbar */
 	width: 100%;
 	top: 0;
 	left: 0;
+	/* Safe area insets for notched devices (iPhone) */
+	padding-top: env(safe-area-inset-top, 0);
+	padding-bottom: env(safe-area-inset-bottom, 0);
+	padding-left: env(safe-area-inset-left, 0);
+	padding-right: env(safe-area-inset-right, 0);
+	box-sizing: border-box;
 }
 
 #smooth-content {
@@ -51,7 +58,8 @@
 	align-items: center;
 	justify-content: center;
 	width: 100vw;
-	height: 100vh;
+	height: 100vh; /* Fallback for older browsers */
+	height: 100svh; /* Small viewport height - accounts for mobile toolbar */
 	overflow: hidden;
 }
 

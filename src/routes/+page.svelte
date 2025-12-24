@@ -29,25 +29,25 @@
   <meta name="description" content="A cinematic waltz in ink and violet light - An immersive scrollytelling experience" />
 </svelte:head>
 
+<!-- ScrollContainer renders behind LoadingScreen so curtains reveal Chapter 1 -->
+<ScrollContainer onReady={handleScrollReady}>
+  {#each chapters as chapter (chapter.id)}
+    <Chapter {chapter}>
+      <!-- All chapters use generic ChapterScene with data-driven configuration -->
+      <ChapterScene chapterId={chapter.id} />
+    </Chapter>
+  {/each}
+</ScrollContainer>
+
+<!-- Violet mask: timeline-driven, appears with C6 text 2, fades with C8 text 4 -->
+<VioletMask
+  active={violetState.active}
+  intensity={0.6}
+/>
+
+<!-- LoadingScreen overlays on top, curtains reveal content when opening -->
 {#if isLoading}
   <LoadingScreen onComplete={handleLoadComplete} />
-{/if}
-
-{#if !isLoading}
-  <ScrollContainer onReady={handleScrollReady}>
-    {#each chapters as chapter (chapter.id)}
-      <Chapter {chapter}>
-        <!-- All chapters use generic ChapterScene with data-driven configuration -->
-        <ChapterScene chapterId={chapter.id} />
-      </Chapter>
-    {/each}
-  </ScrollContainer>
-
-  <!-- Violet mask: timeline-driven, appears with C6 text 2, fades with C8 text 4 -->
-  <VioletMask
-    active={violetState.active}
-    intensity={0.6}
-  />
 {/if}
 
 <style>

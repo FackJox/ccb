@@ -1,7 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { allAssetPaths } from '$data'
+  import { allAssetPaths, curtainAssets } from '$data'
   import { preloadImagesBatched, type PreloadProgress } from '$utils'
+  import { registerGSAP, gsap } from '$gsap'
 
   interface Props {
     onComplete?: () => void
@@ -11,7 +12,65 @@
 
   let progress = $state(0)
   let isComplete = $state(false)
-  let isExiting = $state(false)
+
+  // Element references for GSAP
+  let loadingContent: HTMLDivElement
+  let curtainLeft: HTMLImageElement
+  let curtainRight: HTMLImageElement
+  let curtainUpper: HTMLImageElement
+
+  // Brand motion tokens
+  const SIGNATURE_DURATION = 1.05
+  const EASE_ENTER = 'power2.out' // ease-brand-enter
+  const EASE_EXIT = 'power2.in' // ease-brand-exit
+
+  async function playReveal() {
+    registerGSAP()
+
+    const tl = gsap.timeline()
+
+    // Phase 1: Fade out loading content
+    tl.to(loadingContent, {
+      opacity: 0,
+      duration: 0.3,
+      ease: EASE_EXIT,
+    })
+
+    // Phase 2: Brief pause (heartbeat snag)
+    tl.to({}, { duration: 0.15 })
+
+    // Phase 3: Open curtains simultaneously
+    tl.to(
+      curtainLeft,
+      {
+        x: '-100%',
+        duration: SIGNATURE_DURATION,
+        ease: EASE_ENTER,
+      },
+      '<'
+    )
+      .to(
+        curtainRight,
+        {
+          x: '100%',
+          duration: SIGNATURE_DURATION,
+          ease: EASE_ENTER,
+        },
+        '<'
+      )
+      .to(
+        curtainUpper,
+        {
+          y: '-40%',
+          duration: SIGNATURE_DURATION,
+          ease: EASE_ENTER,
+        },
+        '<'
+      )
+
+    await tl.play()
+    onComplete?.()
+  }
 
   onMount(async () => {
     const handleProgress = (p: PreloadProgress) => {
@@ -21,26 +80,42 @@
     // Preload all assets
     await preloadImagesBatched(allAssetPaths, 4, handleProgress)
 
-    // Mark complete and start exit animation
+    // Mark complete
     isComplete = true
 
-    // Short delay before exit animation
-    await new Promise(resolve => setTimeout(resolve, 300))
-    isExiting = true
+    // Short delay before reveal animation
+    await new Promise((resolve) => setTimeout(resolve, 300))
 
-    // Wait for exit animation
-    await new Promise(resolve => setTimeout(resolve, 600))
-    onComplete?.()
+    // Play the curtain reveal
+    await playReveal()
   })
 </script>
 
-<div
-  class="loading-screen"
-  class:exiting={isExiting}
-  aria-live="polite"
-  aria-busy={!isComplete}
->
-  <div class="loading-content">
+<div class="loading-screen" aria-live="polite" aria-busy={!isComplete}>
+  <!-- Curtain layers -->
+  <div class="curtain-container">
+    <img
+      bind:this={curtainUpper}
+      class="curtain curtain-upper"
+      src={curtainAssets.upper}
+      alt=""
+    />
+    <img
+      bind:this={curtainLeft}
+      class="curtain curtain-left"
+      src={curtainAssets.left}
+      alt=""
+    />
+    <img
+      bind:this={curtainRight}
+      class="curtain curtain-right"
+      src={curtainAssets.right}
+      alt=""
+    />
+  </div>
+
+  <!-- Loading content (centered on top of curtains) -->
+  <div bind:this={loadingContent} class="loading-content">
     <h1 class="loading-title">Violet Square</h1>
     <p class="loading-subtitle">A cinematic waltz in ink and violet light</p>
 
@@ -65,18 +140,42 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #0B0508;
-    transition: opacity 0.6s cubic-bezier(0.33, 0.0, 0.15, 1.0);
+    background: #0b0508;
   }
 
-  .loading-screen.exiting {
-    opacity: 0;
-    pointer-events: none;
+  /* Curtain container */
+  .curtain-container {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
   }
 
+  .curtain {
+    position: absolute;
+    object-fit: fill;
+  }
+
+  .curtain-upper {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+  }
+
+  .curtain-left,
+  .curtain-right {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Loading content */
   .loading-content {
+    position: relative;
+    z-index: 1;
     text-align: center;
-    color: #F4E3C9;
+    color: #f4e3c9;
   }
 
   .loading-title {
@@ -111,14 +210,14 @@
 
   .loading-fill {
     height: 100%;
-    background: #A248FF;
+    background: #a248ff;
     transition: width 0.2s ease-out;
   }
 
   .loading-percent {
     font-family: 'Spectral', Georgia, serif;
     font-size: 0.75rem;
-    color: #A248FF;
+    color: #a248ff;
     width: 3ch;
     text-align: right;
   }
@@ -127,14 +226,19 @@
     margin-top: 1.5rem;
     font-family: 'Canela Bold', Georgia, serif;
     font-size: 0.875rem;
-    color: #A248FF;
+    color: #a248ff;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     animation: pulse 1s ease-in-out infinite;
   }
 
   @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
   }
 </style>

@@ -7,6 +7,15 @@
 const ASSET_BASE = '/assets'
 
 /**
+ * Curtain assets for intro reveal
+ */
+export const curtainAssets = {
+  upper: `${ASSET_BASE}/curtain/upper-curtain.png`,
+  left: `${ASSET_BASE}/curtain/left-curtain.png`,
+  right: `${ASSET_BASE}/curtain/right-curtain.png`,
+} as const
+
+/**
  * Shared assets used across multiple chapters
  */
 export const sharedAssets = {
@@ -67,6 +76,10 @@ export const chapterAssets = {
  * All unique asset paths for preloading
  */
 export const allAssetPaths: string[] = [
+  // Curtain (preload first for intro)
+  curtainAssets.upper,
+  curtainAssets.left,
+  curtainAssets.right,
   // Shared foregrounds
   sharedAssets.fg.coupleCloseup,
   sharedAssets.fg.coupleStanding,
