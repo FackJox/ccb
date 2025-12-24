@@ -257,21 +257,21 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				position: { top: '32%', left: '8%' }
 			},
 			{
-				num: 8,
+				num: 3,
 				content: '"Will you follow?" he asked.',
 				type: 'consent',
 				style: 'beat'
 			},
 			// Frame B texts (parchment style) - positioned on right side over couple-closeup
 			{
-				num: 3,
+				num: 4,
 				content: 'Consent lives in small sentences.',
 				type: 'fragment',
 				style: 'parchment',
 				position: { top: '8%', right: '25%' }
 			},
 			{
-				num: 4,
+				num: 5,
 				content:
 					"She tipped her head, that chin-lift she didn't know she'd made in a hundred lives, and he answered by holding out his embrace.",
 				type: 'fragment',
@@ -279,7 +279,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				position: { top: '12%', right: '5%' }
 			},
 			{
-				num: 5,
+				num: 6,
 				content:
 					'Her palm hovered near his wrist without touching. She matched his tempo. She nodded once—permission, acknowledgment, desire braided quiet.',
 				type: 'fragment',
@@ -287,7 +287,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				position: { top: '32%', right: '5%' }
 			},
 			{
-				num: 6,
+				num: 7,
 				content: 'Not control.',
 				type: 'fragment',
 				style: 'parchment',
@@ -296,7 +296,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				visibleDurationMs: 2800 // 2x base (1400ms) for tension
 			},
 			{
-				num: 7,
+				num: 8,
 				content: 'Permission.',
 				type: 'fragment',
 				style: 'parchment',
@@ -980,7 +980,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				content: 'their feet met.',
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '20%', right: '3%' },
+				position: { top: '20%', right: '8%' },
 				visibleDurationMs: 3200 // 2x base (1600ms)
 			},
 			{
@@ -996,7 +996,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				content: 'Her breath met his.',
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '44%', right: '3%' }
+				position: { top: '44%', right: '8%' }
 			},
 			{
 				num: 8,

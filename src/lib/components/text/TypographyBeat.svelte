@@ -78,10 +78,10 @@
   }
 
   .large {
-    /* Min: 1.125rem (18px) at 320px, Max: 2.5rem (40px) at 1200px */
-    /* More aggressive scaling to fit long beat text on mobile */
-    font-size: clamp(1.125rem, 0.5rem + 3vw, 2.5rem);
-    letter-spacing: clamp(0.02em, 0.04em, 0.06em);
+    /* Min: 1rem (16px) at 320px, Max: 2rem (32px) at 1200px */
+    /* Aggressive scaling to fit long beat text on all viewports */
+    font-size: clamp(1rem, 0.5rem + 2vw, 2rem);
+    letter-spacing: clamp(0.01em, 0.03em, 0.05em);
   }
 
   .hero {

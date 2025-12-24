@@ -97,6 +97,88 @@ function addTextLifecycleTimeBased(
 }
 
 /**
+ * Add consent text animation with SplitText character reveal
+ */
+function addConsentTextAnimation(
+  tl: gsap.core.Timeline,
+  consentText: Element | null,
+  cursor: number
+): number {
+  if (!consentText) return cursor
+
+  // Target the .beat-text span inside TypographyBeat
+  const beatTextSpan = consentText.querySelector('.beat-text')
+  const consentContent = beatTextSpan || consentText.querySelector('.typography-beat') || consentText
+
+  try {
+    const split = new SplitText(consentContent, {
+      type: 'chars,words',
+      charsClass: 'beat-char',
+    })
+
+    // Make the parent container visible
+    tl.to(
+      consentText,
+      {
+        opacity: 1,
+        y: 0,
+        duration: timeToScroll(BRAND_DURATIONS.micro),
+        ease: brandEase.enter,
+      },
+      timeToScroll(cursor)
+    )
+
+    // Animate characters
+    tl.fromTo(
+      split.chars,
+      { opacity: 0, y: 15 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: timeToScroll(BRAND_DURATIONS.signature),
+        stagger: timeToScroll(40),
+        ease: brandEase.enter,
+      },
+      timeToScroll(cursor)
+    )
+
+    // Calculate total reveal duration
+    const beatDuration = BRAND_DURATIONS.signature + 40 * split.chars.length
+    cursor += beatDuration
+
+    // Drift after reveal
+    tl.to(
+      consentContent,
+      {
+        y: -10,
+        duration: timeToScroll(BRAND_DURATIONS.sectionHeld),
+        ease: brandEase.transform,
+      },
+      timeToScroll(cursor)
+    )
+
+    cursor += BRAND_DURATIONS.sectionHeld
+  } catch (err) {
+    console.error('[Chapter2] SplitText failed:', err)
+    // Fallback: simple fade in
+    tl.fromTo(
+      consentText,
+      { opacity: 0, y: 20 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: timeToScroll(BRAND_DURATIONS.signature),
+        ease: brandEase.enter,
+      },
+      timeToScroll(cursor)
+    )
+    cursor += BRAND_DURATIONS.signature
+  }
+
+  return cursor
+}
+
+/**
  * Create Chapter 2 timeline with pure time-based positioning
  */
 export function createChapter2Timeline(container: HTMLElement): gsap.core.Timeline {
@@ -109,14 +191,17 @@ export function createChapter2Timeline(container: HTMLElement): gsap.core.Timeli
   const couple = container.querySelector('[data-layer="couple"]')
   const coupleCloseup = container.querySelector('[data-layer="coupleCloseup"]')
 
+  // Frame A: text 1, 2, 3 (consent)
   const text1 = container.querySelector('[data-text-block="1"]')
   const text2 = container.querySelector('[data-text-block="2"]')
-  const text3 = container.querySelector('[data-text-block="3"]')
+  const consentText = container.querySelector('[data-consent]') // text 3
+
+  // Frame B: text 4, 5, 6, 7, 8
   const text4 = container.querySelector('[data-text-block="4"]')
   const text5 = container.querySelector('[data-text-block="5"]')
   const text6 = container.querySelector('[data-text-block="6"]')
   const text7 = container.querySelector('[data-text-block="7"]')
-  const consentText = container.querySelector('[data-consent]')
+  const text8 = container.querySelector('[data-text-block="8"]')
 
   // DEBUG: Log found elements
   console.log('[Chapter2] Elements found:', {
@@ -124,18 +209,13 @@ export function createChapter2Timeline(container: HTMLElement): gsap.core.Timeli
     coupleCloseup: !!coupleCloseup,
     text1: !!text1,
     text2: !!text2,
-    text3: !!text3,
+    consentText: !!consentText,
     text4: !!text4,
     text5: !!text5,
     text6: !!text6,
     text7: !!text7,
-    consentText: !!consentText,
-    consentTextElement: consentText,
+    text8: !!text8,
   })
-
-  // DEBUG: Also try finding by data-text-block="8"
-  const text8 = container.querySelector('[data-text-block="8"]')
-  console.log('[Chapter2] Text block 8 by number:', !!text8, text8)
 
   // ============== FRAME A: TABLE SCENE ==============
   tl.addLabel('frame-a', timeToScroll(cursor))
@@ -172,7 +252,11 @@ export function createChapter2Timeline(container: HTMLElement): gsap.core.Timeli
       cursor = addTextLifecycleTimeBased(tl, text2, text2Start, readTime, -10)
     }
 
-    // Calculate zoom duration to cover Frame A
+    // Consent text (text 3): "Will you follow?" - signature moment in Frame A
+    cursor += BRAND_DURATIONS.sectionHeld // Held breath before consent
+    cursor = addConsentTextAnimation(tl, consentText, cursor)
+
+    // Calculate zoom duration to cover Frame A (including consent text)
     const zoomDuration = cursor - zoomStartMs + BRAND_DURATIONS.section
     tl.to(
       couple,
@@ -195,6 +279,10 @@ export function createChapter2Timeline(container: HTMLElement): gsap.core.Timeli
       const readTime = calculateReadingTime(getTextContent(2))
       cursor = addTextLifecycleTimeBased(tl, text2, text2Start, readTime, -10)
     }
+
+    // Consent text in fallback path
+    cursor += BRAND_DURATIONS.sectionHeld
+    cursor = addConsentTextAnimation(tl, consentText, cursor)
   }
 
   // Transition pause before Frame B
