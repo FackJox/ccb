@@ -240,7 +240,7 @@ export function createMasterTimeline(
 
     if (chapter5Container) {
       const region5 = chapterScrollRegions[5]
-      const fadeDuration = 0.04  // Longer crossfade from Chapter 4
+      const fadeDuration = 0.02  // Match standard crossfade duration
 
       // Chapter 5 fade in
       masterTL.to(chapter5Container, {
