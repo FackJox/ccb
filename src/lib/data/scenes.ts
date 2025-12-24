@@ -980,7 +980,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				content: 'their feet met.',
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '18%', right: '8%' },
+				position: { top: '20%', right: '8%' },
 				visibleDurationMs: 3200 // 2x base (1600ms)
 			},
 			{
@@ -988,7 +988,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				content: 'A hold.',
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '32%', right: '3%' },
+				position: { top: '34%', right: '3%' },
 				visibleDurationMs: 2800 // 2x base (1400ms)
 			},
 			{
@@ -996,7 +996,7 @@ export const sceneConfigs: Record<number, SceneConfig> = {
 				content: 'Her breath met his.',
 				type: 'fragment',
 				style: 'parchment',
-				position: { top: '46%', right: '13%' }
+				position: { top: '48%', right: '13%' }
 			},
 			{
 				num: 8,
