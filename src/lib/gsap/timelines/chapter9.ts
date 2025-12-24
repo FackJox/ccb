@@ -41,6 +41,7 @@ import {
   BRAND_DURATIONS,
 } from '../timing'
 import { sceneConfigs } from '$data/scenes'
+import { setCurtainShouldClose } from '$stores'
 
 // Get text content for reading time calculations
 const textBlocks = sceneConfigs[9].textBlocks
@@ -395,6 +396,23 @@ export function createChapter9Timeline(container: HTMLElement): gsap.core.Timeli
   if (finalTextOverlay) {
     const text9Start = cursor - TEXT_OVERLAP_MS
     const readTime = calculateReadingTime('New as dawn.')
+
+    // Control curtain state - synced with text 9 appearance
+    // Uses a dummy tween that updates curtain state based on progress
+    // This works bidirectionally with scroll-scrubbing
+    tl.fromTo(
+      { curtainProgress: 0 },
+      { curtainProgress: 1 },
+      {
+        duration: timeToScroll(BRAND_DURATIONS.micro), // Quick transition
+        ease: 'none',
+        onUpdate: function () {
+          // Close curtain when progress > 0.5, open when <= 0.5
+          setCurtainShouldClose(this.progress() > 0.5)
+        },
+      },
+      timeToScroll(text9Start)
+    )
 
     // Fade in with standard section timing
     tl.fromTo(

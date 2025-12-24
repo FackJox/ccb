@@ -38,6 +38,6 @@ export {
 } from './violet.svelte'
 
 export {
-  setCurtainScrollProgress,
+  setCurtainShouldClose,
   createCurtainState,
 } from './curtain.svelte'

@@ -6,9 +6,14 @@
  */
 
 // ============== EXPERIENCE DURATION ==============
-// The canonical "perfect reading pace" - will be DERIVED from content later
-// Initially set manually based on design estimate
-export const PERFECT_DURATION_SECONDS = 90
+// Master control for scroll pacing. This is the single source of truth.
+// Higher = slower scroll (more distance to cover)
+export const PERFECT_DURATION_SECONDS = 360 // 4x slower than original 90s
+
+// ============== SCROLL DISTANCE ==============
+// Derived from duration. Base ratio: 90 seconds = 700vh (original design)
+const VH_PER_SECOND = 700 / 90 // ≈ 7.78
+export const SCROLL_DISTANCE_VH = Math.round(PERFECT_DURATION_SECONDS * VH_PER_SECOND)
 
 // ============== BRAND DURATION TOKENS (from design docs) ==============
 export const BRAND_DURATIONS = {

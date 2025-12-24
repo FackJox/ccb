@@ -13,7 +13,6 @@
   let progress = $state(0)
   let isComplete = $state(false)
   let showInstallPrompt = $state(false)
-  let installPromptDismissed = $state(false)
 
   // Platform detection
   let isIOS = $state(false)
@@ -25,7 +24,6 @@
 
   // Brand motion tokens
   const EASE_EXIT = 'power2.in' // ease-brand-exit
-  const STORAGE_KEY = 'violet-square-install-dismissed'
 
   function shouldShowInstallPrompt(): boolean {
     if (typeof window === 'undefined') return false
@@ -34,22 +32,12 @@
     const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0
     if (!isMobile) return false
 
-    // Check if already running as PWA
+    // Check if already running as PWA - if so, no prompt needed
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
                          (window.navigator as any).standalone === true
     if (isStandalone) return false
 
-    // Check if previously dismissed
-    const dismissed = localStorage.getItem(STORAGE_KEY)
-    if (dismissed) return false
-
     return true
-  }
-
-  function dismissInstallPrompt() {
-    showInstallPrompt = false
-    installPromptDismissed = true
-    localStorage.setItem(STORAGE_KEY, 'true')
   }
 
   async function fadeOutContent() {
@@ -85,20 +73,11 @@
     // Mark complete
     isComplete = true
 
-    // Check if we need to show install prompt
+    // Check if we need to show install prompt (mobile browser, not PWA)
     if (shouldShowInstallPrompt()) {
       showInstallPrompt = true
-      // Wait for user to dismiss the prompt
-      await new Promise<void>((resolve) => {
-        const checkDismissed = () => {
-          if (installPromptDismissed) {
-            resolve()
-          } else {
-            requestAnimationFrame(checkDismissed)
-          }
-        }
-        checkDismissed()
-      })
+      // Stop here - user must install PWA and reopen from home screen
+      return
     }
 
     // Short delay before fade animation
@@ -132,7 +111,7 @@
 
     {#if showInstallPrompt}
       <div class="install-prompt" role="dialog" aria-labelledby="install-title">
-        <p id="install-title" class="prompt-title">For the full experience</p>
+        <p id="install-title" class="prompt-title">Install to continue</p>
 
         {#if isIOS}
           <p class="prompt-instructions">
@@ -159,9 +138,7 @@
           </p>
         {/if}
 
-        <button class="dismiss-btn" onclick={dismissInstallPrompt}>
-          Continue in browser
-        </button>
+        <p class="prompt-hint">Then open from your home screen</p>
       </div>
     {/if}
   </div>
@@ -311,20 +288,11 @@
     color: #a248ff;
   }
 
-  .dismiss-btn {
+  .prompt-hint {
     font-family: 'Spectral', Georgia, serif;
-    font-size: 0.875rem;
-    color: rgba(244, 227, 201, 0.6);
-    background: transparent;
-    border: 1px solid rgba(244, 227, 201, 0.2);
-    border-radius: 6px;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .dismiss-btn:hover {
-    color: #f4e3c9;
-    border-color: rgba(244, 227, 201, 0.4);
+    font-size: 0.75rem;
+    color: rgba(244, 227, 201, 0.5);
+    font-style: italic;
+    margin: 0;
   }
 </style>

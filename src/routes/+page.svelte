@@ -8,7 +8,7 @@
   } from '$components'
   import { ChapterScene } from '$components/chapters'
   import { chapters } from '$data'
-  import { createScrollState, createVioletState, createCurtainState, setCurtainScrollProgress } from '$stores'
+  import { createScrollState, createVioletState, createCurtainState } from '$stores'
 
   let isLoading = $state(true)
   let isReady = $state(false)
@@ -22,12 +22,7 @@
   // Reference to curtain component for triggering reveal
   let curtain: TheatreCurtain
 
-  // Feed scroll progress to curtain store
-  $effect(() => {
-    setCurtainScrollProgress(scrollState.progress)
-  })
-
-  // Watch for curtain state changes (works both directions)
+  // Watch for curtain state changes (controlled by Chapter 9 timeline)
   $effect(() => {
     if (!curtain || curtainAnimating || isLoading) return
 

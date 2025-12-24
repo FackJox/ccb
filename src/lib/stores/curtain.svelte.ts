@@ -2,25 +2,20 @@
  * Curtain State Store
  *
  * Controls the theatre curtain open/close state.
- * Based on scroll progress - closes near end, reopens when scrolling back.
+ * Controlled by Chapter 9 timeline for precise sync with "New as dawn." text.
  */
 
-// Threshold: curtain starts closing when scroll progress >= this value
-const CLOSE_THRESHOLD = 0.97
+let shouldClose = $state(false)
 
-let scrollProgress = $state(0)
-
-export function setCurtainScrollProgress(progress: number) {
-  scrollProgress = progress
+// Called by Chapter 9 timeline when text 9 starts appearing
+export function setCurtainShouldClose(value: boolean) {
+  shouldClose = value
 }
 
 export function createCurtainState() {
   return {
     get shouldClose() {
-      return scrollProgress >= CLOSE_THRESHOLD
-    },
-    get progress() {
-      return scrollProgress
+      return shouldClose
     },
   }
 }

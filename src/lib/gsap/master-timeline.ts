@@ -14,6 +14,7 @@
 
 import { gsap, ScrollTrigger, brandEase } from './register'
 import { chapterScrollRegions } from './scroll'
+import { SCROLL_DISTANCE_VH } from './timing-constants'
 import {
   createChapter1Timeline,
   createChapter2Timeline,
@@ -72,7 +73,7 @@ export function createMasterTimeline(
       scrollTrigger: {
         trigger: stage,
         start: 'top top',
-        end: '+=700%', // Match scroll-spacer height
+        end: `+=${SCROLL_DISTANCE_VH}%`, // Derived from PERFECT_DURATION_SECONDS
         pin: true,
         pinSpacing: false, // Spacer already provides scroll distance
         scrub: mergedConfig.scrub,

@@ -8,6 +8,7 @@
     killAllScrollTriggers,
     ScrollTrigger,
   } from '$gsap'
+  import { SCROLL_DISTANCE_VH } from '$gsap/timing-constants'
   import { createMasterTimeline } from '$gsap/master-timeline'
   import { setScrollProgress, setIsScrolling, resetVioletState } from '$stores'
   import { calculateScale } from '$utils'
@@ -141,7 +142,7 @@
       {/if}
     </div>
     <!-- Scroll spacer: provides scroll distance for timeline scrubbing -->
-    <div class="scroll-spacer"></div>
+    <div class="scroll-spacer" style="height: {SCROLL_DISTANCE_VH}vh"></div>
   </div>
 </div>
 
@@ -173,7 +174,6 @@
 
   /* Provides scroll distance - ScrollSmoother needs content taller than viewport */
   .scroll-spacer {
-    height: 700vh; /* Total scroll distance for 9 chapters */
     pointer-events: none;
   }
 </style>
