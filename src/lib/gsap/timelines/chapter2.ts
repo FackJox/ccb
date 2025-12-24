@@ -128,6 +128,9 @@ function addConsentTextAnimation(
       timeToScroll(cursor)
     )
 
+    // Calculate total reveal duration
+    const beatDuration = BRAND_DURATIONS.signature + 40 * split.chars.length
+
     // Animate characters
     tl.fromTo(
       split.chars,
@@ -142,22 +145,18 @@ function addConsentTextAnimation(
       timeToScroll(cursor)
     )
 
-    // Calculate total reveal duration
-    const beatDuration = BRAND_DURATIONS.signature + 40 * split.chars.length
-    cursor += beatDuration
-
-    // Drift after reveal
+    // Drift runs in parallel with reveal (same start time, longer duration)
     tl.to(
       consentContent,
       {
         y: -10,
-        duration: timeToScroll(BRAND_DURATIONS.sectionHeld),
+        duration: timeToScroll(beatDuration + BRAND_DURATIONS.sectionHeld),
         ease: brandEase.transform,
       },
       timeToScroll(cursor)
     )
 
-    cursor += BRAND_DURATIONS.sectionHeld
+    cursor += beatDuration + BRAND_DURATIONS.sectionHeld
 
     // Fade out the consent text
     tl.to(
