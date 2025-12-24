@@ -3,6 +3,7 @@
     ScrollContainer,
     Chapter,
     LoadingScreen,
+    TheatreCurtain,
     VioletMask,
   } from '$components'
   import { ChapterScene } from '$components/chapters'
@@ -15,7 +16,13 @@
   const scrollState = createScrollState()
   const violetState = createVioletState()
 
-  function handleLoadComplete() {
+  // Reference to curtain component for triggering reveal
+  let curtain: TheatreCurtain
+
+  async function handleLoadingFadeComplete() {
+    // Open the theatre curtain
+    await curtain.open()
+    // Remove loading screen from DOM
     isLoading = false
   }
 
@@ -29,7 +36,7 @@
   <meta name="description" content="A cinematic waltz in ink and violet light - An immersive scrollytelling experience" />
 </svelte:head>
 
-<!-- ScrollContainer renders behind LoadingScreen so curtains reveal Chapter 1 -->
+<!-- ScrollContainer renders behind everything so curtains reveal Chapter 1 -->
 <ScrollContainer onReady={handleScrollReady}>
   {#each chapters as chapter (chapter.id)}
     <Chapter {chapter}>
@@ -39,15 +46,18 @@
   {/each}
 </ScrollContainer>
 
+<!-- Theatre curtain: sits between content and loading screen -->
+<TheatreCurtain bind:this={curtain} />
+
 <!-- Violet mask: timeline-driven, appears with C6 text 2, fades with C8 text 4 -->
 <VioletMask
   active={violetState.active}
   intensity={0.6}
 />
 
-<!-- LoadingScreen overlays on top, curtains reveal content when opening -->
+<!-- LoadingScreen overlays on top, fades content then triggers curtain reveal -->
 {#if isLoading}
-  <LoadingScreen onComplete={handleLoadComplete} />
+  <LoadingScreen onFadeComplete={handleLoadingFadeComplete} />
 {/if}
 
 <style>

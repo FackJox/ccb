@@ -1,75 +1,43 @@
 <script lang="ts">
   import { onMount } from 'svelte'
-  import { allAssetPaths, curtainAssets } from '$data'
+  import { allAssetPaths } from '$data'
   import { preloadImagesBatched, type PreloadProgress } from '$utils'
   import { registerGSAP, gsap } from '$gsap'
 
   interface Props {
-    onComplete?: () => void
+    onFadeComplete?: () => void
   }
 
-  let { onComplete }: Props = $props()
+  let { onFadeComplete }: Props = $props()
 
   let progress = $state(0)
   let isComplete = $state(false)
 
-  // Element references for GSAP
+  // Element reference for GSAP
   let loadingContent: HTMLDivElement
-  let curtainLeft: HTMLImageElement
-  let curtainRight: HTMLImageElement
-  let curtainUpper: HTMLImageElement
+  let loadingScreen: HTMLDivElement
 
   // Brand motion tokens
-  const SIGNATURE_DURATION = 1.05
-  const EASE_ENTER = 'power2.out' // ease-brand-enter
   const EASE_EXIT = 'power2.in' // ease-brand-exit
 
-  async function playReveal() {
+  async function fadeOutContent() {
     registerGSAP()
 
-    const tl = gsap.timeline()
-
-    // Phase 1: Fade out loading content
-    tl.to(loadingContent, {
+    // First fade out the content
+    await gsap.to(loadingContent, {
       opacity: 0,
       duration: 0.3,
       ease: EASE_EXIT,
     })
 
-    // Phase 2: Brief pause (heartbeat snag)
-    tl.to({}, { duration: 0.15 })
+    // Brief pause (heartbeat snag)
+    await new Promise((resolve) => setTimeout(resolve, 150))
 
-    // Phase 3: Open curtains simultaneously
-    tl.to(
-      curtainLeft,
-      {
-        x: '-100%',
-        duration: SIGNATURE_DURATION,
-        ease: EASE_ENTER,
-      },
-      '<'
-    )
-      .to(
-        curtainRight,
-        {
-          x: '100%',
-          duration: SIGNATURE_DURATION,
-          ease: EASE_ENTER,
-        },
-        '<'
-      )
-      .to(
-        curtainUpper,
-        {
-          y: '-40%',
-          duration: SIGNATURE_DURATION,
-          ease: EASE_ENTER,
-        },
-        '<'
-      )
+    // Make background transparent so curtains reveal content behind
+    isFading = true
 
-    await tl.play()
-    onComplete?.()
+    // Notify parent to open curtains
+    onFadeComplete?.()
   }
 
   onMount(async () => {
@@ -83,38 +51,21 @@
     // Mark complete
     isComplete = true
 
-    // Short delay before reveal animation
+    // Short delay before fade animation
     await new Promise((resolve) => setTimeout(resolve, 300))
 
-    // Play the curtain reveal
-    await playReveal()
+    // Fade out content and notify parent
+    await fadeOutContent()
   })
 </script>
 
-<div class="loading-screen" aria-live="polite" aria-busy={!isComplete}>
-  <!-- Curtain layers -->
-  <div class="curtain-container">
-    <img
-      bind:this={curtainUpper}
-      class="curtain curtain-upper"
-      src={curtainAssets.upper}
-      alt=""
-    />
-    <img
-      bind:this={curtainLeft}
-      class="curtain curtain-left"
-      src={curtainAssets.left}
-      alt=""
-    />
-    <img
-      bind:this={curtainRight}
-      class="curtain curtain-right"
-      src={curtainAssets.right}
-      alt=""
-    />
-  </div>
-
-  <!-- Loading content (centered on top of curtains) -->
+<div
+  bind:this={loadingScreen}
+  class="loading-screen"
+  class:fading={isFading}
+  aria-live="polite"
+  aria-busy={!isComplete}
+>
   <div bind:this={loadingContent} class="loading-content">
     <h1 class="loading-title">Violet Square</h1>
     <p class="loading-subtitle">A cinematic waltz in ink and violet light</p>
@@ -140,40 +91,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #0b0508;
+    /* Transparent so curtain behind is visible */
+    background: transparent;
+    pointer-events: none;
   }
 
-  /* Curtain container */
-  .curtain-container {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-  }
-
-  .curtain {
-    position: absolute;
-    object-fit: fill;
-  }
-
-  .curtain-upper {
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: auto;
-  }
-
-  .curtain-left,
-  .curtain-right {
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-  }
-
-  /* Loading content */
   .loading-content {
-    position: relative;
-    z-index: 1;
     text-align: center;
     color: #f4e3c9;
   }

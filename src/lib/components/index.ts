@@ -27,3 +27,5 @@ export { default as TornPaperDefs } from './effects/TornPaperDefs.svelte'
 // UI components
 export { default as LandscapeEnforcer } from './ui/LandscapeEnforcer.svelte'
 export { default as LoadingScreen } from './ui/LoadingScreen.svelte'
+export { default as TheatreCurtain } from './ui/TheatreCurtain.svelte'
+export { default as InstallPrompt } from './ui/InstallPrompt.svelte'
